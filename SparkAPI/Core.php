@@ -257,11 +257,31 @@ class Core {
 		return json_encode( array( 'D' => $data ) );
 	}
 
-	function parse_location_search_string( $location ){
-		// Need to find back references and delete them.
-		// This temporary placeholder is so nothing breaks in the interim.
-		// It should be removed and references should be to the Formatter class.
-		return \FlexMLS\Admin\Formatter::parse_location_search_string( $location );
+	function possible_compliance_fields(){
+		return array(
+			'ListOfficeName' => 'Listing Office',
+			'ListOfficePhone' => 'Office Phone',
+			'ListOfficeEmail' => 'Office Email',
+			'ListOfficeURL' => 'Office Website',
+			'ListOfficeAddress' => 'Office Address',
+			'ListAgentName' => 'Listing Agent',
+			'ListMemberPhone' => 'Agent Phone',
+			'ListMemberEmail' => 'Agent Email',
+			'ListMemberURL' => 'Agent Website',
+			'ListMemberAddress' => 'Agent Address',
+			'CoListOfficeName' => 'Co Office Name',
+			'CoListOfficePhone' => 'Co Office Phone',
+			'CoListOfficeEmail' => 'Co Office Email',
+			'CoListOfficeURL' => 'Co Office Website',
+			'CoListOfficeAddress' => 'Co Office Address',
+			'CoListAgentName' => 'Co Listing Agent',
+			'CoListAgentPhone' => 'Co Agent Phone',
+			'CoListAgentEmail' => 'Co Agent Email',
+			'CoListAgentURL' => 'Co Agent Webpage',
+			'CoListAgentAddress' => 'Co Agent Address',
+			'ListingUpdateTimestamp'=> 'Last Updated',
+			'IDXLogo' => 'LOGO'
+		);
 	}
 
 	function sign_request( $request ){

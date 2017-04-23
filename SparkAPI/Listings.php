@@ -10,6 +10,7 @@ class Listings extends Core {
 	}
 
 	function get_listings( $filter, $page_number = 1 ){
+		global $Flexmls;
 		$flexmls_settings = get_option( 'flexmls_settings' );
 		$search_results_fields = $flexmls_settings[ 'general' ][ 'search_results_fields' ];
 		$formatted_search_results_fields = array(
@@ -18,24 +19,31 @@ class Listings extends Core {
 			'ListPrice',
 			'Longitude',
 			'MlsStatus',
-			'Photos.Name',
-			'Photos.Caption',
-			'Photos.Primary',
-			'Photos.Uri1280',
+			'PhotosCount',
 			'PostalCode',
+			'PrimaryPhoto',
 			'StateOrProvince',
 			'UnparsedFirstLineAddress',
-			'Videos',
+			'VideosCount',
 			'VirtualTours',
 		);
+		foreach( $this->possible_compliance_fields() as $key => $val ){
+			if( !in_array( $val, $formatted_search_results_fields ) ){
+				$formatted_search_results_fields[] = $key;
+			}
+		}
+
 		if( $search_results_fields ){
 			foreach( $search_results_fields as $k => $v ){
-				$formatted_search_results_fields[] = $k;
+				if( !in_array( $k, $formatted_search_results_fields ) ){
+					$formatted_search_results_fields[] = $k;
+				}
 			}
 		}
 		$params = array(
 			'_filter' => $filter,
-			'_orderby' => '-ListPrice',
+			'_limit' => $Flexmls->listings_per_page,
+			'_orderby' => $Flexmls->listings_order_by,
 			'_pagination' => 1,
 			'_page' => $page_number,
 			'_select' => implode( ',', $formatted_search_results_fields )

@@ -1,1 +1,14 @@
 @import "variables";
+@import "../bower_components/font-awesome/scss/font-awesome";
+
+
+/*----------------------------------------------------------------------
+  General stylings universal to all themes
+----------------------------------------------------------------------*/
+@import "public/pagination";
+
+
+/*----------------------------------------------------------------------
+  Import themes
+----------------------------------------------------------------------*/
+@import "public/themes/default";

@@ -20,9 +20,9 @@ function logError( error ){
 gulp.task( 'assets', function(){ 
 	return del( [ 'dist/assets/**/*' ] ).then(
 		gulp.src( 'src/assets/**' ) 
-        .pipe( gulp.dest( 'dist/assets' ) )
-    	.pipe( livereload() )
-    );
+		.pipe( gulp.dest( 'dist/assets' ) )
+		.pipe( livereload() )
+	);
 } );
 
 gulp.task( 'build-plugin-zip', function(){
@@ -44,8 +44,8 @@ gulp.task( 'build-plugin-zip', function(){
 } );
 
 gulp.task( 'font-awesome', function(){ 
-	return gulp.src( 'bower_components/font-awesome/fonts/**.*' ) 
-        .pipe( gulp.dest( 'wp-content/themes/makespace-child/fonts' ) ); 
+	return gulp.src( 'src/bower_components/font-awesome/fonts/**.*' ) 
+		.pipe( gulp.dest( 'dist/fonts' ) ); 
 } );
 
 gulp.task( 'lint', function(){
@@ -146,7 +146,7 @@ gulp.task( 'watch', function(){
 } );
 
 gulp.task( 'default', [
-	'assets', 'sass', 'sass-admin', 'lint', 'scripts', 'scripts-admin', 'scripts-tinymce', 'watch'
+	'assets', 'font-awesome', 'sass', 'sass-admin', 'lint', 'scripts', 'scripts-admin', 'scripts-tinymce', 'watch'
 ] );
 
 gulp.task( 'build', [ 'build-plugin-zip' ] );

@@ -12,6 +12,7 @@
     "tests"
   ],
   "devDependencies": {
-    "select2": "^4.0.3"
+    "select2": "^4.0.3",
+    "font-awesome": "fontawesome#^4.7.0"
   }
 }

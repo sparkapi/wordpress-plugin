@@ -61,6 +61,9 @@ include_once( FLEXMLS_PLUGIN_DIR_PATH . '/autoloader.php' );
 // Main plugin class. All actions, filters, and shortcodes are hooked here.
 class Flexmls {
 
+	public $listings_order_by;
+	public $listings_per_page;
+
 	public static $default_options = array(
 		'credentials' => array(
 			'api_key',
@@ -122,7 +125,8 @@ class Flexmls {
 		add_action( 'admin_notices', array( 'FlexMLS\Admin\Settings', 'notice_test_environment' ), 9 );
 		add_action( 'admin_enqueue_scripts', array( 'FlexMLS\Admin\Enqueue', 'admin_enqueue_scripts' ) );
 		add_action( 'edit_form_after_title', array( 'FlexMLS\Pages\Page', 'search_results_page_notice' ), 9 );
-		add_action( 'init', array( 'FlexMLS\Pages\Page', 'custom_rewrite_rules' ), 10, 0);
+		add_action( 'init', array( 'FlexMLS\Pages\Page', 'custom_rewrite_rules' ), 10, 0 );
+		add_action( 'init', array( 'FlexMLS\Pages\Page', 'set_global_listing_vars' ) );
 		add_action( 'plugins_loaded', array( '\FlexMLS\Admin\Settings', 'update_settings' ), 9 );
 		add_action( 'post_updated', array( 'FlexMLS\Pages\Page', 'maybe_update_permalink' ), 10, 3 );
 		add_action( 'wp', array( $this, 'test_if_idx_page' ), 9 );
@@ -132,6 +136,7 @@ class Flexmls {
 
 		add_filter( 'mce_buttons', array( 'FlexMLS\Admin\TinyMCE', 'mce_buttons' ) );
 		add_filter( 'mce_external_plugins', array( 'FlexMLS\Admin\TinyMCE', 'mce_external_plugins' ) );
+		add_filter( 'script_loader_tag', array( 'FlexMLS\Admin\Enqueue', 'script_loader_tag' ), 10, 2 );
 	}
 
 	function ajax_clear_cache(){
@@ -170,11 +175,11 @@ class Flexmls {
 		$flexmls_settings = get_option( 'flexmls_settings' );
 		if( is_page( $flexmls_settings[ 'general' ][ 'search_results_page' ] ) ){
 			global $wp_query;
-			if( isset( $wp_query->query_vars[ 'idxlisting' ] ) ){
+			if( isset( $wp_query->query_vars[ 'idxlisting_id' ] ) ){
 				// Do single listing page
-				new \ListingDetail();
+				new \FlexMLS\Pages\ListingDetail();
 			} else {
-				if( empty( $wp_query->query_vars[ 'idxsearch' ] ) ){
+				if( empty( $wp_query->query_vars[ 'idxsearch_id' ] ) ){
 					// No default link is set. Do a 404.
 					$wp_query->set_404();
 					status_header( 404 );

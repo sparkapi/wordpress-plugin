@@ -63,5 +63,32 @@ window.optimizedScroll = (function(){
 	};
 }());
 (function($){
-	//alert( 'hi' );
+
+	var changeFilterParams = function(){
+		$( 'select[name="listings_per_page"]' ).change( function(){
+			var baseurl = $( this ).data( 'baseurl' );
+			window.location = baseurl + '?listings_per_page=' + $( this ).val();
+		} );
+		$( 'select[name="listings_order_by"]' ).change( function(){
+			var baseurl = $( this ).data( 'baseurl' );
+			window.location = baseurl + '?listings_order_by=' + $( this ).val();
+		} );
+	};
+
+	$(document).ready( function( $ ){
+		changeFilterParams();
+	} );
+
+})(jQuery);
+(function($){
+
+	var testJS = function(){
+		$( 'body' ).removeClass( 'flexmls-no-js' );
+	};
+
+	$(document).ready(function(){
+		testJS();
+	});
+
+
 })(jQuery);

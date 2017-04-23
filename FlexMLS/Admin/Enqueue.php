@@ -35,7 +35,21 @@ class Enqueue {
 		wp_enqueue_style( 'flexmls-admin', FLEXMLS_PLUGIN_DIR_URL . '/dist/style-admin.css' );
 	}
 
+	static function script_loader_tag( $tag, $handle ){
+		$flexmls_settings = get_option( 'flexmls_settings' );
+		if( 'google_maps' == $handle && 0 == $flexmls_settings[ 'gmaps' ][ 'no_js' ] ){
+			$tag = str_replace( ' src', ' async defer src', $tag );
+		}
+		return $tag;
+	}
+
 	static function wp_enqueue_scripts(){
+		$flexmls_settings = get_option( 'flexmls_settings' );
+
+		if( !empty( $flexmls_settings[ 'gmaps' ][ 'api_key' ] ) && 0 == $flexmls_settings[ 'gmaps' ][ 'no_js' ] ){
+			wp_enqueue_script( 'google_maps', 'https://maps.googleapis.com/maps/api/js?key=' . $flexmls_settings[ 'gmaps' ][ 'api_key' ], array(), null, true );
+		}
+
 		if( in_flexmls_debug_mode() ){
 			wp_register_script( 'flexmls', FLEXMLS_PLUGIN_DIR_URL . '/dist/scripts-public.js', array( 'jquery' ) );
 		} else {

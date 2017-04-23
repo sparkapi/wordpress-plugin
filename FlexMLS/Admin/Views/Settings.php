@@ -262,7 +262,7 @@ class Settings {
 						</th>
 						<td>
 							<label for="gmaps_js"><input type="checkbox" name="flexmls_settings[gmaps][no_js]" id="gmaps_js" value="1" <?php checked( $flexmls_settings[ 'gmaps' ][ 'no_js' ], 1 ); ?>> Do not load the Google Maps Javascript API</label><br />
-							<p class="description">If checked, the Google Maps javascript will not be loaded by this plugin. Check this if your theme or another plugin is already loading the Google Maps javascript and your API Key.</p>
+							<p class="description">If checked, the Google Maps javascript will not be loaded by this plugin. Check this if your theme or another plugin is already loading the Google Maps javascript and your API Key. Note: you must still include your API key above, even if you do not want the Flexmls&reg; plugin to load the Google Maps javascript for you.</p>
 						</td>
 					</tr>
 				</tbody>
