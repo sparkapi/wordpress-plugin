@@ -1,0 +1,128 @@
+.flexmls-idx_page_flexmls_settings {
+	.flexmls-hidden {
+		pointer-events: none;
+		visibility: hidden;
+	}
+
+	.is-clearing-cache {
+		background: $brand-blue;
+		color: #fff;
+		opacity: 0.5;
+		pointer-events: none;
+
+		&:hover,
+		&:focus,
+		&:active {
+			background: $brand-blue;
+			color: #fff;
+			opacity: 0.5;
+			pointer-events: none;
+		}
+	}
+	.cache-is-cleared {
+		background: $wordpress-green;
+		color: #fff;
+		pointer-events: none;
+
+		&:hover,
+		&:focus,
+		&:active {
+			background: $wordpress-green;
+			color: #fff;
+			pointer-events: none;
+		}
+	}
+
+	#searchresults-fields {
+		margin-bottom: 0;
+		max-width: 44em;
+
+		& + .form-table {
+			margin-top: 0;
+		}
+
+		li:first-child {
+			.flexmls-sortable-row {
+				margin-top: 0;
+			}
+		}
+
+		.flexmls-sortable-row {
+			@include clearfix;
+			background: $brand-grey-xlt;
+			border: 1px solid darken($brand-grey-xlt,10%);
+			cursor: move;
+			display: block;
+			margin-top: 0.5em;
+			padding: 0.5em 0;
+			position: relative;
+			transition: background 300ms, border-color 300ms, color 300ms;
+
+			&::before {
+				content: '\f545';
+				display: block;
+				font-family: 'dashicons';
+				left: 0.75em;
+				pointer-events: none;
+				position: absolute;
+				top: 50%;
+				transform: translateY(-50%);
+			}
+			label {
+				cursor: move;
+				display: block;
+				line-height: 1;
+				padding: 0.5em 0 0.5em 3rem;
+
+				@media (min-width: $admin-phablet){
+					float: left;
+					padding: 0.5em 0 0.5em 3em;
+				}
+			}
+			input[type="text"]{
+				display: block;
+				margin: 0 3rem;
+				max-width: 25em;
+				width: 65%;
+				@media (min-width: $admin-phablet){
+					float: right;
+					margin: 0 3em 0 0;
+					width: 20em;
+				}
+			}
+			button {
+				background: transparent;
+				border: none;
+				color: inherit;
+				cursor: pointer;
+				right: 0.5em;
+				position: absolute;
+				top: 50%;
+				transform: translateY(-50%);
+				transition: color 300ms;
+
+				&:hover {
+					color: $wordpress-red;
+				}
+			}
+		}
+
+		.ui-sortable-helper {
+			.flexmls-sortable-row {
+				background: $brand-blue;
+				border: 1px solid darken($brand-blue,10%);
+				color: #fff;
+			}
+		}
+	}
+
+	.flexmls-wysiwyg-label {
+		@media (min-width: $admin-tablet){
+			padding-top: 57px;
+		}
+	}
+
+	#flexmlsseotags-ul {
+		columns: 2;
+	}
+}

@@ -1,0 +1,12 @@
+// Ignore all hidden files and folders
+// except the ones we specifically allow
+.*
+!.bowerrc
+!.gitignore
+!.gitkeep
+
+// Also ignore these files and folders
+// that we specify here
+bower_components
+debug.log
+node_modules

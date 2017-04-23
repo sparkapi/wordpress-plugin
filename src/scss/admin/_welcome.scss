@@ -1,0 +1,36 @@
+.about-flexmls {
+	.wp-badge {
+		background-color: $brand-blue;
+		background-image: url(assets/flexmls_pin.png);
+		background-size: auto 80px;
+
+		.svg & {
+			background-image: url(assets/flexmls_pin.svg);
+		}
+	}
+
+	.button-large {
+		font-size: 1.5em;
+		height: auto;
+		line-height: normal;
+		padding: 0.5em 1.5em;
+	}
+
+	.nav-tab-signup {
+		background: $wordpress-green;
+		color: #fff;
+
+		&:hover {
+			background: lighten($wordpress-green,5%);
+		}
+	}
+
+	.flex-intro {
+		picture {
+			display: block;
+			margin: 0 auto;
+			text-align: center;
+		}
+	}
+
+}

@@ -1,0 +1,17 @@
+{
+  "name": "flexmls-idx",
+  "description": "",
+  "main": "index.js",
+  "license": "MIT",
+  "homepage": "https://github.com/sparkapi/wordpress-idx-plugin",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "select2": "^4.0.3"
+  }
+}
