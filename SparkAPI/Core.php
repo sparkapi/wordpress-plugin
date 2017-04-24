@@ -258,7 +258,19 @@ class Core {
 	}
 
 	function possible_compliance_fields(){
-		return array(
+		global $wp_query;
+		$System = new \SparkAPI\System();
+		$system_info = $System->get_system_info();
+
+		$listing_type = 'Summary';
+		if( isset( $wp_query->query_vars[ 'idxlisting_id' ] ) ){
+			$listing_type = 'Detail';
+		}
+
+		$mls_id = $system_info[ 'MlsId' ];
+		$compliance_list = $system_info[ 'DisplayCompliance' ][ $mls_id ][ 'View' ][ $listing_type ][ 'DisplayCompliance' ];
+
+		$labels = array(
 			'ListOfficeName' => 'Listing Office',
 			'ListOfficePhone' => 'Office Phone',
 			'ListOfficeEmail' => 'Office Email',
@@ -282,6 +294,17 @@ class Core {
 			'ListingUpdateTimestamp'=> 'Last Updated',
 			'IDXLogo' => 'LOGO'
 		);
+
+		$required_fields = array();
+
+		foreach( $compliance_list as $field ){
+			if( array_key_exists( $field, $labels ) ){
+				$required_fields[ $field ] = $labels[ $field ];
+			} else {
+				$required_fields[ $field ] = $field;
+			}
+		}
+		return $required_fields;
 	}
 
 	function sign_request( $request ){

@@ -54,6 +54,14 @@ class Page {
 		add_rewrite_tag( '%idxpage_view%', '([^&]+)' );
 	}
 
+	function display_carts_buttons(){
+		$buttons  = '<ul class="flexmls-carts-buttons">';
+		$buttons .= '<li class="favorite"><a href="#" title="Add to favorites"><i class="fbsicon fbsicon-heart"></i></a></li>';
+		$buttons .= '<li class="reject"><a href="#" title="Add to rejects"><i class="fbsicon fbsicon-thumbs-down"></i></a></li>';
+		$buttons .= '</ul>';
+		return $buttons;
+	}
+
 	public static function maybe_update_permalink( $post_ID, $post_after, $post_before ){
 		$flexmls_settings = get_option( 'flexmls_settings' );
 		if( $post_ID == $flexmls_settings[ 'general' ][ 'search_results_page' ] ){
