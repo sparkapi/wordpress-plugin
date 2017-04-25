@@ -116,4 +116,26 @@ class Page {
 		}
 	}
 
+	public static function test_if_idx_page(){
+		$flexmls_settings = get_option( 'flexmls_settings' );
+		if( is_page( $flexmls_settings[ 'general' ][ 'search_results_page' ] ) ){
+			global $wp_query;
+			if( isset( $wp_query->query_vars[ 'idxlisting_id' ] ) ){
+				// Do single listing page
+				new \FlexMLS\Pages\ListingDetail();
+			} else {
+				if( empty( $wp_query->query_vars[ 'idxsearch_id' ] ) ){
+					// No default link is set. Do a 404.
+					$wp_query->set_404();
+					status_header( 404 );
+					get_template_part( 404 );
+					exit();
+				}
+				// Do search results
+				new \FlexMLS\Pages\ListingSummary();
+			}
+		}
+	}
+
+
 }

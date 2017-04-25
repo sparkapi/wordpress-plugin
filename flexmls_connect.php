@@ -121,6 +121,7 @@ class Flexmls {
 	);
 
 	function __construct(){
+		//add_action( 'admin_head-nav-menus.php', array( 'FlexMLS\Admin\NavMenus', 'add_saved_searches_meta_boxes' ) );
 		add_action( 'admin_menu', array( 'FlexMLS\Admin\Settings', 'admin_menu' ) );
 		add_action( 'admin_notices', array( 'FlexMLS\Admin\Settings', 'notice_test_environment' ), 9 );
 		add_action( 'admin_enqueue_scripts', array( 'FlexMLS\Admin\Enqueue', 'admin_enqueue_scripts' ) );
@@ -129,13 +130,15 @@ class Flexmls {
 		add_action( 'init', array( 'FlexMLS\Pages\Page', 'set_global_listing_vars' ) );
 		add_action( 'plugins_loaded', array( '\FlexMLS\Admin\Settings', 'update_settings' ), 9 );
 		add_action( 'post_updated', array( 'FlexMLS\Pages\Page', 'maybe_update_permalink' ), 10, 3 );
-		add_action( 'wp', array( $this, 'test_if_idx_page' ), 9 );
+		add_action( 'widgets_init', array( 'FlexMLS\Widgets\Widgets', 'widgets_init' ) );
+		add_action( 'wp', array( 'FlexMLS\Pages\Page', 'test_if_idx_page' ), 9 );
 		add_action( 'wp_ajax_clear_spark_api_cache', array( $this, 'ajax_clear_cache' ) );
 		add_action( 'wp_ajax_tinymce_popup', array( 'FlexMLS\Admin\TinyMCE', 'tinymce_popup' ) );
 		add_action( 'wp_enqueue_scripts', array( 'FlexMLS\Admin\Enqueue', 'wp_enqueue_scripts' ) );
 
 		add_filter( 'mce_buttons', array( 'FlexMLS\Admin\TinyMCE', 'mce_buttons' ) );
 		add_filter( 'mce_external_plugins', array( 'FlexMLS\Admin\TinyMCE', 'mce_external_plugins' ) );
+		//add_filter( 'nav_menu_meta_box_object', array( 'FlexMLS\Admin\NavMenus', 'nav_menu_meta_box_object' ) );
 		add_filter( 'script_loader_tag', array( 'FlexMLS\Admin\Enqueue', 'script_loader_tag' ), 10, 2 );
 	}
 
@@ -169,27 +172,6 @@ class Flexmls {
 		\FlexMLS\Admin\Upgrade::maybe_do_upgrade();
 		$SparkAPI = new \SparkAPI\Core();
 		$SparkAPI->clear_cache( true );
-	}
-
-	function test_if_idx_page(){
-		$flexmls_settings = get_option( 'flexmls_settings' );
-		if( is_page( $flexmls_settings[ 'general' ][ 'search_results_page' ] ) ){
-			global $wp_query;
-			if( isset( $wp_query->query_vars[ 'idxlisting_id' ] ) ){
-				// Do single listing page
-				new \FlexMLS\Pages\ListingDetail();
-			} else {
-				if( empty( $wp_query->query_vars[ 'idxsearch_id' ] ) ){
-					// No default link is set. Do a 404.
-					$wp_query->set_404();
-					status_header( 404 );
-					get_template_part( 404 );
-					exit();
-				}
-				// Do search results
-				new \FlexMLS\Pages\ListingSummary();
-			}
-		}
 	}
 
 }

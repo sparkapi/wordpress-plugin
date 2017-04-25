@@ -45,6 +45,22 @@ class Utilities {
 		return number_format( $price, 0 );
 	}
 
+	public static function get_current_url(){
+		global $_SERVER, $wp;
+		if( $wp->did_permalink ){
+			$url = home_url( add_query_arg( array(), $wp->request ) );
+			if( isset( $_SERVER[ 'QUERY_STRING' ] ) && !empty( $_SERVER[ 'QUERY_STRING' ] ) ){
+				$url .= '?' . $_SERVER[ 'QUERY_STRING' ];
+			}
+			return $url;
+		}
+		$qs = $wp->query_string;
+		if( isset( $_SERVER[ 'QUERY_STRING' ] ) && !empty( $_SERVER[ 'QUERY_STRING' ] ) ){
+			$qs .= empty( $qs ) ? $_SERVER[ 'QUERY_STRING' ] : '&' . $_SERVER[ 'QUERY_STRING' ];
+		}
+		return home_url( '?' . $qs );
+	}
+
 	static function is_not_blank_or_restricted( $val ){
 		$result = true;
 		if( !is_array( $val ) ){
@@ -120,30 +136,30 @@ class Utilities {
     else{
       $logo = "IDX";
     }
-    //These will be printed in this order.
+
     $possibleRequired = array(
-      "ListOfficeName"  => array("Listing Office",$sf["ListOfficeName"]),
-      "ListOfficePhone"   => array("Office Phone",$ListOfficePhone),
-      "ListOfficeEmail"   => array("Office Email",$sf["ListOfficeEmail"]),
-      "ListOfficeURL"   => array("Office Website",$sf["ListOfficeURL"]),
-      "ListOfficeAddress"   => array("Office Address",$OfficeAddress),
-      "ListAgentName"   => array("Listing Agent",$AgentName),//Agent name is done below to make sure first and last name are present
-      "ListMemberPhone"   => array("Agent Phone",$sf["ListAgentPreferredPhone"] ),
-      "ListMemberEmail"   => array("Agent Email",$sf["ListAgentEmail"]),
-      "ListMemberURL"   => array("Agent Website",$sf["ListAgentURL"]),
-      "ListMemberAddress"   => array("Agent Address",$AgentAddress),
-      "CoListOfficeName"  => array("Co Office Name",$sf["CoListOfficeName"]),
-      "CoListOfficePhone" => array("Co Office Phone",$sf["CoListOfficePhone"]),
-      "CoListOfficeEmail" => array("Co Office Email",$sf["CoListOfficeEmail"]),
-      "CoListOfficeURL" => array("Co Office Website",$sf["CoListOfficeURL"]),
-      "CoListOfficeAddress" => array("Co Office Address","$CoAgentAddress"),
-      "CoListAgentName" => array("Co Listing Agent",$CoAgentName),
-      "CoListAgentPhone"  => array("Co Agent Phone",$CoListAgentPhone),
-      "CoListAgentEmail"  => array("Co Agent Email",$sf["CoListAgentEmail"]),
-      "CoListAgentURL"  => array("Co Agent Webpage",$sf["CoListAgentURL"]),
-      "CoListAgentAddress"  => array("Co Agent Address",$CoAgentAddress),
-      "ListingUpdateTimestamp"=> array("Last Updated",$LastModifiedDate),
-      "IDXLogo"               => array("LOGO",$logo),//Todo -- Print Logo?
+		"ListOfficeName"  => array("Listing Office",$sf["ListOfficeName"]),
+		"ListOfficePhone"   => array("Office Phone",$ListOfficePhone),
+		"ListOfficeEmail"   => array("Office Email",$sf["ListOfficeEmail"]),
+		"ListOfficeURL"   => array("Office Website",$sf["ListOfficeURL"]),
+		"ListOfficeAddress"   => array("Office Address",$OfficeAddress),
+		"ListAgentName"   => array("Listing Agent",$AgentName),//Agent name is done below to make sure first and last name are present
+		"ListMemberPhone"   => array("Agent Phone",$sf["ListAgentPreferredPhone"] ),
+		"ListMemberEmail"   => array("Agent Email",$sf["ListAgentEmail"]),
+		"ListMemberURL"   => array("Agent Website",$sf["ListAgentURL"]),
+		"ListMemberAddress"   => array("Agent Address",$AgentAddress),
+		"CoListOfficeName"  => array("Co Office Name",$sf["CoListOfficeName"]),
+		"CoListOfficePhone" => array("Co Office Phone",$sf["CoListOfficePhone"]),
+		"CoListOfficeEmail" => array("Co Office Email",$sf["CoListOfficeEmail"]),
+		"CoListOfficeURL" => array("Co Office Website",$sf["CoListOfficeURL"]),
+		"CoListOfficeAddress" => array("Co Office Address","$CoAgentAddress"),
+		"CoListAgentName" => array("Co Listing Agent",$CoAgentName),
+		"CoListAgentPhone"  => array("Co Agent Phone",$CoListAgentPhone),
+		"CoListAgentEmail"  => array("Co Agent Email",$sf["CoListAgentEmail"]),
+		"CoListAgentURL"  => array("Co Agent Webpage",$sf["CoListAgentURL"]),
+		"CoListAgentAddress"  => array("Co Agent Address",$CoAgentAddress),
+		"ListingUpdateTimestamp"=> array("Last Updated",$LastModifiedDate),
+		"IDXLogo"               => array("LOGO",$logo),//Todo -- Print Logo?
     );
     //var_dump($logo);
     $values= array();

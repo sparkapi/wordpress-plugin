@@ -22,14 +22,14 @@ class IDXLinks extends Core {
 	}
 
 	function get_idx_link_details( $link_id ){
-		return $this->get_first_result( $this->get_from_api( 'GET', 'idxlinks/' . $link_id, 15 * MINUTE_IN_SECONDS ) );
+		return $this->get_first_result( $this->get_from_api( 'GET', 'idxlinks/' . $link_id, DAY_IN_SECONDS ) );
 	}
 
 	function get_idx_links( $params = array() ){
 		return $this->get_all_results( $this->get_from_api( 'GET', 'idxlinks', DAY_IN_SECONDS, $params ) );
 	}
 
-	function get_all_idx_links( $only_saved_search = false ){
+	function get_all_idx_links( $only_saved_search = true ){
 		$return = array();
 		$current_page = 0;
 		$total_pages = 1;
