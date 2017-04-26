@@ -328,6 +328,13 @@ class Settings {
 						</td>
 					</tr>
 					<tr>
+						<th scope="row"><label for="portal_title">Portal Title</label></th>
+						<td>
+							<input type="text" class="regular-text" id="portal_title" name="flexmls_settings[portal][portal_title]" value="<?php echo $flexmls_settings[ 'portal' ][ 'portal_title' ]; ?>">
+							<p class="description">Displays as the title of your Portal widgets (if any) and the portal popup</p>
+						</td>
+					</tr>
+					<tr>
 						<th scope="row" class="flexmls-wysiwyg-label"><label>Portal Registration Text</label></th>
 						<td>
 							<?php

@@ -32,20 +32,4 @@ class StandardFields extends Core {
 		return $results;
 	}
 
-	/*
-	// THIS WAS FROM THE OLD lib/flexmlsAPI/Core.php
-	// The function was removed and a paramter added to $this->get_standard_fields
-	// Once references are updated, this comment and function can be removed
-		function GetStandardFieldsPlusHasList() {
-			$stan = $this->GetStandardFields();
-			$stan = $stan[0];
-			foreach ($stan as $key => $s) {
-				if ($s["HasList"]==1) {
-					$fielddata = $this->GetStandardField($key);
-					$stan[$key]["HasListValues"] =  $fielddata[0][$key]["FieldList"];
-				}
-			}
-			return $stan;
-		}
-	*/
 }

@@ -10,8 +10,8 @@ class Contacts extends Core {
 	}
 
 	function add_contact( $contact_data, $notify = false ){
-		$fmc_settings = get_option( 'fmc_settings' );
-		if( !array_key_exists( 'contact_notifications', $fmc_settings ) || 1 == $fmc_settings[ 'contact_notifications' ] ){
+		$flexmls_settings = get_option( 'flexmls_settings' );
+		if( 1 == $flexmls_settings[ 'general' ][ 'lead_notify' ] ){
 			$notify = true;
 		}
 		$data = array(

@@ -12,97 +12,62 @@ class LeadGeneration extends \WP_Widget {
 		) );
 	}
 
-	public function widget( $args, $instance ){
-		$Preferences = new \SparkAPI\Preferences();
-		$prefs = $Preferences->get_preferences();
+	public static function flexmls_leadgen(){
+		if( !isset( $_POST[ 'color' ] ) || !empty( $_POST[ 'color' ] ) ){
+			// Honeypot triggered or non existent. Return fake message that everything
+			// is okay.
+			exit( json_encode( array(
+				'message' => $success,
+				'success' => 1
+			) ) );
+		}
+		$response = array(
+			'message' => 'All fields are required',
+			'success' => 0
+		);
 
-		if( !$prefs ){
-			return;
+		$data = array(
+			'DisplayName' => sanitize_text_field( $_POST[ 'name' ] ),
+			'PrimaryEmail' => is_email( $_POST[ 'email' ] ),
+			'SourceURL' => filter_var( $_POST[ 'source' ], FILTER_VALIDATE_URL )
+		);
+		if( array_key_exists( 'street', $_POST ) ){
+			$data[ 'HomeStreetAddress' ] = sanitize_text_field( $_POST[ 'street' ] );
+			$data[ 'HomeLocality' ] = sanitize_text_field( $_POST[ 'city' ] );
+			$data[ 'HomeRegion' ] = sanitize_text_field( $_POST[ 'state' ] );
+			$data[ 'HomePostalCode' ] = sanitize_text_field( $_POST[ 'zip' ] );
+		}
+		if( array_key_exists( 'phone', $_POST ) ){
+			$data[ 'PrimaryPhoneNumber' ] = sanitize_text_field( $_POST[ 'phone' ] );
 		}
 
-		echo $args[ 'before_widget' ];
-
-		if( !empty( $instance[ 'title' ] ) ){
-			echo $args[ 'before_title' ] . apply_filters( 'widget_title', $instance[ 'title' ] ) . $args[ 'after_title' ];
+		foreach( $data as $d ){
+			if( empty( $d ) || !$d ){
+				exit( json_encode( $response ) );
+			}
 		}
 
-		if( !empty( $instance[ 'blurb' ] ) ){
-			echo wpautop( $instance[ 'blurb' ] );
-		}
+		$Contacts = new \SparkAPI\Contacts();
+		$contact = $Contacts->add_contact( $data );
 
-		$uniqid = uniqid( 'fbs' );
-		?>
-		<form class="flexmls-leadgen" id="flexmls-leadgen-<?php echo $uniqid; ?>">
-			<div class="flexmls-leadgen-body">
-				<ul>
-					<li class="flexmls-leadgen-field flexmls-leadgen-field-text">
-						<div>
-							<label for="<?php echo $uniqid; ?>-name">Your Name</label>
-							<input type="text" name="name" id="<?php echo $uniqid; ?>-name" placeholder="Your Name" required autocomplete="name" inputmode="latin-name">
-						</div>
-					</li>
-					<li class="flexmls-leadgen-field flexmls-leadgen-field-email">
-						<div>
-							<label for="<?php echo $uniqid; ?>-email">Email Address</label>
-							<input type="email" name="email" id="<?php echo $uniqid; ?>-email" placeholder="Email Address" required autocomplete="email">
-						</div>
-					</li>
-					<?php if( !in_array( 'address', $prefs[ 'RequiredFields' ] ) ): ?>
-						<li class="flexmls-leadgen-field flexmls-leadgen-field-address">
-							<div>
-								<label for="<?php echo $uniqid; ?>-street">Home Address</label>
-								<input type="text" name="street" id="<?php echo $uniqid; ?>-street" placeholder="Home Address" required autocomplete="street-address">
-							</div>
-						</li>
-						<li class="flexmls-leadgen-field flexmls-leadgen-field-city">
-							<div>
-								<label for="<?php echo $uniqid; ?>-city">City</label>
-								<input type="text" name="city" id="<?php echo $uniqid; ?>-city" placeholder="City" required autocomplete="postal-code">
-							</div>
-						</li>
-						<li class="flexmls-leadgen-field flexmls-leadgen-field-state">
-							<div>
-								<label for="<?php echo $uniqid; ?>-state">State</label>
-								<input type="text" name="state" id="<?php echo $uniqid; ?>-state" placeholder="State" required>
-							</div>
-						</li>
-						<li class="flexmls-leadgen-field flexmls-leadgen-field-zip">
-							<div>
-								<label for="<?php echo $uniqid; ?>-zip">ZIP Code</label>
-								<input type="text" name="zip" id="<?php echo $uniqid; ?>-zip" placeholder="ZIP Code" required autocomplete="postal-code" inputmode="numeric">
-							</div>
-						</li>
-					<?php endif; ?>
-					<?php if( !in_array( 'phone', $prefs[ 'RequiredFields' ] ) ): ?>
-						<li class="flexmls-leadgen-field flexmls-leadgen-field-phone">
-							<div>
-								<label for="<?php echo $uniqid; ?>-phone">Phone Number</label>
-								<input type="tel" name="phone" id="<?php echo $uniqid; ?>-phone" placeholder="Phone Number" required autocomplete="tel">
-							</div>
-						</li>
-					<?php endif; ?>
-					<li class="flexmls-leadgen-field flexmls-leadgen-field-message">
-						<div>
-							<label for="<?php echo $uniqid; ?>-message">Message</label>
-							<textarea name="message" id="<?php echo $uniqid; ?>-message" placeholder="Your Message" rows="5"></textarea>
-						</div>
-					</li>
-					<li class="flexmls-leadgen-field flexmls-leadgen-field-color">
-						<div>
-							<label for="<?php echo $uniqid; ?>"><?php echo $uniqid; ?></label>
-							<input type="text" name="color" tabindex="-1" value="" autocomplete="off">
-						</div>
-					</li>
-				</ul>
-				<input type="hidden" name="source" value="<?php echo \Flexmls\Admin\Utilities::get_current_url(); ?>">
-				<input type="hidden" name="success" value="<?php echo esc_attr( $instance[ 'success' ] ); ?>">
-			</div>
-			<div class="flexmls-leadgen-footer">
-				<button class="flexmls-button" type="button" data-flexmls-button="leadgen" data-form="#flexmls-leadgen-<?php echo $uniqid; ?>"><?php echo $instance[ 'buttontext' ]; ?></button>
-			</div>
-		</form>
-		<?php
-		echo $args[ 'after_widget' ];
+		$message = wp_kses( $_POST[ 'message' ], array() );
+
+		$subject = $data[ 'DisplayName' ] . ' would like you to contact them.';
+
+		$body  = 'Message: ' . stripslashes( $message ) . PHP_EOL . PHP_EOL;
+		$body .= 'Email: ' . $data[ 'PrimaryEmail' ] . PHP_EOL;
+		if( array_key_exists( 'PrimaryPhoneNumber', $data ) ){
+			$body .= 'Phone: ' . $data[ 'PrimaryPhoneNumber' ] . PHP_EOL;
+		}
+		$body .= PHP_EOL;
+		$body .= '(This message was generated by your WordPress Flexmls(r) Contact Me Form on ' . $data[ 'SourceURL' ] . ')';
+
+		$message_me = $Contacts->message_me( $subject, $body, $data[ 'PrimaryEmail' ] );
+
+		$response[ 'message' ] = $required_fields[ 'success' ];
+		$response[ 'success' ] = 1;
+
+		exit( json_encode( $response ) );
 	}
 
 	public function form( $instance ) {
@@ -140,5 +105,98 @@ class LeadGeneration extends \WP_Widget {
 		$instance[ 'success' ] = !empty( wp_kses( $new_instance[ 'success' ], array() ) ) ?  wp_kses( $new_instance[ 'success' ], array() ) : 'Thank you for your request';
 		$instance[ 'buttontext' ] = !empty( $new_instance[ 'buttontext' ] ) ? sanitize_text_field( $new_instance[ 'buttontext' ] ) : 'Submit';
 		return $instance;
+	}
+
+	public function widget( $args, $instance ){
+		$Preferences = new \SparkAPI\Preferences();
+		$prefs = $Preferences->get_preferences();
+
+		if( !$prefs ){
+			return;
+		}
+
+		echo $args[ 'before_widget' ];
+
+		if( !empty( $instance[ 'title' ] ) ){
+			echo $args[ 'before_title' ] . apply_filters( 'widget_title', $instance[ 'title' ] ) . $args[ 'after_title' ];
+		}
+
+		if( !empty( $instance[ 'blurb' ] ) ){
+			echo wpautop( $instance[ 'blurb' ] );
+		}
+
+		$uniqid = uniqid( 'fbs' );
+		?>
+		<form class="flexmls-leadgen" id="flexmls-leadgen-<?php echo $uniqid; ?>">
+			<div class="flexmls-leadgen-body">
+				<ul>
+					<li class="flexmls-leadgen-field flexmls-leadgen-field-text">
+						<div>
+							<label for="<?php echo $uniqid; ?>-name">Your Name</label>
+							<input type="text" name="name" id="<?php echo $uniqid; ?>-name" placeholder="Your Name" required autocomplete="name" inputmode="latin-name">
+						</div>
+					</li>
+					<li class="flexmls-leadgen-field flexmls-leadgen-field-email">
+						<div>
+							<label for="<?php echo $uniqid; ?>-email">Email Address</label>
+							<input type="email" name="email" id="<?php echo $uniqid; ?>-email" placeholder="Email Address" required autocomplete="email">
+						</div>
+					</li>
+					<?php if( in_array( 'address', $prefs[ 'RequiredFields' ] ) ): ?>
+						<li class="flexmls-leadgen-field flexmls-leadgen-field-address">
+							<div>
+								<label for="<?php echo $uniqid; ?>-street">Home Address</label>
+								<input type="text" name="street" id="<?php echo $uniqid; ?>-street" placeholder="Home Address" required autocomplete="street-address">
+							</div>
+						</li>
+						<li class="flexmls-leadgen-field flexmls-leadgen-field-city">
+							<div>
+								<label for="<?php echo $uniqid; ?>-city">City</label>
+								<input type="text" name="city" id="<?php echo $uniqid; ?>-city" placeholder="City" required autocomplete="postal-code">
+							</div>
+						</li>
+						<li class="flexmls-leadgen-field flexmls-leadgen-field-state">
+							<div>
+								<label for="<?php echo $uniqid; ?>-state">State</label>
+								<input type="text" name="state" id="<?php echo $uniqid; ?>-state" placeholder="State" required>
+							</div>
+						</li>
+						<li class="flexmls-leadgen-field flexmls-leadgen-field-zip">
+							<div>
+								<label for="<?php echo $uniqid; ?>-zip">ZIP Code</label>
+								<input type="text" name="zip" id="<?php echo $uniqid; ?>-zip" placeholder="ZIP Code" required autocomplete="postal-code" inputmode="numeric">
+							</div>
+						</li>
+					<?php endif; ?>
+					<?php if( in_array( 'phone', $prefs[ 'RequiredFields' ] ) ): ?>
+						<li class="flexmls-leadgen-field flexmls-leadgen-field-phone">
+							<div>
+								<label for="<?php echo $uniqid; ?>-phone">Phone Number</label>
+								<input type="tel" name="phone" id="<?php echo $uniqid; ?>-phone" placeholder="Phone Number" required autocomplete="tel">
+							</div>
+						</li>
+					<?php endif; ?>
+					<li class="flexmls-leadgen-field flexmls-leadgen-field-message">
+						<div>
+							<label for="<?php echo $uniqid; ?>-message">Message</label>
+							<textarea name="message" id="<?php echo $uniqid; ?>-message" placeholder="Your Message" rows="5"></textarea>
+						</div>
+					</li>
+					<li class="flexmls-leadgen-field flexmls-leadgen-field-color">
+						<div>
+							<label for="<?php echo $uniqid; ?>"><?php echo $uniqid; ?></label>
+							<input type="text" name="color" tabindex="-1" value="" autocomplete="off">
+						</div>
+					</li>
+				</ul>
+				<input type="hidden" name="source" value="<?php echo \Flexmls\Admin\Utilities::get_current_url(); ?>">
+				<input type="hidden" name="success" value="<?php echo esc_attr( $instance[ 'success' ] ); ?>">
+			</div>
+			<div class="flexmls-leadgen-footer">
+				<button class="flexmls-button flexmls-button-primary" type="button" data-flexmls-button="leadgen" data-form="#flexmls-leadgen-<?php echo $uniqid; ?>"><?php echo $instance[ 'buttontext' ]; ?></button>
+			</div>
+		</form>
+		<?php
+		echo $args[ 'after_widget' ];
 	}
 }

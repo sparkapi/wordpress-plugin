@@ -1,0 +1,26 @@
+.flexmls-button {
+	border: 1px solid $brand-blue;
+	border-radius: 0;
+	box-shadow: none;
+	cursor: pointer;
+	display: inline-block;
+	padding: 0.5rem 1.5rem;
+	text-transform: uppercase;
+}
+.flexmls-button-primary {
+	background: $brand-blue;
+	color: #fff;
+	transition: background 300ms, opacity 300ms;
+
+	&:hover,
+	&:focus,
+	&:active {
+		background: darken($brand-blue,10%);
+	}
+
+	&:disabled {
+		cursor: disabled;
+		opacity: 0.5;
+		pointer-events: none;
+	}
+}

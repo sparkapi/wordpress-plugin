@@ -9,14 +9,6 @@ class Page {
 		global $Flexmls;
 		$this->listings_order_by = $Flexmls->listings_order_by;
 		$this->listings_per_page = $Flexmls->listings_per_page;
-		add_filter( 'body_class', array( $this, 'body_class_universals' ) );
-	}
-
-	function body_class_universals( $classes ){
-		$classes[] = 'flexmls';
-		$classes[] = 'flexmls-theme-default';
-		$classes[] = 'flexmls-no-js';
-		return $classes;
 	}
 
 	function can_do_maps(){

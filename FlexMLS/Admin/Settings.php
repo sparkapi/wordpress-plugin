@@ -143,6 +143,7 @@ class Settings {
 				$flexmls_settings[ 'portal' ][ 'delay' ][ 'time_on_site' ] = !empty( $_POST[ 'flexmls_settings' ][ 'portal' ][ 'delay' ][ 'time_on_site' ] ) ? intval( $_POST[ 'flexmls_settings' ][ 'portal' ][ 'delay' ][ 'time_on_site' ] ) : '';
 				$flexmls_settings[ 'portal' ][ 'delay' ][ 'summary_page_views' ] = !empty( $_POST[ 'flexmls_settings' ][ 'portal' ][ 'delay' ][ 'summary_page_views' ] ) ? intval( $_POST[ 'flexmls_settings' ][ 'portal' ][ 'delay' ][ 'summary_page_views' ] ) : '';
 				$flexmls_settings[ 'portal' ][ 'delay' ][ 'detail_page_views' ] = !empty( $_POST[ 'flexmls_settings' ][ 'portal' ][ 'delay' ][ 'detail_page_views' ] ) ? intval( $_POST[ 'flexmls_settings' ][ 'portal' ][ 'delay' ][ 'detail_page_views' ] ) : '';
+				$flexmls_settings[ 'portal' ][ 'portal_title' ] = sanitize_text_field( $_POST[ 'flexmls_settings' ][ 'portal' ][ 'portal_title' ] );
 				$flexmls_settings[ 'portal' ][ 'require_login' ] = ( 1 == $_POST[ 'flexmls_settings' ][ 'portal' ][ 'require_login' ] ? 1 : 0 );
 				$flexmls_settings[ 'portal' ][ 'registration_text' ] = wp_kses_post( $_POST[ 'flexmls_settings' ][ 'portal' ][ 'registration_text' ] );
 				$flexmls_settings[ 'portal' ][ 'allow_carts' ] = isset( $_POST[ 'flexmls_settings' ][ 'portal' ][ 'allow_carts' ] ) ? 1 : 0;

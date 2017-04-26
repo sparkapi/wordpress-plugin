@@ -111,6 +111,7 @@ class Flexmls {
 				'summary_page_views' => '',
 				'detail_page_views' => ''
 			),
+			'portal_title' => 'Create a Real Estate Portal',
 			'require_login' => 0,
 			'registration_text' => 'With a portal you are able to:' . PHP_EOL . '<ol><li>Save your searches</li><li>Get updates on listings</li><li>Track listings</li><li>Add notes and messages</li><li>Personalize your dashboard</li></ol>',
 			'allow_carts' => 1
@@ -125,6 +126,7 @@ class Flexmls {
 		add_action( 'admin_menu', array( 'FlexMLS\Admin\Settings', 'admin_menu' ) );
 		add_action( 'admin_notices', array( 'FlexMLS\Admin\Settings', 'notice_test_environment' ), 9 );
 		add_action( 'admin_enqueue_scripts', array( 'FlexMLS\Admin\Enqueue', 'admin_enqueue_scripts' ) );
+		add_action( 'before_delete_post', array( $this, 'prevent_delete_flexmls_search_page' ), 10, 1 );
 		add_action( 'edit_form_after_title', array( 'FlexMLS\Pages\Page', 'search_results_page_notice' ), 9 );
 		add_action( 'init', array( 'FlexMLS\Pages\Page', 'custom_rewrite_rules' ), 10, 0 );
 		add_action( 'init', array( 'FlexMLS\Pages\Page', 'set_global_listing_vars' ) );
@@ -133,9 +135,13 @@ class Flexmls {
 		add_action( 'widgets_init', array( 'FlexMLS\Widgets\Widgets', 'widgets_init' ) );
 		add_action( 'wp', array( 'FlexMLS\Pages\Page', 'test_if_idx_page' ), 9 );
 		add_action( 'wp_ajax_clear_spark_api_cache', array( $this, 'ajax_clear_cache' ) );
+		add_action( 'wp_ajax_flexmls_leadgen', array( 'FlexMLS\Widgets\LeadGeneration', 'flexmls_leadgen' ) );
+		add_action( 'wp_ajax_nopriv_flexmls_leadgen', array( 'FlexMLS\Widgets\LeadGeneration', 'flexmls_leadgen' ) );
 		add_action( 'wp_ajax_tinymce_popup', array( 'FlexMLS\Admin\TinyMCE', 'tinymce_popup' ) );
 		add_action( 'wp_enqueue_scripts', array( 'FlexMLS\Admin\Enqueue', 'wp_enqueue_scripts' ) );
+		add_action( 'wp_trash_post', array( $this, 'prevent_delete_flexmls_search_page' ), 10, 1 );
 
+		add_filter( 'body_class', array( $this, 'body_class' ) );
 		add_filter( 'mce_buttons', array( 'FlexMLS\Admin\TinyMCE', 'mce_buttons' ) );
 		add_filter( 'mce_external_plugins', array( 'FlexMLS\Admin\TinyMCE', 'mce_external_plugins' ) );
 		//add_filter( 'nav_menu_meta_box_object', array( 'FlexMLS\Admin\NavMenus', 'nav_menu_meta_box_object' ) );
@@ -172,6 +178,21 @@ class Flexmls {
 		\FlexMLS\Admin\Upgrade::maybe_do_upgrade();
 		$SparkAPI = new \SparkAPI\Core();
 		$SparkAPI->clear_cache( true );
+	}
+
+	function body_class( $classes ){
+		$classes[] = 'flexmls';
+		$classes[] = 'flexmls-theme-default';
+		$classes[] = 'flexmls-no-js';
+		return $classes;
+	}
+
+	function prevent_delete_flexmls_search_page( $post_id ){
+		$flexmls_settings = get_option( 'flexmls_settings' );
+		$search_results_page = $flexmls_settings[ 'general' ][ 'search_results_page' ];
+		if( $post_id == $search_results_page ){
+			wp_die( '<h2>Flexmls&reg; Plugin Notice</h2><p>This page is required by your Flexmls&reg; IDX plugin. To delete it, you must first <a href="' . admin_url( 'admin.php?page=flexmls_settings' ) . '">set a different page as your Flexmls&reg; search results page</a>.</p><p>If you want to temporarily disable IDX searches and listings on your site, you can unpublish this page (set it to <em>draft</em> status); however, to delete it entirely, you must first set a new page as your search results page or disable the Flexmls&reg; IDX plugin entirely.</p><p><a href="' . admin_url( 'edit.php?post_type=page' ) . '">&larr; Back to Pages</a></p>', 'Flexmls Plugin Warning' );
+		}
 	}
 
 }

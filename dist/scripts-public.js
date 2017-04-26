@@ -66,6 +66,7 @@ window.optimizedScroll = (function(){
 
 	var doLeadgen = function(){
 		$( 'button[data-flexmls-button="leadgen"]' ).on( 'click', function(){
+			$( '.flexmls-leadgen-notice' ).remove();
 			var btn = $( this );
 			var btnHtml = $( btn ).html();
 			$( btn ).html( 'Sending' ).attr( 'disabled', true );
@@ -74,18 +75,29 @@ window.optimizedScroll = (function(){
 				action: 'flexmls_leadgen',
 				name: $( form ).find( 'input[name="name"]' ).val(),
 				email: $( form ).find( 'input[name="email"]' ).val(),
-				street: $( form ).find( 'input[name="street"]' ).val() || '',
-				city: $( form ).find( 'input[name="city"]' ).val() || '',
-				state: $( form ).find( 'input[name="state"]' ).val() || '',
-				zip: $( form ).find( 'input[name="zip"]' ).val() || '',
-				phone: $( form ).find( 'input[name="phone"]' ).val() || '',
 				message: $( form ).find( 'textarea[name="message"]' ).val(),
 				color: $( form ).find( 'input[name="color"]' ).val(),
 				source: $( form ).find( 'input[name="source"]' ).val(),
+				success: $( form ).find( 'input[name="success"]' ).val()
 			};
+			if( $( form ).find( 'input[name="street"]' ).length ){
+				data.street = $( form ).find( 'input[name="street"]' ).val();
+				data.city = $( form ).find( 'input[name="city"]' ).val();
+				data.state = $( form ).find( 'input[name="state"]' ).val();
+				data.zip = $( form ).find( 'input[name="zip"]' ).val();
+			}
+			if( $( form ).find( 'input[name="phone"]' ).length ){
+				data.phone = $( form ).find( 'input[name="phone"]' ).val();
+			}
+
 			$.post( flexmls.ajaxurl, data, function( response ){
-				console.log( response );
+				var noticeClass = 'warning';
+				if( 1 === response.success ){
+					noticeClass = 'success';
+				}
+				$( form ).prepend( '<div class="flexmls-leadgen-notice flexmls-leadgen-notice-' + noticeClass + '">' + response.message + '</div>' );
 				$( btn ).html( btnHtml ).removeAttr( 'disabled' );
+				console.log( response );
 			}, 'json' );
 		});
 	};

@@ -58,18 +58,17 @@ class Core {
 
 		if( true === $force ){
 			/*----------------------------------------------------------------------
-			  The user has requested that ALL FlexMLS caches be purged so
-			  we will bulk delete all newly created FlexMLS caches
+			  The user has requested that ALL Flexmls caches be purged so
+			  we will bulk delete all newly created Flexmls caches
 			----------------------------------------------------------------------*/
 			$wpdb->query( $wpdb->prepare(
 				$delete_query,
 				'_transient_flexmls_query_%',
 				'_transient_timeout_flexmls_query_%'
 			) );
-			delete_option( 'fmc_db_cache_key' );
 		} else {
 			/*----------------------------------------------------------------------
-			  Just delete expired FlexMLS transients but leave current ones
+			  Just delete expired Flexmls transients but leave current ones
 			  intact. This is just regular clean-up, not a forced cache clear.
 			----------------------------------------------------------------------*/
 			$time = time();
@@ -103,7 +102,9 @@ class Core {
 			$query = build_query( $params );
 			$url = $this->api_base . '/' . $this->api_version . '/session?' . build_query( $params );
 			$args = array(
-				'headers' => $this->api_headers
+				'compress' => true,
+				'headers' => $this->api_headers,
+				'timeout' => 10
 			);
 			$response = wp_remote_post( $url, $args );
 
@@ -174,9 +175,11 @@ class Core {
 			$url = $this->api_base . '/' . $this->api_version . '/' . $service . '?' . $request[ 'query_string' ];
 			$json = array();
 			$args = array(
-				'method' => $method,
+				'body' => $post_data,
+				'compress' => true,
 				'headers' => $this->api_headers,
-				'body' => $post_data
+				'method' => $method,
+				'timeout' => 10
 			);
 			$response = wp_remote_request( $url, $args );
 

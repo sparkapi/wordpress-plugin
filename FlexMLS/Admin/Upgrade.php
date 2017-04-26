@@ -19,7 +19,6 @@ class Upgrade {
 			$flexmls_settings = \Flexmls::$default_options;
 			// These are the old options from v3 and prior
 			$fmc_settings = get_option( 'fmc_settings' );
-			write_log( 'Do upgrade' );
 
 			// Transfer credentials
 			$flexmls_settings[ 'credentials' ][ 'api_key' ] = $fmc_settings[ 'api_key' ];
@@ -79,6 +78,7 @@ class Upgrade {
 
 			// Clean up old options no longer used or moved to the 'flexmls_settings' option
 			delete_option( 'fmc_cache_version' );
+			delete_option( 'fmc_db_cache_key' );
 			delete_option( 'fmc_settings' );
 			delete_option( 'fmc_plugin_version' );
 		}
