@@ -103,14 +103,14 @@ class Flexmls {
 			'plugin_version' => FLEXMLS_PLUGIN_VERSION
 		),
 		'portal' => array(
-			'popup_summaries' => 0,
-			'popup_details' => 0,
 			'delay' => array(
 				'time_on_page' => '',
 				'time_on_site' =>'',
 				'summary_page_views' => '',
 				'detail_page_views' => ''
 			),
+			'popup_summaries' => 0,
+			'popup_details' => 0,
 			'portal_title' => 'Create a Real Estate Portal',
 			'require_login' => 0,
 			'registration_text' => 'With a portal you are able to:' . PHP_EOL . '<ol><li>Save your searches</li><li>Get updates on listings</li><li>Track listings</li><li>Add notes and messages</li><li>Personalize your dashboard</li></ol>',
@@ -122,30 +122,32 @@ class Flexmls {
 	);
 
 	function __construct(){
-		//add_action( 'admin_head-nav-menus.php', array( 'FlexMLS\Admin\NavMenus', 'add_saved_searches_meta_boxes' ) );
-		add_action( 'admin_menu', array( 'FlexMLS\Admin\Settings', 'admin_menu' ) );
-		add_action( 'admin_notices', array( 'FlexMLS\Admin\Settings', 'notice_test_environment' ), 9 );
-		add_action( 'admin_enqueue_scripts', array( 'FlexMLS\Admin\Enqueue', 'admin_enqueue_scripts' ) );
+		//add_action( 'admin_head-nav-menus.php', array( 'FBS\Admin\NavMenus', 'add_saved_searches_meta_boxes' ) );
+		add_action( 'admin_menu', array( 'FBS\Admin\Settings', 'admin_menu' ) );
+		add_action( 'admin_notices', array( 'FBS\Admin\Settings', 'notice_test_environment' ), 9 );
+		add_action( 'admin_enqueue_scripts', array( 'FBS\Admin\Enqueue', 'admin_enqueue_scripts' ) );
 		add_action( 'before_delete_post', array( $this, 'prevent_delete_flexmls_search_page' ), 10, 1 );
-		add_action( 'edit_form_after_title', array( 'FlexMLS\Pages\Page', 'search_results_page_notice' ), 9 );
-		add_action( 'init', array( 'FlexMLS\Pages\Page', 'custom_rewrite_rules' ), 10, 0 );
-		add_action( 'init', array( 'FlexMLS\Pages\Page', 'set_global_listing_vars' ) );
-		add_action( 'plugins_loaded', array( '\FlexMLS\Admin\Settings', 'update_settings' ), 9 );
-		add_action( 'post_updated', array( 'FlexMLS\Pages\Page', 'maybe_update_permalink' ), 10, 3 );
-		add_action( 'widgets_init', array( 'FlexMLS\Widgets\Widgets', 'widgets_init' ) );
-		add_action( 'wp', array( 'FlexMLS\Pages\Page', 'test_if_idx_page' ), 9 );
+		add_action( 'edit_form_after_title', array( 'FBS\Pages\Page', 'search_results_page_notice' ), 9 );
+		add_action( 'init', array( 'FBS\Pages\Page', 'custom_rewrite_rules' ), 10, 0 );
+		add_action( 'init', array( 'FBS\Pages\Page', 'set_global_listing_vars' ) );
+		add_action( 'plugins_loaded', array( '\FBS\Admin\Settings', 'update_settings' ), 9 );
+		add_action( 'post_updated', array( 'FBS\Pages\Page', 'maybe_update_permalink' ), 10, 3 );
+		add_action( 'widgets_init', array( 'FBS\Widgets\Widgets', 'widgets_init' ) );
+		add_action( 'wp', array( 'FBS\Pages\Page', 'test_if_idx_page' ), 9 );
 		add_action( 'wp_ajax_clear_spark_api_cache', array( $this, 'ajax_clear_cache' ) );
-		add_action( 'wp_ajax_flexmls_leadgen', array( 'FlexMLS\Widgets\LeadGeneration', 'flexmls_leadgen' ) );
-		add_action( 'wp_ajax_nopriv_flexmls_leadgen', array( 'FlexMLS\Widgets\LeadGeneration', 'flexmls_leadgen' ) );
-		add_action( 'wp_ajax_tinymce_popup', array( 'FlexMLS\Admin\TinyMCE', 'tinymce_popup' ) );
-		add_action( 'wp_enqueue_scripts', array( 'FlexMLS\Admin\Enqueue', 'wp_enqueue_scripts' ) );
+		add_action( 'wp_ajax_flexmls_leadgen', array( 'FBS\Widgets\LeadGeneration', 'flexmls_leadgen' ) );
+		add_action( 'wp_ajax_nopriv_flexmls_leadgen', array( 'FBS\Widgets\LeadGeneration', 'flexmls_leadgen' ) );
+		add_action( 'wp_ajax_tinymce_popup', array( 'FBS\Admin\TinyMCE', 'tinymce_popup' ) );
+		add_action( 'wp_enqueue_scripts', array( 'FBS\Admin\Enqueue', 'wp_enqueue_scripts' ) );
 		add_action( 'wp_trash_post', array( $this, 'prevent_delete_flexmls_search_page' ), 10, 1 );
 
 		add_filter( 'body_class', array( $this, 'body_class' ) );
-		add_filter( 'mce_buttons', array( 'FlexMLS\Admin\TinyMCE', 'mce_buttons' ) );
-		add_filter( 'mce_external_plugins', array( 'FlexMLS\Admin\TinyMCE', 'mce_external_plugins' ) );
-		//add_filter( 'nav_menu_meta_box_object', array( 'FlexMLS\Admin\NavMenus', 'nav_menu_meta_box_object' ) );
-		add_filter( 'script_loader_tag', array( 'FlexMLS\Admin\Enqueue', 'script_loader_tag' ), 10, 2 );
+		add_filter( 'nav_menu_css_class' , array( 'FBS\Pages\Page', 'nav_menu_css_class' ), 10, 2 );
+		add_filter( 'mce_buttons', array( 'FBS\Admin\TinyMCE', 'mce_buttons' ) );
+		add_filter( 'mce_external_plugins', array( 'FBS\Admin\TinyMCE', 'mce_external_plugins' ) );
+		//add_filter( 'nav_menu_meta_box_object', array( 'FBS\Admin\NavMenus', 'nav_menu_meta_box_object' ) );
+		add_filter( 'script_loader_tag', array( 'FBS\Admin\Enqueue', 'script_loader_tag' ), 10, 2 );
+
 	}
 
 	function ajax_clear_cache(){
@@ -175,7 +177,7 @@ class Flexmls {
 		}
 
 		// This is a plugin reactivation or upgrade.
-		\FlexMLS\Admin\Upgrade::maybe_do_upgrade();
+		\FBS\Admin\Upgrade::maybe_do_upgrade();
 		$SparkAPI = new \SparkAPI\Core();
 		$SparkAPI->clear_cache( true );
 	}

@@ -6,7 +6,7 @@ defined( 'ABSPATH' ) or die( 'This plugin requires WordPress' );
 spl_autoload_register( function( $class ){
 
 	$namespaces = array(
-		'Flexmls',
+		'FBS',
 		'SparkAPI'
 	);
 
