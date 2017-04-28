@@ -58,6 +58,9 @@ class MarketStats extends \WP_Widget {
 		$chart_data = !isset( $instance[ 'chart_data' ] ) ? array( 'AbsorptionRate' ) : $instance[ 'chart_data' ];
 		$chart_type = !isset( $instance[ 'chart_type' ] ) ? 'line' : $instance[ 'chart_type' ];
 		$property_type = !isset( $instance[ 'property_type' ] ) ? 'A' : $instance[ 'property_type' ];
+		$location_field_name_to_display = !isset( $instance[ 'location_field_name_to_display' ] ) ? '' : $instance[ 'location_field_name_to_display' ];
+		$location_field_name_to_search = !isset( $instance[ 'location_field_name_to_search' ] ) ? '' : $instance[ 'location_field_name_to_search' ];
+		$location_field_value_to_search = !isset( $instance[ 'location_field_value_to_search' ] ) ? '' : $instance[ 'location_field_value_to_search' ];
 		$flexmls_settings = get_option( 'flexmls_settings' );
 		?>
 		<p>
@@ -103,7 +106,17 @@ class MarketStats extends \WP_Widget {
 		</p>
 		<p>
 			<label>Select a Location</label>
-			<button type="button" class="widefat button-secondary flexmls-location-selector" data-limit="1" data-target="<?php echo $this->get_field_id( 'location_popup' ); ?>">Select Location</button>
+			<input type="text" class="widefat" name="<?php echo esc_attr( $this->get_field_name( 'location_field_name_to_display' ) ); ?>" value="<?php echo $location_field_name_to_display; ?>" readonly>
+			<input type="hidden" name="<?php echo esc_attr( $this->get_field_name( 'location_field_name_to_search' ) ); ?>" value="<?php echo $location_field_name_to_search; ?>">
+			<input type="hidden" name="<?php echo esc_attr( $this->get_field_name( 'location_field_value_to_search' ) ); ?>" value="<?php echo $location_field_value_to_search; ?>">
+			<button
+				type="button"
+				class="widefat button-secondary flexmls-location-selector"
+				data-limit="1"
+				data-name-to-display="<?php echo $this->get_field_name( 'location_field_name_to_display' ); ?>"
+				data-name-to-search="<?php echo $this->get_field_name( 'location_field_name_to_search' ); ?>"
+				data-value-to-search="<?php echo $this->get_field_name( 'location_field_value_to_search' ); ?>"
+				data-target="<?php echo $this->get_field_id( 'location_popup' ); ?>">Select Location</button>
 		</p>
 		<?php
 		\FBS\Admin\Utilities::location_popup( $this->get_field_id( 'location_popup' ) );
@@ -138,25 +151,79 @@ class MarketStats extends \WP_Widget {
 		} else {
 			$instance[ 'chart_data' ] = array_filter( $new_instance[ 'chart_data' ], 'sanitize_text_field' );
 		}
+		$instance[ 'chart_type' ] = 'bar' == $new_instance[ 'chart_type' ] ? 'bar' : 'line';
+		$instance[ 'property_type' ] = sanitize_text_field( $new_instance[ 'property_type' ] );
+		$instance[ 'location_field_name_to_display' ] = !isset( $new_instance[ 'location_field_name_to_display' ] ) ? '' : sanitize_text_field( $new_instance[ 'location_field_name_to_display' ] );
+		$instance[ 'location_field_name_to_search' ] = !isset( $new_instance[ 'location_field_name_to_search' ] ) ? '' : sanitize_text_field( $new_instance[ 'location_field_name_to_search' ] );
+		$instance[ 'location_field_value_to_search' ] = !isset( $new_instance[ 'location_field_value_to_search' ] ) ? '' : sanitize_text_field( $new_instance[ 'location_field_value_to_search' ] );
 
 		return $instance;
 	}
 
 	public function widget( $args, $instance ){
-		$flexmls_settings = get_option( 'flexmls_settings' );
+		wp_enqueue_script( 'chartjs' );
+
+		$stat_type = $instance[ 'stat_type' ];
+		$chart_data = $instance[ 'chart_data' ];
+		$chart_type = $instance[ 'chart_type' ];
+		$property_type = $instance[ 'property_type' ];
+		$location_field_name_to_search = isset( $instance[ 'location_field_name_to_search' ] ) ? $instance[ 'location_field_name_to_search' ] : null;
+		$location_field_value_to_search = isset( $instance[ 'location_field_value_to_search' ] ) ? $instance[ 'location_field_value_to_search' ] : null;
+
+		$MarketStats = new \SparkAPI\MarketStats();
+		write_log( $MarketStats->get_market_data( $stat_type, $chart_data, $property_type, $location_field_name_to_search, $location_field_value_to_search ) );
 
 		echo $args[ 'before_widget' ];
 
-		if( !empty( $flexmls_settings[ 'portal' ][ 'portal_title' ] ) ){
-			echo $args[ 'before_title' ] . apply_filters( 'widget_title', $flexmls_settings[ 'portal' ][ 'portal_title' ] ) . $args[ 'after_title' ];
+		if( !empty( $instance[ 'title' ] ) ){
+			echo $args[ 'before_title' ] . apply_filters( 'widget_title', $instance[ 'title' ] ) . $args[ 'after_title' ];
 		}
+
+		$id = sprintf( '%u', crc32( $args[ 'widget_id' ] ) );
 		?>
-		<div class="flexmls-portal-container">
-			<div class="flexmls-portal-body"><?php echo wpautop( $flexmls_settings[ 'portal' ][ 'registration_text' ] ); ?></div>
-			<div class="flexmls-portal-footer">
-				<button type="button" class="flexmls-button flexmls-button-primary">Sign up or Sign In</button>
-			</div>
-		</div>
+		<canvas id="flexmls_market_stats_<?php echo $id; ?>" width="400" height="400"></canvas>
+		<script>
+			(function($){
+				$( document ).ready( function(){
+					var chart_<?php echo $id; ?> = new Chart( document.getElementById( 'flexmls_market_stats_<?php echo $id; ?>' ), {
+						type: '<?php echo $chart_type; ?>',
+						data: {
+        labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
+        datasets: [{
+            label: '# of Votes',
+            data: [12, 19, 3, 5, 2, 3],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255,99,132,1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+        }
+    }
+});
+		});
+			})(jQuery);
+		</script>
 		<?php
 		echo $args[ 'after_widget' ];
 	}

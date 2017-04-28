@@ -35,7 +35,7 @@ class Enqueue {
 			wp_enqueue_script( 'jquery-ui-sortable' );
 		}
 
-		wp_register_script( 'flexmls-admin', FLEXMLS_PLUGIN_DIR_URL . '/dist/scripts-admin.min.js', array( 'jquery' ) );
+		wp_register_script( 'flexmls-admin', FLEXMLS_PLUGIN_DIR_URL . '/dist/js/scripts-admin.min.js', array( 'jquery' ) );
 		wp_enqueue_script( 'flexmls-admin' );
 
 		wp_localize_script( 'flexmls-admin', 'flexmls', array(
@@ -44,7 +44,7 @@ class Enqueue {
 			'tech_id' => $tech_id
 		) );
 
-		wp_enqueue_style( 'flexmls-admin', FLEXMLS_PLUGIN_DIR_URL . '/dist/style-admin.css' );
+		wp_enqueue_style( 'flexmls-admin', FLEXMLS_PLUGIN_DIR_URL . '/dist/css/style-admin.css' );
 	}
 
 	static function script_loader_tag( $tag, $handle ){
@@ -59,21 +59,20 @@ class Enqueue {
 		$flexmls_settings = get_option( 'flexmls_settings' );
 
 		if( !empty( $flexmls_settings[ 'gmaps' ][ 'api_key' ] ) && 0 == $flexmls_settings[ 'gmaps' ][ 'no_js' ] ){
-			wp_enqueue_script( 'google_maps', 'https://maps.googleapis.com/maps/api/js?key=' . $flexmls_settings[ 'gmaps' ][ 'api_key' ], array(), null, true );
+			wp_register_script( 'google_maps', 'https://maps.googleapis.com/maps/api/js?key=' . $flexmls_settings[ 'gmaps' ][ 'api_key' ], array(), null, true );
+			wp_enqueue_script( 'google_maps' );
 		}
+		wp_register_script( 'chartjs', FLEXMLS_PLUGIN_DIR_URL . '/dist/js/Chart.bundle.min.js' );
 
-		if( in_flexmls_debug_mode() ){
-			wp_register_script( 'flexmls', FLEXMLS_PLUGIN_DIR_URL . '/dist/scripts-public.js', array( 'jquery' ) );
-		} else {
-			wp_register_script( 'flexmls', FLEXMLS_PLUGIN_DIR_URL . '/dist/scripts-public.min.js', array( 'jquery' ) );
-		}
+		wp_register_script( 'flexmls', FLEXMLS_PLUGIN_DIR_URL . '/dist/js/scripts-public.min.js', array( 'jquery' ) );
 		wp_enqueue_script( 'flexmls' );
+
 		wp_localize_script( 'flexmls', 'flexmls', array(
 			'ajaxurl' => admin_url( 'admin-ajax.php' ),
 			'pluginurl' => FLEXMLS_PLUGIN_DIR_URL
 		) );
 
-		wp_enqueue_style( 'flexmls', FLEXMLS_PLUGIN_DIR_URL . '/dist/style-public.css' );
+		wp_enqueue_style( 'flexmls', FLEXMLS_PLUGIN_DIR_URL . '/dist/css/style-public.css' );
 	}
 
 }

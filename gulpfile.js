@@ -43,6 +43,11 @@ gulp.task( 'build-plugin-zip', function(){
 		.pipe( gulp.dest( './' ) );
 } );
 
+gulp.task( 'chartjs', function(){ 
+	return gulp.src( 'src/bower_components/chart.js/dist/Chart.bundle.min.js' ) 
+		.pipe( gulp.dest( 'dist/js' ) ); 
+} );
+
 gulp.task( 'font-awesome', function(){ 
 	return gulp.src( 'src/bower_components/font-awesome/fonts/**.*' ) 
 		.pipe( gulp.dest( 'dist/fonts' ) ); 
@@ -83,7 +88,7 @@ gulp.task( 'sass', function(){
 			outputStyle: 'compressed'
 		} ).on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
 		.pipe( postcss( [ autoprefixer ] ) )
-		.pipe( gulp.dest( './dist/' ) )
+		.pipe( gulp.dest( './dist/css/' ) )
 		.pipe( livereload() );
 } );
 
@@ -93,7 +98,7 @@ gulp.task( 'sass-admin', function(){
 			outputStyle: 'compressed'
 		} ).on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
 		.pipe( postcss( [ autoprefixer ] ) )
-		.pipe( gulp.dest( './dist/' ) )
+		.pipe( gulp.dest( './dist/css/' ) )
 		.pipe( livereload() );
 } );
 
@@ -103,9 +108,9 @@ gulp.task( 'scripts', [ 'lint' ], function(){
 			'src/js/optimized-events.js',
 			'src/js/public/*.js'
 		] )
-		.pipe( concat( 'dist/scripts-public.js' ).on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
+		.pipe( concat( 'dist/js/scripts-public.js' ).on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
 		.pipe( gulp.dest( '' ) )
-		.pipe( concat( 'dist/scripts-public.min.js' ).on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
+		.pipe( concat( 'dist/js/scripts-public.min.js' ).on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
 		.pipe( uglify().on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
 		.pipe( gulp.dest( '' ) )
 		.pipe( livereload() );
@@ -117,10 +122,10 @@ gulp.task( 'scripts-admin', [ 'lint' ], function(){
 			'src/js/optimized-events.js',
 			'src/js/admin/*.js'
 		] )
-		.pipe( concat( 'dist/scripts-admin.js' ).on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
+		.pipe( concat( 'dist/js/scripts-admin.js' ).on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
 		.pipe( gulp.dest( '' ) )
 		.pipe( uglify().on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
-		.pipe( concat( 'dist/scripts-admin.min.js' ).on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
+		.pipe( concat( 'dist/js/scripts-admin.min.js' ).on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
 		.pipe( gulp.dest( '' ) )
 		.pipe( livereload() );
 } );
@@ -129,10 +134,10 @@ gulp.task( 'scripts-tinymce', [ 'lint' ], function(){
 	return gulp.src( [
 			'src/js/tinymce/*.js'
 		] )
-		.pipe( concat( 'dist/scripts-tinymce.js' ).on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
+		.pipe( concat( 'dist/js/scripts-tinymce.js' ).on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
 		.pipe( gulp.dest( '' ) )
 		.pipe( uglify().on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
-		.pipe( concat( 'dist/scripts-tinymce.min.js' ).on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
+		.pipe( concat( 'dist/js/scripts-tinymce.min.js' ).on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
 		.pipe( gulp.dest( '' ) )
 		.pipe( livereload() );
 } );
@@ -146,7 +151,7 @@ gulp.task( 'watch', function(){
 } );
 
 gulp.task( 'default', [
-	'assets', 'font-awesome', 'sass', 'sass-admin', 'lint', 'scripts', 'scripts-admin', 'scripts-tinymce', 'watch'
+	'assets', 'chartjs', 'font-awesome', 'sass', 'sass-admin', 'lint', 'scripts', 'scripts-admin', 'scripts-tinymce', 'watch'
 ] );
 
 gulp.task( 'build', [ 'build-plugin-zip' ] );

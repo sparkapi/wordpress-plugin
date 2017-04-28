@@ -25,3 +25,30 @@
 		animation: flexmls_querying_spin 2s linear infinite;
 	}
 }
+.flexmls-location-result {
+	@include clearfix;
+
+	h2 {
+		clear: left;
+		float: left;
+		font-size: 1em;
+		margin: 0;
+		padding: 1px 10px 10px 0;
+		text-transform: uppercase;
+		width: 120px;
+	}
+
+	ul {
+		float: left;
+		list-style: none;
+		margin: 0;
+		padding: 0 0 6px;
+	}
+
+	li {
+		list-style: none;
+		margin: 0;
+		padding: 0 0 4px;
+		white-space: nowrap;
+	}
+}

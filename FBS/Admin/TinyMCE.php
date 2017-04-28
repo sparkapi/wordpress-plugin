@@ -11,11 +11,7 @@ class TinyMCE {
 	}
 
 	public static function mce_external_plugins( $plugin_array ){
-		if( in_flexmls_debug_mode() ){
-			$plugin_array[ 'flexmlsidx' ] = \FLEXMLS_PLUGIN_DIR_URL . '/dist/scripts-tinymce.js';
-		} else {
-			$plugin_array[ 'flexmlsidx' ] = \FLEXMLS_PLUGIN_DIR_URL . '/dist/scripts-tinymce.min.js';
-		}
+		$plugin_array[ 'flexmlsidx' ] = \FLEXMLS_PLUGIN_DIR_URL . '/dist/js/scripts-tinymce.min.js';
 		return $plugin_array;
 	}
 

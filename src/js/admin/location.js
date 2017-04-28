@@ -1,5 +1,15 @@
 (function($){
 
+	var resultsInputType, nameToDisplayInput, fieldToSearchInput, valueToSearchInput;
+
+	var delay = (function(){
+		var timer = 0;
+			return function( callback, ms ){
+				clearTimeout( timer );
+				timer = setTimeout(callback, ms);
+			};
+	})();
+
 	var doLocationSearch = function( query, resultDiv ){
 		$.ajax({
 			beforeSend: function(){
@@ -9,11 +19,37 @@
 			data: query,
 			dataType: 'jsonp',
 			error: function( x, err, p ){
+				$( resultDiv ).html( 'There was an error retrieving locations. Please try again later. If you continue to see this message, please contact FBS Support.' );
 				console.log( err, p );
 			},
 			success: function( response ){
 				// Find renderSearchFields in location.js to see formatting/parsing
-				console.log( response );
+				var html = '<div class="flexmls-location-result">';
+				if( response.hasOwnProperty( 'top_result' ) ){
+					html += '<h2>Top Result</h2>';
+					html += '<ul><li><label><input class="flexmls-single-location" type="' + resultsInputType + '" data-field="' + response.top_result.name + '" data-value="' + response.top_result.value + '" data-name="' + response.top_result.display_val + '"> ' + response.top_result.display_val + ' <small>(' + response.top_result.field_display_val + ')</small></label></li></ul>';
+				}
+				if( response.hasOwnProperty( 'results' ) ){
+					var groups = {};
+					response.results.forEach( function( item ){
+						var list = groups[ item.name ];
+						if( list ){
+							list.push( item );
+						} else {
+							groups[ item.name ] = [ item ];
+						}
+					} );
+					for( var k in groups ){
+						html += '<h2>' + groups[ k ][ 0 ].field_display_val + '</h2>';
+						html += '<ul>';
+						for( var j = 0; j < groups[ k ].length; j++ ){
+							html += '<li><label><input class="flexmls-single-location" type="' + resultsInputType + '" data-field="' + groups[ k ][ j ].name + '" data-value="' + groups[ k ][ j ].value + '" data-name="' + groups[ k ][ j ].display_val + '"> ' + groups[ k ][ j ].display_val + '</label></li>';
+						}
+						html += '</ul>';
+					}
+				}
+				html += '</div>';
+				$( resultDiv ).html( html );
 			},
 			url: 'https://www.flexmls.com/cgi-bin/mainmenu.cgi'
 		});
@@ -27,10 +63,19 @@
 			var divID = $( this ).data( 'target' ),
 				limit = $( this ).data( 'limit' ) || 0,
 				searchInput = $( 'div#' + divID ).find( 'input.flexmls-searchbox' ),
-				resultsDiv = $( 'div#' + divID ).find( 'section' );
+				resultDiv = $( 'div#' + divID ).find( 'section' );
+
+			nameToDisplayInput = $( this ).data( 'name-to-display' );
+			nameToSearchInput = $( this ).data( 'name-to-search' );
+			valueToSearchInput = $( this ).data( 'value-to-search' );
+			resultsInputType = 'checkbox';
+
+			if( 1 === limit ){
+				//resultsInputType = 'radio';
+			}
 
 			$( searchInput ).val( '' );
-			$( resultsDiv ).html( defaultResultsText );
+			$( resultDiv ).html( defaultResultsText );
 
 			tb_show( 'Flexmls&reg;: Select Location', '#TB_inline?height=300&width=400&inlineId=' + divID );
 
@@ -46,19 +91,31 @@
 			};
 
 			$( searchInput ).focus().keyup( function(){
-				var searchText = $.trim( $( this ).val() );
-				if( 2 < searchText.length ){
-					qs.q = searchText;
-					doLocationSearch( qs, resultsDiv );
-				} else {
-					$( resultsDiv ).html( defaultResultsText );
-				}
+				delay( function(){
+					var searchText = $.trim( $( searchInput ).val() );
+					if( 2 < searchText.length ){
+						qs.q = searchText;
+						doLocationSearch( qs, resultDiv );
+					} else {
+						$( resultDiv ).html( defaultResultsText );
+					}
+				}, 500 );
 			} );
+		} );
+	};
+
+	var selectLocation = function(){
+		$( 'body' ).on( 'click', 'input.flexmls-single-location', function( ev ){
+			$( 'input[name="' + nameToDisplayInput + '"]' ).val( $( this ).data( 'name' ) );
+			$( 'input[name="' + nameToSearchInput + '"]' ).val( $( this ).data( 'field' ) );
+			$( 'input[name="' + valueToSearchInput + '"]' ).val( $( this ).data( 'value' ) );
+			tb_remove();
 		} );
 	};
 
 	$(document).ready(function(){
 		locationSelector();
+		selectLocation();
 	});
 
 })(jQuery);
