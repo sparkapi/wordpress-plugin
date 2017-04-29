@@ -9,8 +9,12 @@ class Account extends Core {
 		parent::__construct();
 	}
 
+	function get_accounts( $params = array() ){
+		return $this->get_all_results( $this->get_from_api( 'GET', 'accounts', DAY_IN_SECONDS, $params ) );
+	}
+
 	function get_my_account( $params = array() ){
-		return $this->get_first_result( $this->get_from_api( 'GET', 'my/account', HOUR_IN_SECONDS, $params ) );
+		return $this->get_first_result( $this->get_from_api( 'GET', 'my/account', DAY_IN_SECONDS, $params ) );
 	}
 
 	function GetAccounts($params = array()) {

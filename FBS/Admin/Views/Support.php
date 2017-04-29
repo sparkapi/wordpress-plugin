@@ -11,12 +11,18 @@ class Support {
 		add_thickbox();
 
 		$active_theme = wp_get_theme();
-		$active_plugins = get_plugins();
+		$all_plugins = get_plugins();
+		$active_plugins = array();
+		foreach( $all_plugins as $kp => $ap ){
+			if( is_plugin_active( $kp ) ){
+				$active_plugins[ $kp ] = $ap;
+			}
+		}
 
 		$flexmls_settings = get_option( 'flexmls_settings' );
 
 		$known_plugin_conflicts = array(
-			'screencastcom-video-embedder/screencast.php', // Screencast Video Embedder, JS syntax errors in 0.4.4 breaks all pages
+			//'screencastcom-video-embedder/screencast.php', // Screencast Video Embedder, JS syntax errors in 0.4.4 breaks all pages
 		);
 
 		$known_plugin_conflicts_tag = ' &ndash; <span class="flexmls-known-plugin-conflict-tag">Known issues</span>';
@@ -34,8 +40,8 @@ class Support {
 		} else {
 			$license_info[] = '<strong>Licensed to:</strong> Unlicensed/Unknown (Not connected)';
 		}
-		$license_info[] = '<strong>API Key:</strong> ' . ( !empty( $options[ 'api_key' ] ) ? '<code>' . $options[ 'api_key' ] . '</code>' : 'Not Set' );
-		$license_info[] = '<strong>OAuth Client ID:</strong> ' . ( !empty( $options[ 'oauth_key' ] ) ? '<code>' . $options[ 'oauth_key' ] . '</code>' : 'Not Set' );
+		$license_info[] = '<strong>API Key:</strong> ' . ( !empty( $flexmls_settings[ 'credentials' ][ 'api_key' ] ) ? '<code>' . $flexmls_settings[ 'credentials' ][ 'api_key' ] . '</code>' : 'Not Set' );
+		$license_info[] = '<strong>OAuth Key:</strong> ' . ( !empty( $flexmls_settings[ 'credentials' ][ 'oauth_key' ] ) ? '<code>' . $flexmls_settings[ 'credentials' ][ 'oauth_key' ] . '</code>' : 'Not Set' );
 
 		?>
 		<div class="wrap">

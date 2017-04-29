@@ -28,6 +28,17 @@
 		} );
 	};
 
+	var changeFilterParams = function(){
+		$( 'select[name="listings_per_page"]' ).change( function(){
+			var baseurl = $( this ).data( 'baseurl' );
+			window.location = baseurl + '?listings_per_page=' + $( this ).val();
+		} );
+		$( 'select[name="listings_order_by"]' ).change( function(){
+			var baseurl = $( this ).data( 'baseurl' );
+			window.location = baseurl + '?listings_order_by=' + $( this ).val();
+		} );
+	};
+
 	var initGoogleMap = function(){
 		markers = flexmls_data.gmaps;
 		map = new google.maps.Map( document.getElementById( 'flexmls-listing-map' ), {
@@ -58,17 +69,6 @@
 				}
 			}, 500 );
 		}
-	};
-
-	var changeFilterParams = function(){
-		$( 'select[name="listings_per_page"]' ).change( function(){
-			var baseurl = $( this ).data( 'baseurl' );
-			window.location = baseurl + '?listings_per_page=' + $( this ).val();
-		} );
-		$( 'select[name="listings_order_by"]' ).change( function(){
-			var baseurl = $( this ).data( 'baseurl' );
-			window.location = baseurl + '?listings_order_by=' + $( this ).val();
-		} );
 	};
 
 	$(document).ready( function( $ ){

@@ -9,6 +9,8 @@ class Page {
 		global $Flexmls;
 		$this->listings_order_by = $Flexmls->listings_order_by;
 		$this->listings_per_page = $Flexmls->listings_per_page;
+
+		add_action( 'wp_footer', array( $this, 'place_loading_spinner' ) );
 	}
 
 	function can_do_maps(){
@@ -54,6 +56,33 @@ class Page {
 		return $buttons;
 	}
 
+	public static function listing_media(){
+		$Listings = new \SparkAPI\Listings();
+		$listing_id = preg_replace( '/[^0-9]/', '', $_POST[ 'listingid' ] );
+		$media_type = preg_replace( '/[^a-z]/', '', $_POST[ 'mediatype' ] );
+		$response = array(
+			'items' => array(),
+			'message' => 'Could not load ' . $media_type,
+			'success' => 0,
+		);
+		if( empty( $listing_id ) ){
+			$response[ 'message' ] = 'Invalid listing id';
+			exit( json_encode( $response ) );
+		}
+		switch( $media_type ){
+			case 'photos':
+				$photos = $Listings->get_listing_photos( $listing_id );
+				if( !$photos ){
+					$response[ 'message' ] = 'Problem retrieving photos. Please try again later.';
+					exit( json_encode( $response ) );
+				}
+				$response[ 'items' ] = $photos;
+				$response[ 'success' ] = 1;
+				break;
+		}
+		exit( json_encode( $response ) );
+	}
+
 	public static function maybe_update_permalink( $post_ID, $post_after, $post_before ){
 		$flexmls_settings = get_option( 'flexmls_settings' );
 		if( $post_ID == $flexmls_settings[ 'general' ][ 'search_results_page' ] ){
@@ -81,6 +110,10 @@ class Page {
 			}
 		}
 		return $classes;
+	}
+
+	function place_loading_spinner(){
+		echo '<div id="flexmls-loading-spinner"><?xml version="1.0" encoding="utf-8"?><svg width="74px" height="74px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="uil-cube"><rect x="0" y="0" width="100" height="100" fill="none" class="bk"></rect><g transform="translate(25 25)"><rect x="-20" y="-20" width="40" height="40" fill="#4b6ed0" opacity="0.9" class="cube"><animateTransform attributeName="transform" type="scale" from="1.5" to="1" repeatCount="indefinite" begin="0s" dur="1s" calcMode="spline" keySplines="0.2 0.8 0.2 0.8" keyTimes="0;1"></animateTransform></rect></g><g transform="translate(75 25)"><rect x="-20" y="-20" width="40" height="40" fill="#4b6ed0" opacity="0.8" class="cube"><animateTransform attributeName="transform" type="scale" from="1.5" to="1" repeatCount="indefinite" begin="0.1s" dur="1s" calcMode="spline" keySplines="0.2 0.8 0.2 0.8" keyTimes="0;1"></animateTransform></rect></g><g transform="translate(25 75)"><rect x="-20" y="-20" width="40" height="40" fill="#4b6ed0" opacity="0.7" class="cube"><animateTransform attributeName="transform" type="scale" from="1.5" to="1" repeatCount="indefinite" begin="0.3s" dur="1s" calcMode="spline" keySplines="0.2 0.8 0.2 0.8" keyTimes="0;1"></animateTransform></rect></g><g transform="translate(75 75)"><rect x="-20" y="-20" width="40" height="40" fill="#4b6ed0" opacity="0.6" class="cube"><animateTransform attributeName="transform" type="scale" from="1.5" to="1" repeatCount="indefinite" begin="0.2s" dur="1s" calcMode="spline" keySplines="0.2 0.8 0.2 0.8" keyTimes="0;1"></animateTransform></rect></g></svg></div>';
 	}
 
 	public static function search_results_page_notice( $post ){

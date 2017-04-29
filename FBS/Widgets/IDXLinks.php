@@ -5,7 +5,7 @@ defined( 'ABSPATH' ) or die( 'This plugin requires WordPress' );
 
 class IDXLinks extends \WP_Widget {
 
-	public function __construct() {
+	public function __construct(){
 		parent::__construct( 'flexmls_idxlinks', 'Flexmls&reg;: IDX Links', array(
 			'classname' => 'flexmls_idxlinks',
 			'description' => 'List links to select saved searches',
@@ -40,14 +40,14 @@ class IDXLinks extends \WP_Widget {
 		}
 	}
 
-	public function form( $instance ) {
+	public function form( $instance ){
 		$title = !isset( $instance[ 'title' ] ) ? 'Saved Searches' : $instance[ 'title' ];
 		$idx_link = !isset( $instance[ 'idx_link' ] ) ? array() : $instance[ 'idx_link' ];
 		$IDXLinks = new \SparkAPI\IDXLinks();
 		$all_idx_links = $IDXLinks->get_all_idx_links( true );
 		?>
 		<?php if( !$all_idx_links ): ?>
-			<p>You do not have any saved searches in Flexmls. Create saved searches in Flexmls, and then come back here to select which ones you want to show on your site.</p>
+			<p>You do not have any saved searches in Flexmls&reg;. Create saved searches in your Flexmls&reg; account, and then come back here to select which ones you want to show on your site.</p>
 		<?php else: ?>
 			<p>
 				<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_attr_e( 'Title:', 'text_domain' ); ?></label>
@@ -66,7 +66,7 @@ class IDXLinks extends \WP_Widget {
 			endif;
 	}
 
-	public function update( $new_instance, $old_instance ) {
+	public function update( $new_instance, $old_instance ){
 		$instance = array();
 		$instance[ 'title' ] = !empty( $new_instance[ 'title' ] ) ? sanitize_text_field( $new_instance[ 'title' ] ) : '';
 		if( isset( $new_instance[ 'idx_link' ] ) && is_array( $new_instance[ 'idx_link' ] ) ){

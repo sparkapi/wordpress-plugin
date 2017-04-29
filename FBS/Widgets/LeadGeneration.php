@@ -5,7 +5,7 @@ defined( 'ABSPATH' ) or die( 'This plugin requires WordPress' );
 
 class LeadGeneration extends \WP_Widget {
 
-	public function __construct() {
+	public function __construct(){
 		parent::__construct( 'flexmls_lead_generation', 'Flexmls&reg;: Lead Generation', array(
 			'classname' => 'flexmls_leadgen',
 			'description' => 'Allow visitors to contact you via Flexmls&reg; directly through your site',
@@ -70,7 +70,7 @@ class LeadGeneration extends \WP_Widget {
 		exit( json_encode( $response ) );
 	}
 
-	public function form( $instance ) {
+	public function form( $instance ){
 		$title = !isset( $instance[ 'title' ] ) ? 'Contact Me' : $instance[ 'title' ];
 		$blurb = !isset( $instance[ 'blurb' ] ) ? '' : $instance[ 'blurb' ];
 		$success = !isset( $instance[ 'success' ] ) ? 'Thank you for your request' : $instance[ 'success' ];
@@ -98,7 +98,7 @@ class LeadGeneration extends \WP_Widget {
 		<?php
 	}
 
-	public function update( $new_instance, $old_instance ) {
+	public function update( $new_instance, $old_instance ){
 		$instance = array();
 		$instance[ 'title' ] = sanitize_text_field( $new_instance[ 'title' ] );
 		$instance[ 'blurb' ] = !empty( wp_kses( $new_instance[ 'blurb' ], array() ) ) ?  wp_kses( $new_instance[ 'blurb' ], array() ) : '';

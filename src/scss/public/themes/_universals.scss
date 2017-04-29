@@ -24,3 +24,25 @@
 		pointer-events: none;
 	}
 }
+#flexmls-loading-spinner {
+	background: rgba(255,255,255,0.9);
+	bottom: 0;
+	display: none;
+	left: 0;
+	pointer-events: all;
+	position: fixed;
+	right: 0;
+	top: 0;
+	z-index: 99999;
+
+	&.show {
+		display: block;
+	}
+
+	svg {
+		left: 50%;
+		position: absolute;
+		top: 50%;
+		transform: translate(-50%,-50%);
+	}
+}

@@ -6511,7 +6511,7 @@ window.optimizedScroll = (function(){
 			};
 	})();
 
-	var doLocationSearch = function( query, resultDiv ){
+	var doLocationSearch = function( query, resultDiv, limit ){
 		$.ajax({
 			beforeSend: function(){
 				$( resultDiv ).html( '<span class="dashicons dashicons-image-filter flexmls-querying"></span>' );
@@ -6549,6 +6549,9 @@ window.optimizedScroll = (function(){
 						html += '</ul>';
 					}
 				}
+				if( !limit ){
+					html += '<h2>&nbsp;</h2><ul><li><button type="button" class="button-secondary flexmls-multiple-locations">Add Locations</button></li></ul>';
+				}
 				html += '</div>';
 				$( resultDiv ).html( html );
 			},
@@ -6571,10 +6574,6 @@ window.optimizedScroll = (function(){
 			valueToSearchInput = $( this ).data( 'value-to-search' );
 			resultsInputType = 'checkbox';
 
-			if( 1 === limit ){
-				//resultsInputType = 'radio';
-			}
-
 			$( searchInput ).val( '' );
 			$( resultDiv ).html( defaultResultsText );
 
@@ -6591,12 +6590,14 @@ window.optimizedScroll = (function(){
 				tech_id: 'x\'' + flexmls.tech_id + '\''
 			};
 
+			selectLocation( limit );
+
 			$( searchInput ).focus().keyup( function(){
 				delay( function(){
 					var searchText = $.trim( $( searchInput ).val() );
 					if( 2 < searchText.length ){
 						qs.q = searchText;
-						doLocationSearch( qs, resultDiv );
+						doLocationSearch( qs, resultDiv, limit );
 					} else {
 						$( resultDiv ).html( defaultResultsText );
 					}
@@ -6605,18 +6606,25 @@ window.optimizedScroll = (function(){
 		} );
 	};
 
-	var selectLocation = function(){
+	var selectLocation = function( limit ){
+		$( 'body' ).on( 'click', 'button.flexmls-multiple-locations', function( ev ){
+			if( 0 === limit ){
+				var c = $( this ).closest( '.flexmls-location-result' );
+				tb_remove();
+			}
+		} );
 		$( 'body' ).on( 'click', 'input.flexmls-single-location', function( ev ){
-			$( 'input[name="' + nameToDisplayInput + '"]' ).val( $( this ).data( 'name' ) );
-			$( 'input[name="' + nameToSearchInput + '"]' ).val( $( this ).data( 'field' ) );
-			$( 'input[name="' + valueToSearchInput + '"]' ).val( $( this ).data( 'value' ) );
-			tb_remove();
+			if( 1 === limit ){
+				$( 'input[name="' + nameToDisplayInput + '"]' ).val( $( this ).data( 'name' ) );
+				$( 'input[name="' + nameToSearchInput + '"]' ).val( $( this ).data( 'field' ) );
+				$( 'input[name="' + valueToSearchInput + '"]' ).val( $( this ).data( 'value' ) );
+				tb_remove();
+			}
 		} );
 	};
 
 	$(document).ready(function(){
 		locationSelector();
-		selectLocation();
 	});
 
 })(jQuery);
@@ -6718,6 +6726,19 @@ window.optimizedScroll = (function(){
 })(jQuery);
 (function($){
 
+	var dependentSelect = function(){
+		$( 'select.widget-toggle-dependent' ).on( 'change', function(){
+			var v = $( this ).val();
+			var target = $( this ).data( 'child' );
+			var triggeron = $( this ).data( 'triggeron' );
+			if( -1 === $.inArray( v, triggeron ) ){
+				$( target ).hide();
+			} else {
+				$( target ).show();
+			}
+		} );
+	};
+
 	var populateMarketStatOptions = function(){
 		$( 'body' ).on( 'change', 'select.flexmls-widget-market-stat-selector', function( ev ){
 			var availableOptions = $( this ).data( 'options' );
@@ -6734,6 +6755,7 @@ window.optimizedScroll = (function(){
 	};
 
 	$(document).ready(function(){
+		dependentSelect();
 		populateMarketStatOptions();
 	});
 

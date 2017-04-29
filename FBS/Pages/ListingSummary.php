@@ -306,7 +306,7 @@ class ListingSummary extends Page {
 										if( isset( $listing[ 'StandardFields' ][ 'PhotosCount' ] ) && !empty( $listing[ 'StandardFields' ][ 'PhotosCount' ] ) && 0 < $listing[ 'StandardFields' ][ 'PhotosCount' ] ){
 											$photo_count = intval( $listing[ 'StandardFields' ][ 'PhotosCount' ] );
 											$photo_text = _n( 'Photo', 'Photos', $photo_count );
-											$media[] = '<li class="listing-photos-link"><a href="#" title="View ' . $photo_text . '"><i class="fbsicon fbsicon-picture-o"></i> View ' . $photo_text . '</a></li>';
+											$media[] = '<li class="listing-photos-link"><a href="#" class="flexmls-magnific-media" data-listingid="' . $listing[ 'Id' ] . '" data-mediatype="photos" title="View ' . $photo_text . '"><i class="fbsicon fbsicon-picture-o"></i> View ' . $photo_text . '</a></li>';
 										}
 										if( isset( $listing[ 'StandardFields' ][ 'VideosCount' ] ) && !empty( $listing[ 'StandardFields' ][ 'VideosCount' ] ) && 0 < $listing[ 'StandardFields' ][ 'VideosCount' ] ){
 											$video_count = intval( $listing[ 'StandardFields' ][ 'VideosCount' ] );

@@ -5,14 +5,14 @@ defined( 'ABSPATH' ) or die( 'This plugin requires WordPress' );
 
 class Portal extends \WP_Widget {
 
-	public function __construct() {
+	public function __construct(){
 		parent::__construct( 'flexmls_portal', 'Flexmls&reg;: Portal Widget', array(
 			'classname' => 'flexmls_portal',
 			'description' => 'Allow visitors to sign up or sign in to save listings',
 		) );
 	}
 
-	public function form( $instance ) {
+	public function form( $instance ){
 		$saved_searches = !isset( $instance[ 'saved_searches' ] ) ? 1 : $instance[ 'saved_searches' ];
 		$listing_carts = !isset( $instance[ 'listing_carts' ] ) ? 1 : $instance[ 'listing_carts' ];
 		?>
@@ -27,7 +27,7 @@ class Portal extends \WP_Widget {
 		<?php
 	}
 
-	public function update( $new_instance, $old_instance ) {
+	public function update( $new_instance, $old_instance ){
 		$instance = array();
 		$instance[ 'saved_searches' ] = isset( $new_instance[ 'saved_searches' ] ) ? 1 : 0;
 		$instance[ 'listing_carts' ] = isset( $new_instance[ 'listing_carts' ] ) ? 1 : 0;

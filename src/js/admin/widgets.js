@@ -1,5 +1,18 @@
 (function($){
 
+	var dependentSelect = function(){
+		$( 'select.widget-toggle-dependent' ).on( 'change', function(){
+			var v = $( this ).val();
+			var target = $( this ).data( 'child' );
+			var triggeron = $( this ).data( 'triggeron' );
+			if( -1 === $.inArray( v, triggeron ) ){
+				$( target ).hide();
+			} else {
+				$( target ).show();
+			}
+		} );
+	};
+
 	var populateMarketStatOptions = function(){
 		$( 'body' ).on( 'change', 'select.flexmls-widget-market-stat-selector', function( ev ){
 			var availableOptions = $( this ).data( 'options' );
@@ -16,6 +29,7 @@
 	};
 
 	$(document).ready(function(){
+		dependentSelect();
 		populateMarketStatOptions();
 	});
 

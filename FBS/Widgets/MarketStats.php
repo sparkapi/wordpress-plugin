@@ -57,7 +57,7 @@ class MarketStats extends \WP_Widget {
 		)
 	);
 
-	public function __construct() {
+	public function __construct(){
 		parent::__construct( 'flexmls_market_stats', 'Flexmls&reg;: Market Statistics', array(
 			'classname' => 'flexmls_market_stats',
 			'description' => 'Monthly summary listing data about the market, displayed graphs.',
@@ -71,6 +71,7 @@ class MarketStats extends \WP_Widget {
 		$chart_data = !isset( $instance[ 'chart_data' ] ) ? array( 'AbsorptionRate' ) : $instance[ 'chart_data' ];
 		$chart_type = !isset( $instance[ 'chart_type' ] ) ? 'line' : $instance[ 'chart_type' ];
 		$property_type = !isset( $instance[ 'property_type' ] ) ? 'A' : $instance[ 'property_type' ];
+		$time_period = !isset( $instance[ 'time_period' ] ) ? 12 : $instance[ 'time_period' ];
 		$location_field_name_to_display = !isset( $instance[ 'location_field_name_to_display' ] ) ? '' : $instance[ 'location_field_name_to_display' ];
 		$location_field_name_to_search = !isset( $instance[ 'location_field_name_to_search' ] ) ? '' : $instance[ 'location_field_name_to_search' ];
 		$location_field_value_to_search = !isset( $instance[ 'location_field_value_to_search' ] ) ? '' : $instance[ 'location_field_value_to_search' ];
@@ -118,6 +119,14 @@ class MarketStats extends \WP_Widget {
 			</select>
 		</p>
 		<p>
+			<label for="<?php echo esc_attr( $this->get_field_id( 'time_period' ) ); ?>">Time Period</label>
+			<select class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'time_period' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'time_period' ) ); ?>">
+				<?php for( $i = 1; $i < 13; $i++ ): ?>
+					<option value="<?php echo $i; ?>" <?php selected( $time_period, $i ); ?>><?php printf( _n( '%d Month', '%d Months', $i ), $i ); ?></option>
+				<?php endfor; ?>
+			</select>
+		</p>
+		<p>
 			<label>Select a Location</label>
 			<input type="text" class="widefat" name="<?php echo esc_attr( $this->get_field_name( 'location_field_name_to_display' ) ); ?>" value="<?php echo $location_field_name_to_display; ?>" readonly>
 			<input type="hidden" name="<?php echo esc_attr( $this->get_field_name( 'location_field_name_to_search' ) ); ?>" value="<?php echo $location_field_name_to_search; ?>">
@@ -135,7 +144,7 @@ class MarketStats extends \WP_Widget {
 		\FBS\Admin\Utilities::location_popup( $this->get_field_id( 'location_popup' ) );
 	}
 
-	public function update( $new_instance, $old_instance ) {
+	public function update( $new_instance, $old_instance ){
 		$instance = array();
 		$instance[ 'title' ] = sanitize_text_field( $new_instance[ 'title' ] );
 		$instance[ 'stat_type' ] = sanitize_text_field( $new_instance[ 'stat_type' ] );
@@ -166,6 +175,7 @@ class MarketStats extends \WP_Widget {
 		}
 		$instance[ 'chart_type' ] = 'bar' == $new_instance[ 'chart_type' ] ? 'bar' : 'line';
 		$instance[ 'property_type' ] = sanitize_text_field( $new_instance[ 'property_type' ] );
+		$instance[ 'time_period' ] = min( 12, max( 1, intval( $new_instance[ 'time_period' ] ) ) );
 		$instance[ 'location_field_name_to_display' ] = !isset( $new_instance[ 'location_field_name_to_display' ] ) ? '' : sanitize_text_field( $new_instance[ 'location_field_name_to_display' ] );
 		$instance[ 'location_field_name_to_search' ] = !isset( $new_instance[ 'location_field_name_to_search' ] ) ? '' : sanitize_text_field( $new_instance[ 'location_field_name_to_search' ] );
 		$instance[ 'location_field_value_to_search' ] = !isset( $new_instance[ 'location_field_value_to_search' ] ) ? '' : sanitize_text_field( $new_instance[ 'location_field_value_to_search' ] );
@@ -180,6 +190,7 @@ class MarketStats extends \WP_Widget {
 		$chart_data = $instance[ 'chart_data' ];
 		$chart_type = $instance[ 'chart_type' ];
 		$property_type = $instance[ 'property_type' ];
+		$time_period = $instance[ 'time_period' ];
 		$location_field_name_to_search = isset( $instance[ 'location_field_name_to_search' ] ) ? $instance[ 'location_field_name_to_search' ] : null;
 		$location_field_value_to_search = isset( $instance[ 'location_field_value_to_search' ] ) ? $instance[ 'location_field_value_to_search' ] : null;
 
@@ -206,8 +217,8 @@ class MarketStats extends \WP_Widget {
 								labels: [<?php
 									$dates = array_reverse( $data[ 'Dates' ] );
 									$dates_formatted = array();
-									foreach( $dates as $date ){
-										list($m,$d,$y) = explode( '/', $date );
+									for( $i = 0; $i < $time_period; $i++ ){
+										list($m,$d,$y) = explode( '/', $dates[ $i ] );
 										$dates_formatted[] = date( 'M Y', mktime( 1,0,0,$m,$d,$y ) );
 									}
 									echo '"' . implode( '","', $dates_formatted ) . '"';
@@ -221,11 +232,16 @@ class MarketStats extends \WP_Widget {
 										if( 'Dates' == $key ){
 											continue;
 										}
+										$vals = array_reverse( $vals );
+										$vals_to_display = array();
+										for( $i = 0; $i < $time_period; $i++ ){
+											$vals_to_display[] = $vals[ $i ];
+										}
 										$obj[] = array(
 											'backgroundColor' => 'rgba(' . implode( ',', $chart_colors[ $color ] ) . ',0.2)',
 											'borderWidth' => 1,
 											'borderColor' => 'rgba(' . implode( ',', $chart_colors[ $color ] ) . ',0.6)',
-											'data' => array_reverse( $vals ),
+											'data' => $vals_to_display,
 											'label' => $stat_options[ $stat_type ][ $key ]
 										);
 										$color++;

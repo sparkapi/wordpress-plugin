@@ -9,6 +9,13 @@ class Listings extends Core {
 		parent::__construct();
 	}
 
+	function get_listing_photos( $listing_id = null ){
+		if( !$listing_id ){
+			return;
+		}
+		return $this->get_all_results( $this->get_from_api( 'GET', 'listings/' . $listing_id . '/photos', 15 * MINUTE_IN_SECONDS ) );
+	}
+
 	function get_listings( $filter, $page_number = 1 ){
 		global $Flexmls;
 		$flexmls_settings = get_option( 'flexmls_settings' );

@@ -137,6 +137,8 @@ class Flexmls {
 		add_action( 'wp_ajax_clear_spark_api_cache', array( $this, 'ajax_clear_cache' ) );
 		add_action( 'wp_ajax_flexmls_leadgen', array( 'FBS\Widgets\LeadGeneration', 'flexmls_leadgen' ) );
 		add_action( 'wp_ajax_nopriv_flexmls_leadgen', array( 'FBS\Widgets\LeadGeneration', 'flexmls_leadgen' ) );
+		add_action( 'wp_ajax_get_listing_media', array( 'FBS\Pages\Page', 'listing_media' ) );
+		add_action( 'wp_ajax_nopriv_get_listing_media', array( 'FBS\Pages\Page', 'listing_media' ) );
 		add_action( 'wp_ajax_tinymce_popup', array( 'FBS\Admin\TinyMCE', 'tinymce_popup' ) );
 		add_action( 'wp_enqueue_scripts', array( 'FBS\Admin\Enqueue', 'wp_enqueue_scripts' ) );
 		add_action( 'wp_trash_post', array( $this, 'prevent_delete_flexmls_search_page' ), 10, 1 );

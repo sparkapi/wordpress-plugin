@@ -13,6 +13,7 @@ class Widgets {
 		register_widget( '\FBS\Widgets\IDXLinks' );
 		register_widget( '\FBS\Widgets\LeadGeneration' );
 		register_widget( '\FBS\Widgets\MarketStats' );
+		register_widget( '\FBS\Widgets\Slideshow' );
 	}
 
 }
