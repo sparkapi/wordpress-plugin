@@ -5,6 +5,19 @@ defined( 'ABSPATH' ) or die( 'This plugin requires WordPress' );
 
 class MarketStats extends \WP_Widget {
 
+	public static $chart_colors = array(
+		array(78,183,78),
+		array(238,198,67),
+		array(183,195,243),
+		array(89,127,89),
+		array(95,95,95),
+		array(1,22,56),
+		array(227,74,111),
+		array(224,109,6),
+		array(243,91,4),
+		array(241,135,1)
+	);
+
 	public static $stat_options = array(
 		'absorption' => array(
 			'AbsorptionRate' => 'Absorption Rate',
@@ -171,60 +184,75 @@ class MarketStats extends \WP_Widget {
 		$location_field_value_to_search = isset( $instance[ 'location_field_value_to_search' ] ) ? $instance[ 'location_field_value_to_search' ] : null;
 
 		$MarketStats = new \SparkAPI\MarketStats();
-		write_log( $MarketStats->get_market_data( $stat_type, $chart_data, $property_type, $location_field_name_to_search, $location_field_value_to_search ) );
+		$data = $MarketStats->get_market_data( $stat_type, $chart_data, $property_type, $location_field_name_to_search, $location_field_value_to_search );
 
-		echo $args[ 'before_widget' ];
+		if( !empty( $data ) ){
 
-		if( !empty( $instance[ 'title' ] ) ){
-			echo $args[ 'before_title' ] . apply_filters( 'widget_title', $instance[ 'title' ] ) . $args[ 'after_title' ];
+			echo $args[ 'before_widget' ];
+
+			if( !empty( $instance[ 'title' ] ) ){
+				echo $args[ 'before_title' ] . apply_filters( 'widget_title', $instance[ 'title' ] ) . $args[ 'after_title' ];
+			}
+
+			$id = sprintf( '%u', crc32( $args[ 'widget_id' ] ) );
+			?>
+			<canvas id="flexmls_market_stats_<?php echo $id; ?>" width="400" height="400"></canvas>
+			<script>
+				(function($){
+					$( document ).ready( function(){
+						var chart_<?php echo $id; ?> = new Chart( document.getElementById( 'flexmls_market_stats_<?php echo $id; ?>' ), {
+							type: '<?php echo $chart_type; ?>',
+							data: {
+								labels: [<?php
+									$dates = array_reverse( $data[ 'Dates' ] );
+									$dates_formatted = array();
+									foreach( $dates as $date ){
+										list($m,$d,$y) = explode( '/', $date );
+										$dates_formatted[] = date( 'M Y', mktime( 1,0,0,$m,$d,$y ) );
+									}
+									echo '"' . implode( '","', $dates_formatted ) . '"';
+								?>],
+								datasets: <?php
+									$obj = array();
+									$chart_colors = MarketStats::$chart_colors;
+									$stat_options = MarketStats::$stat_options;
+									$color = 0;
+									foreach( $data as $key => $vals ){
+										if( 'Dates' == $key ){
+											continue;
+										}
+										$obj[] = array(
+											'backgroundColor' => 'rgba(' . implode( ',', $chart_colors[ $color ] ) . ',0.2)',
+											'borderWidth' => 1,
+											'borderColor' => 'rgba(' . implode( ',', $chart_colors[ $color ] ) . ',0.6)',
+											'data' => array_reverse( $vals ),
+											'label' => $stat_options[ $stat_type ][ $key ]
+										);
+										$color++;
+									}
+									echo json_encode( $obj );
+								?>
+							},
+							options: {
+								scales: {
+									xAxes: [{
+										ticks: {
+											autoSkip: false,
+											maxRotation: 90,
+											minRotation: 90
+										}
+									}]
+								},
+								tooltips: {
+									enabled: true
+								}
+							}
+						} );
+					} );
+				} )( jQuery );
+			</script>
+			<?php
+			echo $args[ 'after_widget' ];
 		}
-
-		$id = sprintf( '%u', crc32( $args[ 'widget_id' ] ) );
-		?>
-		<canvas id="flexmls_market_stats_<?php echo $id; ?>" width="400" height="400"></canvas>
-		<script>
-			(function($){
-				$( document ).ready( function(){
-					var chart_<?php echo $id; ?> = new Chart( document.getElementById( 'flexmls_market_stats_<?php echo $id; ?>' ), {
-						type: '<?php echo $chart_type; ?>',
-						data: {
-        labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-        datasets: [{
-            label: '# of Votes',
-            data: [12, 19, 3, 5, 2, 3],
-            backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)'
-            ],
-            borderColor: [
-                'rgba(255,99,132,1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)'
-            ],
-            borderWidth: 1
-        }]
-    },
-    options: {
-        scales: {
-            yAxes: [{
-                ticks: {
-                    beginAtZero:true
-                }
-            }]
-        }
-    }
-});
-		});
-			})(jQuery);
-		</script>
-		<?php
-		echo $args[ 'after_widget' ];
 	}
 }
