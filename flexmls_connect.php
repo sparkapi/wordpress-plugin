@@ -130,6 +130,7 @@ class Flexmls {
 		add_action( 'edit_form_after_title', array( 'FBS\Pages\Page', 'search_results_page_notice' ), 9 );
 		add_action( 'init', array( 'FBS\Pages\Page', 'custom_rewrite_rules' ), 10, 0 );
 		add_action( 'init', array( 'FBS\Pages\Page', 'set_global_listing_vars' ) );
+		add_action( 'preload_related_search_results', array( 'FBS\Pages\Page', 'preload_related_search_results' ) );
 		add_action( 'plugins_loaded', array( '\FBS\Admin\Settings', 'update_settings' ), 9 );
 		add_action( 'post_updated', array( 'FBS\Pages\Page', 'maybe_update_permalink' ), 10, 3 );
 		add_action( 'widgets_init', array( 'FBS\Widgets\Widgets', 'widgets_init' ) );
@@ -204,3 +205,5 @@ class Flexmls {
 register_activation_hook( __FILE__, array( 'Flexmls', 'activate' ) );
 
 $Flexmls = new Flexmls();
+//global $wp_query;
+//wp_schedule_single_event( time() - DAY_IN_SECONDS, 'preload_related_search_results', array( $wp_query->query_vars[ 'idxsearch_id' ] ) );

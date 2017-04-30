@@ -21,7 +21,6 @@ class ListingSummary extends Page {
 
 		add_filter( 'body_class', array( $this, 'body_class' ) );
 		add_filter( 'pre_get_document_title', array( $this, 'pre_get_document_title' ) );
-		add_filter( 'the_content', array( $this, 'strip_old_iframe' ), 1 );
 		add_filter( 'the_content', array( $this, 'the_content' ) );
 		add_filter( 'the_title', array( $this, 'the_title' ), 10, 2 );
 		add_filter( 'wp_seo_get_bc_title', array( $this, 'wp_seo_get_bc_title' ) );
@@ -182,17 +181,6 @@ class ListingSummary extends Page {
 		return $title;
 	}
 
-	function strip_old_iframe( $content ){
-		if( !in_the_loop() ){
-			return $content;
-		}
-		$page_content = preg_replace( '/^(\[idx_frame(?:.*)\])$/', '', $content );
-		if( empty( $page_content ) ){
-			$content = '';
-		}
-		return $page_content;
-	}
-
 	function the_content( $content ){
 		if( !in_the_loop() ){
 			return $content;
@@ -200,7 +188,7 @@ class ListingSummary extends Page {
 		global $Flexmls, $wp_query;
 		$flexmls_settings = get_option( 'flexmls_settings' );
 
-		$content .= '	<div class="flexmls-content">
+		$content  = '	<div class="flexmls-content">
 							<aside class="flexmls-listings-meta">';
 		$content .= '			<div class="flexmls-listings-count">';
 									$content .= sprintf( _n(

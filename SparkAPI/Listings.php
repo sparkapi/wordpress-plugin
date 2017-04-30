@@ -68,4 +68,17 @@ class Listings extends Core {
 		return $this->get_all_results( $this->get_from_api( 'GET', 'listings', 15 * MINUTE_IN_SECONDS, $params ) );
 	}
 
+	function get_listings_ids( $filter, $page_number = 1 ){
+		global $Flexmls;
+		$params = array(
+			'_filter' => $filter,
+			'_limit' => $Flexmls->listings_per_page,
+			'_orderby' => $Flexmls->listings_order_by,
+			'_pagination' => 1,
+			'_page' => $page_number,
+			'_select' => 'ListingId,UnparsedFirstLineAddress,City,StateOrProvince,PostalCode'
+		);
+		return $this->get_all_results( $this->get_from_api( 'GET', 'listings', 15 * MINUTE_IN_SECONDS, $params ) );
+	}
+
 }

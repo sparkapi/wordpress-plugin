@@ -190,4 +190,22 @@ class Utilities {
     return $values;
 	}
 
+	public static function remove_blank_and_restricted_fields( $item ){
+		if( is_array( $item ) ){
+			foreach( $item as $key => $val ){
+				$new_val = self::remove_blank_and_restricted_fields( $item[ $key ] );
+				if( $new_val ){
+					$item[ $key ] = $new_val;
+				} else {
+					unset( $item[ $key ] );
+				}
+			}
+			return $item;
+		}
+		if( strlen( $item ) && false === strpos( $item, '********' ) ){
+			return $item;
+		}
+		return false;
+	}
+
 }

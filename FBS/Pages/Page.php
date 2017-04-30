@@ -6,11 +6,14 @@ defined( 'ABSPATH' ) or die( 'This plugin requires WordPress' );
 class Page {
 
 	function __construct(){
-		global $Flexmls;
+		global $Flexmls, $wp_query;
 		$this->listings_order_by = $Flexmls->listings_order_by;
 		$this->listings_per_page = $Flexmls->listings_per_page;
 
+		add_action( 'shutdown', array( $this, 'schedule_preload_of_related_results' ) );
 		add_action( 'wp_footer', array( $this, 'place_loading_spinner' ) );
+
+		add_filter( 'get_canonical_url', array( $this, 'get_canonical_url' ) );
 	}
 
 	function can_do_maps(){
@@ -97,7 +100,6 @@ class Page {
 		if( isset( $flexmls_settings[ 'general' ][ 'search_results_page' ] ) && 'page' == $item->object && $flexmls_settings[ 'general' ][ 'search_results_page' ] == $item->object_id ){
 			global $wp_query;
 			$classes[] = 'menu-item-type-flexmls';
-			$classes[] = 'menu-item-type-flexmls_search_results';
 			$search_results_default = !empty( $flexmls_settings[ 'general' ][ 'search_results_default' ] ) ? $flexmls_settings[ 'general' ][ 'search_results_default' ] : '';
 			if( isset( $wp_query->query_vars[ 'idxsearch_id' ] ) && $search_results_default != $wp_query->query_vars[ 'idxsearch_id' ] ){
 				if( ( $key = array_search( 'current-menu-item', $classes ) ) !== false ){
@@ -106,7 +108,13 @@ class Page {
 				if( ( $key = array_search( 'current_page_item', $classes ) ) !== false ){
 					unset( $classes[ $key ] );
 				}
-				$classes[] = 'current-flexmls_search_results-ancestor';
+				if( isset( $wp_query->query_vars[ 'idxlisting_id' ] ) ){
+					$classes[] = 'current-flexmls_search_results-ancestor';
+					$classes[] = 'menu-item-type-flexmls_listing_details';
+				} else {
+					$classes[] = 'menu-item-type-flexmls_search_results';
+					$classes[] = 'current-flexmls_search_results-ancestor';
+				}
 			}
 		}
 		return $classes;
@@ -114,6 +122,39 @@ class Page {
 
 	function place_loading_spinner(){
 		echo '<div id="flexmls-loading-spinner"><?xml version="1.0" encoding="utf-8"?><svg width="74px" height="74px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="uil-cube"><rect x="0" y="0" width="100" height="100" fill="none" class="bk"></rect><g transform="translate(25 25)"><rect x="-20" y="-20" width="40" height="40" fill="#4b6ed0" opacity="0.9" class="cube"><animateTransform attributeName="transform" type="scale" from="1.5" to="1" repeatCount="indefinite" begin="0s" dur="1s" calcMode="spline" keySplines="0.2 0.8 0.2 0.8" keyTimes="0;1"></animateTransform></rect></g><g transform="translate(75 25)"><rect x="-20" y="-20" width="40" height="40" fill="#4b6ed0" opacity="0.8" class="cube"><animateTransform attributeName="transform" type="scale" from="1.5" to="1" repeatCount="indefinite" begin="0.1s" dur="1s" calcMode="spline" keySplines="0.2 0.8 0.2 0.8" keyTimes="0;1"></animateTransform></rect></g><g transform="translate(25 75)"><rect x="-20" y="-20" width="40" height="40" fill="#4b6ed0" opacity="0.7" class="cube"><animateTransform attributeName="transform" type="scale" from="1.5" to="1" repeatCount="indefinite" begin="0.3s" dur="1s" calcMode="spline" keySplines="0.2 0.8 0.2 0.8" keyTimes="0;1"></animateTransform></rect></g><g transform="translate(75 75)"><rect x="-20" y="-20" width="40" height="40" fill="#4b6ed0" opacity="0.6" class="cube"><animateTransform attributeName="transform" type="scale" from="1.5" to="1" repeatCount="indefinite" begin="0.2s" dur="1s" calcMode="spline" keySplines="0.2 0.8 0.2 0.8" keyTimes="0;1"></animateTransform></rect></g></svg></div>';
+	}
+
+	public static function preload_related_search_results( $search_id ){
+		$IDXLinks = new \SparkAPI\IDXLinks();
+		$idx_link_details = $IDXLinks->get_idx_link_details( $search_id );
+		if( !$idx_link_details ){
+			return;
+		}
+		$search_filter = '';
+		if( isset( $idx_link_details[ 'Filter' ] ) ){
+			$search_filter = $idx_link_details[ 'Filter' ];
+		} else {
+			$SavedSearches = new \SparkAPI\SavedSearches();
+			$saved_search_details = $SavedSearches->get_saved_search_details( $idx_link_details[ 'SearchId' ] );
+			$search_filter = $saved_search_details[ 'Filter' ];
+		}
+		if( empty( $search_filter ) ){
+			return;
+		}
+
+		$Listings = new \SparkAPI\Listings();
+		$first_run = $Listings->get_listings( $search_filter, 1 );
+		if( $first_run ){
+			$total_pages = $Listings->total_pages + 1;
+			for( $i = 2; $i < $total_pages; $i++ ){
+				$Listings->get_listings( $search_filter, $i );
+			}
+		}
+	}
+
+	function schedule_preload_of_related_results(){
+		global $wp_query;
+		wp_schedule_single_event( time() - DAY_IN_SECONDS, 'preload_related_search_results', array( $wp_query->query_vars[ 'idxsearch_id' ] ) );
 	}
 
 	public static function search_results_page_notice( $post ){
@@ -181,6 +222,5 @@ class Page {
 			}
 		}
 	}
-
 
 }
