@@ -9,6 +9,16 @@ class Listings extends Core {
 		parent::__construct();
 	}
 
+	function get_listing( $listing_id = null ){
+		if( !$listing_id ){
+			return;
+		}
+		$expansions = array(
+			'_expand' => 'PrimaryPhoto'
+		);
+		return $this->get_first_result( $this->get_from_api( 'GET', 'listings/' . $listing_id, 15 * MINUTE_IN_SECONDS, $expansions ) );
+	}
+
 	function get_listing_photos( $listing_id = null ){
 		if( !$listing_id ){
 			return;

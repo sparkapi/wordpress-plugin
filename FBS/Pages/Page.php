@@ -37,7 +37,7 @@ class Page {
 		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/[^/]*_([0-9]+)/map/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=$matches[1]&idxpage_view=map&idxlisting_id=$matches[2]', 'top' );
 		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/[^/]*_([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=$matches[1]&idxpage_view=list&idxlisting_id=$matches[2]', 'top' );
 		add_rewrite_rule( '^' . $search_results_page->post_name . '/[^/]*_([0-9]+)/map/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=$matches[1]&idxpage_view=map&idxlisting_id=$matches[2]', 'top' );
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/[^/]*_([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=$matches[1]&idxpage_view=list&idxlisting_id=$matches[2]', 'top' );
+		add_rewrite_rule( '^' . $search_results_page->post_name . '/[^/]*_([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=' . $search_results_default . '&idxpage_view=list&idxlisting_id=$matches[1]', 'top' );
 		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=$matches[1]&idxpage_view=list&idxsearch_page=1', 'top' );
 
 		add_rewrite_rule( '^' . $search_results_page->post_name . '/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=' . $search_results_default . '&idxpage_view=list&idxsearch_page=1', 'top' );
