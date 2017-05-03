@@ -20,9 +20,8 @@ class ListingDetail extends Page {
 		add_filter( 'the_content', array( $this, 'the_content' ) );
 		add_filter( 'the_title', array( $this, 'the_title' ), 10, 2 );
 		add_filter( 'wpseo_breadcrumb_links', array( $this, 'wpseo_breadcrumb_links' ) );
+		add_filter( 'wpseo_canonical', array( $this, 'wpseo_canonical' ) );
 		add_filter( 'wp_seo_get_bc_title', array( $this, 'wp_seo_get_bc_title' ) );
-		add_filter( 'wpseo_opengraph_type', array( $this, 'wpseo_opengraph_type' ) );
-		add_filter( 'wpseo_opengraph_url', array( $this, 'wpseo_opengraph_url' ) );
 		add_filter( 'wpseo_metadesc', array( $this, 'wpseo_metadesc' ) );
 		add_filter( 'wpseo_title', array( $this, 'wpseo_title' ) );
 
@@ -99,13 +98,81 @@ class ListingDetail extends Page {
 		global $Flexmls, $wp_query;
 		$flexmls_settings = get_option( 'flexmls_settings' );
 		$content  = '	<div class="flexmls-content">
-							<header>
-								<h1>' . get_the_title() . '</h1>
-								<ul>
-									<li><a href="' . ( $this->previous_listing_url ? $this->previous_listing_url : '#' ) . '">Previous Listing</a></li>
-									<li><a href="' . ( $this->next_listing_url ? $this->next_listing_url : '#' ) . '">Next Listing</a></li>
-								</ul>
-							</header>';
+							<header class="listing-header">';
+								$address = \FBS\Admin\Utilities::format_listing_street_address( $this->listing );
+								$address_text = '<span class="listing-address-line-1">' . $address[ 0 ] . '</span>';
+								if( !empty( $address[ 1 ] ) ){
+									$address_text .= '<span class="listing-address-line-2">' . $address[ 1 ] . '</span>';
+								}
+								$content .= '<h1>' . $address_text . '</h1>
+								<p class="status status-' . sanitize_title_with_dashes( $this->listing[ 'StandardFields' ][ 'MlsStatus' ] ) . '">' . $this->listing[ 'StandardFields' ][ 'MlsStatus' ] . '</p>
+								<p class="price">$' . \FBS\Admin\Utilities::gentle_price_rounding( $this->listing[ 'StandardFields' ][ 'ListPrice' ] ) . '</p>';
+								// Check to see if we have baths, beds, and/or sq footage
+								$listing_quickfacts = array();
+								if( isset( $this->listing[ 'StandardFields' ][ 'BedsTotal' ] ) ){
+									$listing_quickfacts[] = sprintf( _n(
+										'%s bath',
+										'%s baths',
+										$this->listing[ 'StandardFields' ][ 'BedsTotal' ]
+									), $this->listing[ 'StandardFields' ][ 'BedsTotal' ] );
+								}
+								if( isset( $this->listing[ 'StandardFields' ][ 'BathsTotal' ] ) ){
+									$listing_quickfacts[] = sprintf( _n(
+										'%s bath',
+										'%s baths',
+										$this->listing[ 'StandardFields' ][ 'BathsTotal' ]
+									), $this->listing[ 'StandardFields' ][ 'BathsTotal' ] );
+								}
+								if( isset( $this->listing[ 'StandardFields' ][ 'BuildingAreaTotal' ] ) ){
+									if( false === strpos( $this->listing[ 'StandardFields' ][ 'BuildingAreaTotal' ], '.' ) ){
+										$listing_quickfacts[] = number_format( $this->listing[ 'StandardFields' ][ 'BuildingAreaTotal' ], 0 ) . ' sq ft';
+									} else {
+										$listing_quickfacts[] = number_format( $this->listing[ 'StandardFields' ][ 'BuildingAreaTotal' ], 1 ) . ' sq ft';
+									}
+								}
+								if( $listing_quickfacts ){
+									$content .= '<ul class="quickfacts"><li>' . implode( '</li><li>', $listing_quickfacts ) . '</li></ul>';
+								}
+								if( 1 == $flexmls_settings[ 'portal' ][ 'allow_carts' ] ){
+									$content .= $this->display_carts_buttons();
+								}
+								$content .= '</header>';
+								if( isset( $this->listing[ 'StandardFields' ][ 'Photos' ] ) ){
+									$content .= '<div class="media-container">';
+									$p = $this->listing[ 'StandardFields' ][ 'Photos' ][ 0 ];
+									$caption = '';
+									if( isset( $p[ 'Caption' ] ) && !empty( $p[ 'Caption' ] ) ){
+										$caption = $p[ 'Caption' ];
+									} elseif( isset( $p[ 'Name' ] ) && !empty( $p[ 'Name' ] ) ){
+										$caption = $p[ 'Name' ];
+									}
+									$photo = '<img src="' . $p[ 'Uri1600' ] . '" alt="' . $caption . '" srcset="' . $p[ 'Uri800' ] . ' 800w,' . $p[ 'Uri1024' ] . ' 1024w,' . $p[ 'Uri1280' ] . ' 1280w,' . $p[ 'Uri1600' ] . ' 1600w,' . $p[ 'Uri2048' ] . ' 2048w">';
+									if( isset( $p[ 'Caption' ] ) && !empty( $p[ 'Caption' ] ) ){
+										$photo .= '<figcaption>' . wpautop( $p[ 'Caption' ] ) . '</figcaption>';
+									} elseif( isset( $p[ 'Name' ] ) && !empty( $p[ 'Name' ] ) ){
+										$photo .= '<figcaption>' . wpautop( $p[ 'Name' ] ) . '</figcaption>';
+									}
+									$content .= '<figure class="featured-image">' . $photo . '</figure>';
+								}
+								$media = array();
+								if( isset( $this->listing[ 'StandardFields' ][ 'PhotosCount' ] ) ){
+									$photo_count = intval( $this->listing[ 'StandardFields' ][ 'PhotosCount' ] );
+									$photo_text = _n( 'Photo', 'Photos', $photo_count );
+									$media[] = '<li class="listing-photos-link"><a href="#" class="flexmls-magnific-media" data-listingid="' . $this->listing[ 'Id' ] . '" data-mediatype="photos" title="View ' . $photo_text . '"><i class="fbsicon fbsicon-picture-o"></i> View ' . $photo_text . '</a></li>';
+								}
+								if( isset( $this->listing[ 'StandardFields' ][ 'VideosCount' ] ) ){
+									$video_count = intval( $this->listing[ 'StandardFields' ][ 'VideosCount' ] );
+									$video_text = _n( 'Video', 'Videos', $video_count );
+									$media[] = '<li class="listing-videos-link"><a href="#" title="View ' . $video_text . '"><i class="fbsicon fbsicon-play-circle-o"></i> View ' . $video_text . '</a></li>';
+								}
+								if( isset( $this->listing[ 'StandardFields' ][ 'VirtualToursCount' ] ) ){
+									$tour_count = intval( $this->listing[ 'StandardFields' ][ 'VirtualToursCount' ] );
+									$tour_text = _n( 'Virtual Tour', 'Virtual Tours', $tour_count );
+									$media[] = '<li class="listing-virtualtours-link"><a href="#" title="View ' . $tour_text . '"><i class="fbsicon fbsicon-video-camera"></i> View ' . $tour_text . '</a></li>';
+								}
+								if( count( $media ) ){
+									$content .= '<ul class="listing-media">' . implode( '', $media ) . '</ul>';
+								}
 		$content .= '	</div>'; // end .flexmls-content;
 		return $content;
 	}
@@ -155,7 +222,6 @@ class ListingDetail extends Page {
 		if( $wp_query->query_vars[ 'idxsearch_id' ] != $flexmls_settings[ 'general' ][ 'search_results_default' ] ){
 			$this->base_url .= '/' . $wp_query->query_vars[ 'idxsearch_id' ];
 		}
-		$this->listing = \FBS\Admin\Utilities::remove_blank_and_restricted_fields( $this->listing );
 		$this->generate_previous_and_next_listings();
 		//write_log( $this->listing );
 	}
@@ -211,6 +277,13 @@ class ListingDetail extends Page {
 		return $breadcrumbs;
 	}
 
+	function wpseo_canonical(){
+		global $wp_query;
+		$address = \FBS\Admin\Utilities::format_listing_street_address( $this->listing );
+		$url = $this->base_url . '/' . sanitize_title_with_dashes( $address[ 0 ] . ' ' . $address[ 1 ] ) . '_' . $this->listing[ 'Id' ];
+		return $url;
+	}
+
 	function wpseo_opengraph_image( $image ){
 		if( isset( $this->listing[ 'StandardFields' ][ 'Photos' ] ) && count( $this->listing[ 'StandardFields' ][ 'Photos' ] ) ){
 			if( isset( $this->listing[ 'StandardFields' ][ 'Photos' ][ 0 ][ 'Uri2048' ] ) ){
@@ -219,14 +292,6 @@ class ListingDetail extends Page {
 				$GLOBALS[ 'wpseo_og' ]->image_output( $this->listing[ 'StandardFields' ][ 'Photos' ][ 0 ][ 'UriLarge' ] );
 			}
 		}
-	}
-
-	function wpseo_opengraph_type( $type ){
-		return 'website';
-	}
-
-	function wpseo_opengraph_url( $url ){
-		return \FBS\Admin\Utilities::get_current_url();
 	}
 
 	function wpseo_metadesc( $desc ){
@@ -246,9 +311,6 @@ class ListingDetail extends Page {
 		$sep = apply_filters( 'document_title_separator', '-' );
 		$title = apply_filters( 'document_title_parts', $title );
 		$title = implode( " $sep ", array_filter( $title ) );
-		$title = wptexturize( $title );
-		$title = convert_chars( $title );
-		$title = esc_html( $title );
 		$title = capital_P_dangit( $title );
 		return $title;
 	}

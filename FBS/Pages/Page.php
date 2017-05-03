@@ -14,6 +14,8 @@ class Page {
 		add_action( 'wp_footer', array( $this, 'place_loading_spinner' ) );
 
 		add_filter( 'get_canonical_url', array( $this, 'get_canonical_url' ) );
+		add_filter( 'wpseo_opengraph_type', array( $this, 'wpseo_opengraph_type' ) );
+		add_filter( 'wpseo_opengraph_url', array( $this, 'wpseo_opengraph_url' ) );
 	}
 
 	function can_do_maps(){
@@ -221,6 +223,14 @@ class Page {
 				new \FBS\Pages\ListingSummary();
 			}
 		}
+	}
+
+	function wpseo_opengraph_type( $type ){
+		return 'website';
+	}
+
+	function wpseo_opengraph_url( $url ){
+		return \FBS\Admin\Utilities::get_current_url();
 	}
 
 }

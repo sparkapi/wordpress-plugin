@@ -26,8 +26,6 @@ class ListingSummary extends Page {
 		add_filter( 'wp_seo_get_bc_title', array( $this, 'wp_seo_get_bc_title' ) );
 		add_filter( 'wpseo_canonical', array( $this, 'wpseo_canonical' ) );
 		add_filter( 'wpseo_json_ld_output', array( $this, 'wpseo_json_ld_output' ) );
-		add_filter( 'wpseo_opengraph_type', array( $this, 'wpseo_opengraph_type' ) );
-		add_filter( 'wpseo_opengraph_url', array( $this, 'wpseo_opengraph_url' ) );
 		add_filter( 'wpseo_metadesc', array( $this, 'wpseo_metadesc' ) );
 		add_filter( 'wpseo_title', array( $this, 'wpseo_title' ) );
 
@@ -488,14 +486,6 @@ class ListingSummary extends Page {
 
 	function wpseo_json_ld_output( $json ){
 		return $json;
-	}
-
-	function wpseo_opengraph_type( $type ){
-		return 'website';
-	}
-
-	function wpseo_opengraph_url( $url ){
-		return \FBS\Admin\Utilities::get_current_url();
 	}
 
 	function wpseo_metadesc( $desc ){

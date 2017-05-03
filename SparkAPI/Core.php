@@ -197,6 +197,7 @@ class Core {
 				$return[ 'body' ] = $json;
 				return $return;
 			}
+			$json = $this->remove_blank_and_restricted_fields( $json );
 			if( array_key_exists( 'D', $json ) ){
 				if( true == $json[ 'D' ][ 'Success' ] && 'GET' == strtoupper( $method ) ){
 					set_transient( 'flexmls_query_' . $request[ 'transient_name' ], $json, $seconds_to_cache );
@@ -308,6 +309,24 @@ class Core {
 			}
 		}
 		return $required_fields;
+	}
+
+	function remove_blank_and_restricted_fields( $item ){
+		if( is_array( $item ) ){
+			foreach( $item as $key => $val ){
+				$new_val = $this->remove_blank_and_restricted_fields( $item[ $key ] );
+				if( $new_val ){
+					$item[ $key ] = $new_val;
+				} else {
+					unset( $item[ $key ] );
+				}
+			}
+			return $item;
+		}
+		if( strlen( $item ) && false === strpos( $item, '********' ) ){
+			return $item;
+		}
+		return false;
 	}
 
 	function sign_request( $request ){

@@ -46,3 +46,28 @@
 		transform: translate(-50%,-50%);
 	}
 }
+.mfp-close {
+	width: 44px;
+
+	&:hover,
+	&:focus {
+		background: transparent;
+	}
+}
+.mfp-arrow-left,
+.mfp-arrow-right {
+	&::before {
+		opacity: 1;
+	}
+	&:hover,
+	&:focus {
+		background: transparent;
+		box-shadow: none;
+	}
+}
+.mfp-arrow-left::before {
+	border-right-color: $brand-blue;
+}
+.mfp-arrow-right::before {
+	border-left-color: $brand-blue;
+}
