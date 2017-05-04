@@ -9,21 +9,19 @@ class Listings extends Core {
 		parent::__construct();
 	}
 
-	function get_listing( $listing_id = null ){
+	function get_listing( $listing_id = null, $expansions = array( '_expand' => 'PrimaryPhoto' ) ){
 		if( !$listing_id ){
 			return;
 		}
-		$expansions = array(
-			'_expand' => 'PrimaryPhoto'
-		);
-		return $this->get_first_result( $this->get_from_api( 'GET', 'listings/' . $listing_id, 15 * MINUTE_IN_SECONDS, $expansions ) );
+		$expansions[ '_limit' ] = 1;
+		return $this->get_first_result( $this->get_from_api( 'GET', 'listings/' . $listing_id, 30 * MINUTE_IN_SECONDS, $expansions ) );
 	}
 
 	function get_listing_photos( $listing_id = null ){
 		if( !$listing_id ){
 			return;
 		}
-		return $this->get_all_results( $this->get_from_api( 'GET', 'listings/' . $listing_id . '/photos', 15 * MINUTE_IN_SECONDS ) );
+		return $this->get_all_results( $this->get_from_api( 'GET', 'listings/' . $listing_id . '/photos', 30 * MINUTE_IN_SECONDS ) );
 	}
 
 	function get_listings( $filter, $page_number = 1 ){
@@ -65,7 +63,7 @@ class Listings extends Core {
 			'_page' => $page_number,
 			'_select' => implode( ',', $formatted_search_results_fields )
 		);
-		return $this->get_all_results( $this->get_from_api( 'GET', 'listings', 15 * MINUTE_IN_SECONDS, $params ) );
+		return $this->get_all_results( $this->get_from_api( 'GET', 'listings', 30 * MINUTE_IN_SECONDS, $params ) );
 	}
 
 	function get_listings_ids( $filter, $page_number = 1 ){
@@ -78,7 +76,7 @@ class Listings extends Core {
 			'_page' => $page_number,
 			'_select' => 'ListingId,UnparsedFirstLineAddress,City,StateOrProvince,PostalCode'
 		);
-		return $this->get_all_results( $this->get_from_api( 'GET', 'listings', 15 * MINUTE_IN_SECONDS, $params ) );
+		return $this->get_all_results( $this->get_from_api( 'GET', 'listings', 30 * MINUTE_IN_SECONDS, $params ) );
 	}
 
 }

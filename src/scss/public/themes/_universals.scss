@@ -1,3 +1,8 @@
+.flexmls-content *,
+.flexmls-content *::before,
+.flexmls-content *::after {
+	box-sizing: border-box;
+}
 .flexmls-button {
 	border: 1px solid $brand-blue;
 	border-radius: 0;
@@ -5,11 +10,12 @@
 	cursor: pointer;
 	display: inline-block;
 	padding: 0.5rem 1.5rem;
+	text-decoration: none !important;
 	text-transform: uppercase;
 }
 .flexmls-button-primary {
 	background: $brand-blue;
-	color: #fff;
+	color: #fff !important;
 	transition: background 300ms, opacity 300ms;
 
 	&:hover,

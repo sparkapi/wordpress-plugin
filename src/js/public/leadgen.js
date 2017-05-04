@@ -33,7 +33,6 @@
 				}
 				$( form ).prepend( '<div class="flexmls-leadgen-notice flexmls-leadgen-notice-' + noticeClass + '">' + response.message + '</div>' );
 				$( btn ).html( btnHtml ).removeAttr( 'disabled' );
-				console.log( response );
 			}, 'json' );
 		});
 	};

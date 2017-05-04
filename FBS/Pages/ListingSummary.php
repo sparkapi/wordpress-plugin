@@ -43,7 +43,7 @@ class ListingSummary extends Page {
 		if( 'map' == $wp_query->query_vars[ 'idxpage_view' ] ){
 			$locations = array();
 			foreach( $this->query->results as $listing ){
-				if( \FBS\Admin\Utilities::is_not_blank_or_restricted( $listing[ 'StandardFields' ][ 'Latitude' ] ) && \FBS\Admin\Utilities::is_not_blank_or_restricted( $listing[ 'StandardFields' ][ 'Longitude' ] ) ){
+				if( array_key_exists( 'Latitude', $listing[ 'StandardFields' ] ) && array_key_exists( 'Longitude', $listing[ 'StandardFields' ] ) ){
 					$address = \FBS\Admin\Utilities::format_listing_street_address( $listing );
 					$address_text = '<span class="listing-address-line-1">' . $address[ 0 ] . '</span>';
 					if( !empty( $address[ 1 ] ) ){
@@ -53,21 +53,21 @@ class ListingSummary extends Page {
 
 					$listing_quickfacts = array();
 					$listing_quickfacts_list = '';
-					if( isset( $listing[ 'StandardFields' ][ 'BedsTotal' ] ) && \FBS\Admin\Utilities::is_not_blank_or_restricted( $listing[ 'StandardFields' ][ 'BedsTotal' ] ) ){
+					if( array_key_exists( 'BedsTotal', $listing[ 'StandardFields' ] ) ){
 						$listing_quickfacts[] = sprintf( _n(
-							'%s bath',
-							'%s baths',
+							'%s bed',
+							'%s beds',
 							$listing[ 'StandardFields' ][ 'BedsTotal' ]
 						), $listing[ 'StandardFields' ][ 'BedsTotal' ] );
 					}
-					if( isset( $listing[ 'StandardFields' ][ 'BathsTotal' ] ) && \FBS\Admin\Utilities::is_not_blank_or_restricted( $listing[ 'StandardFields' ][ 'BathsTotal' ] ) ){
+					if( array_key_exists( 'BathsTotal', $listing[ 'StandardFields' ] ) ){
 						$listing_quickfacts[] = sprintf( _n(
 							'%s bath',
 							'%s baths',
 							$listing[ 'StandardFields' ][ 'BathsTotal' ]
 						), $listing[ 'StandardFields' ][ 'BathsTotal' ] );
 					}
-					if( isset( $listing[ 'StandardFields' ][ 'BuildingAreaTotal' ] ) && \FBS\Admin\Utilities::is_not_blank_or_restricted( $listing[ 'StandardFields' ][ 'BuildingAreaTotal' ] ) ){
+					if( array_key_exists( 'BuildingAreaTotal', $listing[ 'StandardFields' ] ) ){
 						if( false === strpos( $listing[ 'StandardFields' ][ 'BuildingAreaTotal' ], '.' ) ){
 							$listing_quickfacts[] = number_format( $listing[ 'StandardFields' ][ 'BuildingAreaTotal' ], 0 ) . ' sq ft';
 						} else {
@@ -251,8 +251,8 @@ class ListingSummary extends Page {
 										$listing_quickfacts = array();
 										if( isset( $listing[ 'StandardFields' ][ 'BedsTotal' ] ) && \FBS\Admin\Utilities::is_not_blank_or_restricted( $listing[ 'StandardFields' ][ 'BedsTotal' ] ) ){
 											$listing_quickfacts[] = sprintf( _n(
-												'%s bath',
-												'%s baths',
+												'%s bed',
+												'%s beds',
 												$listing[ 'StandardFields' ][ 'BedsTotal' ]
 											), $listing[ 'StandardFields' ][ 'BedsTotal' ] );
 										}

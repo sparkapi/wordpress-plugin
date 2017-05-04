@@ -274,6 +274,15 @@ class Core {
 		$mls_id = $system_info[ 'MlsId' ];
 		$compliance_list = $system_info[ 'DisplayCompliance' ][ $mls_id ][ 'View' ][ $listing_type ][ 'DisplayCompliance' ];
 
+		$logo = '';
+		if( $system_info[ 'Configuration' ][ 0 ][ 'IdxLogoSmall' ] ){
+			$logo = $system_info[ 'Configuration' ][ 0 ][ 'IdxLogoSmall' ];
+		} elseif( $system_info[ 'Configuration' ][ 0 ][ 'IdxLogo' ] ){
+			$logo = $system_info[ 'Configuration' ][ 0 ][ 'IdxLogo' ];
+		} else {
+			$logo = 'IDX';
+		}
+
 		$labels = array(
 			'ListOfficeName' => 'Listing Office',
 			'ListOfficePhone' => 'Office Phone',
@@ -296,7 +305,7 @@ class Core {
 			'CoListAgentURL' => 'Co Agent Webpage',
 			'CoListAgentAddress' => 'Co Agent Address',
 			'ListingUpdateTimestamp'=> 'Last Updated',
-			'IDXLogo' => 'LOGO'
+			'IDXLogo' => $logo
 		);
 
 		$required_fields = array();

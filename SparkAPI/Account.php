@@ -9,8 +9,16 @@ class Account extends Core {
 		parent::__construct();
 	}
 
+	function get_account( $id ){
+		return $this->get_first_result( $this->get_from_api( 'GET', 'accounts/' . $id, HOUR_IN_SECONDS ) );
+	}
+
 	function get_accounts( $params = array() ){
 		return $this->get_all_results( $this->get_from_api( 'GET', 'accounts', DAY_IN_SECONDS, $params ) );
+	}
+
+	function get_accounts_by_office( $id, $params = array() ){
+		return $this->get_all_results( $this->get_from_api( 'GET', 'accounts/by/office/' . $id, HOUR_IN_SECONDS, $params ) );
 	}
 
 	function get_my_account( $params = array() ){
@@ -19,14 +27,6 @@ class Account extends Core {
 
 	function GetAccounts($params = array()) {
 	return $this->return_all_results( $this->MakeAPICall("GET", "accounts", '1h', $params) );
-	}
-
-	function GetAccount($id) {
-	return $this->return_first_result( $this->MakeAPICall("GET", "accounts/".$id, '1h') );
-	}
-
-	function GetAccountsByOffice($id, $params = array()) {
-	return $this->return_all_results( $this->MakeAPICall("GET", "accounts/by/office/".$id, '1h', $params) );
 	}
 
 	function UpdateMyAccount($data) {

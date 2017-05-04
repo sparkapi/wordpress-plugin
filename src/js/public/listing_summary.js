@@ -64,16 +64,17 @@
 				if( 'object' === typeof google && 'object' === typeof google.maps ){
 					initGoogleMap();
 				} else {
-					console.log( 'Google maps is not loaded' );
 					isGoogleMapsLoaded();
 				}
 			}, 500 );
 		}
 	};
 
-	$(document).ready( function( $ ){
-		changeFilterParams();
-		isGoogleMapsLoaded();
+	$(document).ready( function(){
+		if( $( 'body' ).hasClass( 'flexmls-summary' ) ){
+			changeFilterParams();
+			isGoogleMapsLoaded();
+		}
 	} );
 
 })(jQuery);
