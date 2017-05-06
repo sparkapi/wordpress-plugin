@@ -270,7 +270,7 @@ class ListingDetail extends Page {
 									$content .= '<ul class="quickfacts"><li>' . implode( '</li><li>', $listing_quickfacts ) . '</li></ul>';
 								}
 								if( 1 == $flexmls_settings[ 'portal' ][ 'allow_carts' ] ){
-									$content .= $this->display_carts_buttons();
+									$content .= $this->display_carts_buttons( $this->listing[ 'Id' ] );
 								}
 								$content .= '</header>';
 

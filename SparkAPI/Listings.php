@@ -17,6 +17,14 @@ class Listings extends Core {
 		return $this->get_first_result( $this->get_from_api( 'GET', 'listings/' . $listing_id, 30 * MINUTE_IN_SECONDS, $expansions ) );
 	}
 
+	function get_listing_cart_listings( $listing_cart_id = null, $expansions = array( '_expand' => 'PrimaryPhoto' ) ){
+		if( !$listing_cart_id ){
+			return;
+		}
+		$expansions[ '_limit' ] = 1;
+		return $this->get_all_results( $this->get_from_api( 'GET', 'listingcarts/' . $listing_cart_id . '/listings', 30 * MINUTE_IN_SECONDS, $expansions ) );
+	}
+
 	function get_listing_photos( $listing_id = null ){
 		if( !$listing_id ){
 			return;

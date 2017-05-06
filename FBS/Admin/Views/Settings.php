@@ -348,7 +348,7 @@ class Settings {
 					<tr>
 						<th scope="row"><label>OAuth Redirect URI</label></th>
 						<td>
-							<input type="text" class="large-text" value="<?php echo site_url( 'index.php/oauth/callback' ); ?>" readonly="readonly" onclick="javascript:this.focus();this.select();">
+							<input type="text" class="large-text" value="<?php echo home_url( 'index.php/oauth/callback', 'https' ); ?>" readonly="readonly" onclick="javascript:this.focus();this.select();">
 							<p class="description">This is here for your reference only. You can not change the OAuth Redirect URI.</p>
 						</td>
 					</tr>

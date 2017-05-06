@@ -2089,6 +2089,23 @@ window.optimizedScroll = (function(){
 })(jQuery);
 (function($){
 
+	var openPortalLoginInModal = function(){
+		$( '.flexmls-carts-buttons' ).on( 'click', 'a', function( ev ){
+			var action = $( this ).data( 'portalaction' );
+			if( 'login' != action ){
+				ev.preventDefault();
+				return false;
+			}
+		} );
+	};
+
+	$(document).ready( function(){
+		openPortalLoginInModal();
+	} );
+
+})(jQuery);
+(function($){
+
 	var magnificPhotos = function(){
 		var items = [], currentListingId, previousListingId;
 		$( '.flexmls-magnific-media' ).on( 'click', function( ev ){

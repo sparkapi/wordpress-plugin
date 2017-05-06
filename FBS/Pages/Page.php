@@ -39,9 +39,9 @@ class Page {
 		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/page/([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=$matches[1]&idxpage_view=list&idxsearch_page=$matches[2]', 'top' );
 		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/map/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=$matches[1]&idxpage_view=map&idxsearch_page=1', 'top' );
 
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/[^/]*_([0-9]+)/map/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=$matches[1]&idxpage_view=map&idxlisting_id=$matches[2]', 'top' );
+		//add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/[^/]*_([0-9]+)/map/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=$matches[1]&idxpage_view=map&idxlisting_id=$matches[2]', 'top' );
 		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/[^/]*_([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=$matches[1]&idxpage_view=list&idxlisting_id=$matches[2]', 'top' );
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/[^/]*_([0-9]+)/map/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=$matches[1]&idxpage_view=map&idxlisting_id=$matches[2]', 'top' );
+		//add_rewrite_rule( '^' . $search_results_page->post_name . '/[^/]*_([0-9]+)/map/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=$matches[1]&idxpage_view=map&idxlisting_id=$matches[2]', 'top' );
 		add_rewrite_rule( '^' . $search_results_page->post_name . '/[^/]*_([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=' . $search_results_default . '&idxpage_view=list&idxlisting_id=$matches[1]', 'top' );
 		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=$matches[1]&idxpage_view=list&idxsearch_page=1', 'top' );
 
@@ -53,10 +53,13 @@ class Page {
 		add_rewrite_tag( '%idxpage_view%', '([^&]+)' );
 	}
 
-	function display_carts_buttons(){
+	function display_carts_buttons( $listing_id = null ){
+		$Oauth = new \SparkAPI\Oauth();
+		$url = $Oauth->is_user_logged_in() ? '#' : $Oauth->get_portal_url();
+
 		$buttons  = '<ul class="flexmls-carts-buttons">';
-		$buttons .= '<li class="favorite"><a href="#" title="Add to favorites"><i class="fbsicon fbsicon-heart"></i></a></li>';
-		$buttons .= '<li class="reject"><a href="#" title="Add to rejects"><i class="fbsicon fbsicon-thumbs-down"></i></a></li>';
+		$buttons .= '<li class="favorite"><a href="' . $url . '" title="Add to favorites" data-portalaction="' . ( !$Oauth->is_user_logged_in() ? 'login' : 'favorite' ) . '" data-listingid="' . $listing_id . '"><i class="fbsicon fbsicon-heart"></i></a></li>';
+		$buttons .= '<li class="reject"><a href="' . $url . '" title="Add to rejects" data-portalaction="' . ( !$Oauth->is_user_logged_in() ? 'login' : 'reject' ) . '" data-listingid="' . $listing_id . '"><i class="fbsicon fbsicon-thumbs-down"></i></a></li>';
 		$buttons .= '</ul>';
 		return $buttons;
 	}
@@ -123,7 +126,7 @@ class Page {
 	}
 
 	function place_loading_spinner(){
-		echo '<div id="flexmls-loading-spinner"><?xml version="1.0" encoding="utf-8"?><svg width="74px" height="74px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="uil-cube"><rect x="0" y="0" width="100" height="100" fill="none" class="bk"></rect><g transform="translate(25 25)"><rect x="-20" y="-20" width="40" height="40" fill="#4b6ed0" opacity="0.9" class="cube"><animateTransform attributeName="transform" type="scale" from="1.5" to="1" repeatCount="indefinite" begin="0s" dur="1s" calcMode="spline" keySplines="0.2 0.8 0.2 0.8" keyTimes="0;1"></animateTransform></rect></g><g transform="translate(75 25)"><rect x="-20" y="-20" width="40" height="40" fill="#4b6ed0" opacity="0.8" class="cube"><animateTransform attributeName="transform" type="scale" from="1.5" to="1" repeatCount="indefinite" begin="0.1s" dur="1s" calcMode="spline" keySplines="0.2 0.8 0.2 0.8" keyTimes="0;1"></animateTransform></rect></g><g transform="translate(25 75)"><rect x="-20" y="-20" width="40" height="40" fill="#4b6ed0" opacity="0.7" class="cube"><animateTransform attributeName="transform" type="scale" from="1.5" to="1" repeatCount="indefinite" begin="0.3s" dur="1s" calcMode="spline" keySplines="0.2 0.8 0.2 0.8" keyTimes="0;1"></animateTransform></rect></g><g transform="translate(75 75)"><rect x="-20" y="-20" width="40" height="40" fill="#4b6ed0" opacity="0.6" class="cube"><animateTransform attributeName="transform" type="scale" from="1.5" to="1" repeatCount="indefinite" begin="0.2s" dur="1s" calcMode="spline" keySplines="0.2 0.8 0.2 0.8" keyTimes="0;1"></animateTransform></rect></g></svg></div>';
+		echo '<div id="flexmls-loading-spinner"><svg width="74px" height="74px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="uil-cube"><rect x="0" y="0" width="100" height="100" fill="none" class="bk"></rect><g transform="translate(25 25)"><rect x="-20" y="-20" width="40" height="40" fill="#4b6ed0" opacity="0.9" class="cube"><animateTransform attributeName="transform" type="scale" from="1.5" to="1" repeatCount="indefinite" begin="0s" dur="1s" calcMode="spline" keySplines="0.2 0.8 0.2 0.8" keyTimes="0;1"></animateTransform></rect></g><g transform="translate(75 25)"><rect x="-20" y="-20" width="40" height="40" fill="#4b6ed0" opacity="0.8" class="cube"><animateTransform attributeName="transform" type="scale" from="1.5" to="1" repeatCount="indefinite" begin="0.1s" dur="1s" calcMode="spline" keySplines="0.2 0.8 0.2 0.8" keyTimes="0;1"></animateTransform></rect></g><g transform="translate(25 75)"><rect x="-20" y="-20" width="40" height="40" fill="#4b6ed0" opacity="0.7" class="cube"><animateTransform attributeName="transform" type="scale" from="1.5" to="1" repeatCount="indefinite" begin="0.3s" dur="1s" calcMode="spline" keySplines="0.2 0.8 0.2 0.8" keyTimes="0;1"></animateTransform></rect></g><g transform="translate(75 75)"><rect x="-20" y="-20" width="40" height="40" fill="#4b6ed0" opacity="0.6" class="cube"><animateTransform attributeName="transform" type="scale" from="1.5" to="1" repeatCount="indefinite" begin="0.2s" dur="1s" calcMode="spline" keySplines="0.2 0.8 0.2 0.8" keyTimes="0;1"></animateTransform></rect></g></svg></div>';
 	}
 
 	public static function preload_related_search_results( $search_id ){

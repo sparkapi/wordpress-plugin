@@ -1,0 +1,24 @@
+.flexmls-carts-buttons {
+	li {
+		a {
+			color: $brand-grey-lt;
+			transition: color 300ms;
+		}
+
+		&.favorite {
+			&.in-cart a,
+			a:hover,
+			a:focus {
+				color: $wordpress-red;
+			}
+		}
+
+		&.reject {
+			&.in-cart a,
+			a:hover,
+			a:focus {
+				color: $brand-grey-alt;
+			}
+		}
+	}
+}

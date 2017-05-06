@@ -25,6 +25,16 @@ class Core {
 			'User-Agent' => 'Flexmls WordPress Plugin/' . $this->plugin_version,
 			'X-SparkApi-User-Agent' => 'Flexmls-WordPress-Plugin/' . $this->plugin_version
 		);
+
+		global $Flexmls;
+		$stored_tokens = is_array( $Flexmls->oauth_tokens ) ? $Flexmls->oauth_tokens : array();
+		if( empty( $stored_tokens ) && isset( $_COOKIE[ 'flexmls_oauth_tokens' ] ) ){
+			$stored_tokens = json_decode( stripslashes( $_COOKIE[ 'flexmls_oauth_tokens' ] ), true );
+			$Flexmls->oauth_tokens = $stored_tokens;
+		}
+		if( array_key_exists( 'access_token', $stored_tokens ) ){
+			$this->api_headers[ 'Authorization' ] = 'OAuth ' . $stored_tokens[ 'access_token' ];
+		}
 	}
 
 	function admin_notices_api_connection_error(){
@@ -170,8 +180,15 @@ class Core {
 		$transient_name = 'flexmls_query_' . $request[ 'transient_name' ];
 
 		$return = array();
+		$json = false;
 
-		if( false === ( $json = get_transient( $transient_name ) ) ){
+		if( array_key_exists( 'Authorization', $this->api_headers ) && isset( $_COOKIE[ $transient_name ] ) ){
+			$json = json_decode( stripslashes( $_COOKIE[ $transient_name ] ), true );
+		} else {
+			$json = get_transient( $transient_name );
+		}
+
+		if( false === $json ){
 			$url = $this->api_base . '/' . $this->api_version . '/' . $service . '?' . $request[ 'query_string' ];
 			$json = array();
 			$args = array(
@@ -191,6 +208,7 @@ class Core {
 				add_action( 'admin_notices', array( $this, 'admin_notices_error_wordpress' ) );
 				return $return;
 			}
+			//write_log( $response, $request[ 'service' ] );
 			$json = json_decode( wp_remote_retrieve_body( $response ), true );
 			if( !is_array( $json ) ){
 				// The response wasn't JSON as expected so bail out with the original, unparsed body
@@ -200,9 +218,16 @@ class Core {
 			$json = $this->remove_blank_and_restricted_fields( $json );
 			if( array_key_exists( 'D', $json ) ){
 				if( true == $json[ 'D' ][ 'Success' ] && 'GET' == strtoupper( $method ) ){
-					set_transient( 'flexmls_query_' . $request[ 'transient_name' ], $json, $seconds_to_cache );
+					if( array_key_exists( 'Authorization', $this->api_headers ) ){
+						setcookie( $transient_name, json_encode( $json ), time() + $seconds_to_cache, '/' );
+					} else {
+						set_transient( $transient_name, $json, $seconds_to_cache );
+					}
 				} elseif( isset( $json[ 'D' ][ 'Code' ] ) && 1020 == $json[ 'D' ][ 'Code' ] ){
 					delete_transient( 'flexmls_auth_token' );
+					if( array_key_exists( 'Authorization', $this->api_headers ) ){
+						$this->generate_oauth_token();
+					}
 					if( $this->generate_auth_token() ){
 						$json = $this->get_from_api( $method, $service, $seconds_to_cache, $params, $post_data, $a_retry );
 					}

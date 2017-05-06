@@ -274,7 +274,7 @@ class ListingSummary extends Page {
 											$content .= '<ul class="quickfacts"><li>' . implode( '</li><li>', $listing_quickfacts ) . '</li></ul>';
 										}
 										if( 1 == $flexmls_settings[ 'portal' ][ 'allow_carts' ] ){
-											$content .= $this->display_carts_buttons();
+											$content .= $this->display_carts_buttons( $listing[ 'Id' ] );
 										}
 									$content .= '</header>';
 									$content .= '<div class="media-container">';
@@ -409,41 +409,30 @@ class ListingSummary extends Page {
 		global $wp_query;
 		$IDXLinks = new \SparkAPI\IDXLinks();
 		$this->idx_link_details = $IDXLinks->get_idx_link_details( $wp_query->query_vars[ 'idxsearch_id' ] );
-		if( !$this->idx_link_details ){
-			// This is a bad link
-			$wp_query->set_404();
-			status_header( 404 );
-			get_template_part( 404 );
-			exit();
+		if( $this->idx_link_details ){
+			if( isset( $this->idx_link_details[ 'Filter' ] ) ){
+				$this->search_filter = $this->idx_link_details[ 'Filter' ];
+			} else {
+				$SavedSearches = new \SparkAPI\SavedSearches();
+				$saved_search_details = $SavedSearches->get_saved_search_details( $this->idx_link_details[ 'SearchId' ] );
+				$this->search_filter = $saved_search_details[ 'Filter' ];
+			}
+			if( !empty( $this->search_filter ) ){
+				$this->query->results = $this->query->get_listings( $this->search_filter, $wp_query->query_vars[ 'idxsearch_page' ] );
+				if( !empty( $this->query->results ) ){
+					$flexmls_settings = get_option( 'flexmls_settings' );
+					$this->base_url = untrailingslashit( get_permalink() );
+					if( $wp_query->query_vars[ 'idxsearch_id' ] != $flexmls_settings[ 'general' ][ 'search_results_default' ] ){
+						$this->base_url .= '/' . $wp_query->query_vars[ 'idxsearch_id' ];
+					}
+					return;
+				}
+			}
 		}
-		if( isset( $this->idx_link_details[ 'Filter' ] ) ){
-			$this->search_filter = $this->idx_link_details[ 'Filter' ];
-		} else {
-			$SavedSearches = new \SparkAPI\SavedSearches();
-			$saved_search_details = $SavedSearches->get_saved_search_details( $this->idx_link_details[ 'SearchId' ] );
-			$this->search_filter = $saved_search_details[ 'Filter' ];
-		}
-		if( empty( $this->search_filter ) ){
-			// No search information available. Must bail.
-			$wp_query->set_404();
-			status_header( 404 );
-			get_template_part( 404 );
-			exit();
-		}
-		$this->query->results = $this->query->get_listings( $this->search_filter, $wp_query->query_vars[ 'idxsearch_page' ] );
-		if( empty( $this->query->results ) ){
-			// No listings on this page, likely because of a bad page number.
-			$wp_query->set_404();
-			status_header( 404 );
-			get_template_part( 404 );
-			exit();
-		}
-		$flexmls_settings = get_option( 'flexmls_settings' );
-		$this->base_url = untrailingslashit( get_permalink() );
-		if( $wp_query->query_vars[ 'idxsearch_id' ] != $flexmls_settings[ 'general' ][ 'search_results_default' ] ){
-			$this->base_url .= '/' . $wp_query->query_vars[ 'idxsearch_id' ];
-		}
-
+		$wp_query->set_404();
+		status_header( 404 );
+		get_template_part( 404 );
+		exit();
 	}
 
 	function wp_head(){

@@ -6,17 +6,17 @@ defined( 'ABSPATH' ) or die( 'This plugin requires WordPress' );
 class Utilities {
 
 	static function format_listing_street_address( $record ){
-		$first_line_address = self::is_not_blank_or_restricted( $record[ 'StandardFields' ][ 'UnparsedFirstLineAddress' ] ) ? sanitize_text_field( $record[ 'StandardFields' ][ 'UnparsedFirstLineAddress' ] ) : '';
+		$first_line_address = array_key_exists( 'UnparsedFirstLineAddress', $record[ 'StandardFields' ] ) ? sanitize_text_field( $record[ 'StandardFields' ][ 'UnparsedFirstLineAddress' ] ) : '';
 		$second_line_address = array();
-		if( self::is_not_blank_or_restricted( $record[ 'StandardFields' ][ 'City' ] ) ){
+		if( array_key_exists( 'City', $record[ 'StandardFields' ] ) ){
 			$second_line_address[] = sanitize_text_field( $record[ 'StandardFields' ][ 'City' ] );
 		}
-		if( self::is_not_blank_or_restricted( $record[ 'StandardFields' ][ 'StateOrProvince' ] ) ){
+		if( array_key_exists( 'StateOrProvince', $record[ 'StandardFields' ] ) ){
 			$second_line_address[] = sanitize_text_field( $record[ 'StandardFields' ][ 'StateOrProvince' ] );
 		}
 		$second_line_address = implode( ', ', $second_line_address );
 		$second_line_address = array( $second_line_address );
-		if( self::is_not_blank_or_restricted( $record[ 'StandardFields' ][ 'PostalCode' ] ) ){
+		if( array_key_exists( 'PostalCode', $record[ 'StandardFields' ] ) ){
 			$second_line_address[] = sanitize_text_field( $record[ 'StandardFields' ][ 'PostalCode' ] );
 		}
 		$second_line_address = implode( ' ', $second_line_address );
