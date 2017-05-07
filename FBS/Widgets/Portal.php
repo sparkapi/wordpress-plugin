@@ -10,13 +10,6 @@ class Portal extends \WP_Widget {
 			'classname' => 'flexmls_portal',
 			'description' => 'Allow visitors to sign up or sign in to save listings',
 		) );
-		//add_action( 'parse_request', array( 'FBS\Widgets\Portal', 'setup_portal_cookies' ) );
-	}
-
-	public static function setup_portal_cookies(){
-		$Oauth = new \SparkAPI\Oauth();
-		$Oauth->get_portal_favorites();
-		$Oauth->get_portal_rejects();
 	}
 
 	public function form( $instance ){
@@ -59,7 +52,7 @@ class Portal extends \WP_Widget {
 			<div class="flexmls-portal-container">
 				<div class="flexmls-portal-body"><?php echo wpautop( $flexmls_settings[ 'portal' ][ 'registration_text' ] ); ?></div>
 				<div class="flexmls-portal-footer">
-					<button type="button" class="flexmls-button flexmls-button-primary">Sign up or Sign In</button>
+					<a href="<?php echo $Oauth->get_portal_url(); ?>" class="flexmls-button flexmls-button-primary">Sign up or Sign In</a>
 				</div>
 			</div>
 			<?php
@@ -68,28 +61,38 @@ class Portal extends \WP_Widget {
 			$flexmls_settings = get_option( 'flexmls_settings' );
 			$search_results_page = $flexmls_settings[ 'general' ][ 'search_results_page' ];
 			$base_url = untrailingslashit( get_permalink( $search_results_page ) );
-			echo $args[ 'before_title' ] . apply_filters( 'widget_title', $get_me[ 'DisplayName' ] . '&#8217;s Portal' ) . $args[ 'after_title' ];
+			echo $args[ 'before_title' ] . $get_me[ 'DisplayName' ] . '&#8217;s Portal (<a href="' . home_url( 'oauth/callback/logout?redirect_to=' . \FBS\Admin\Utilities::get_current_url() ) . '">Log out</a>)' . $args[ 'after_title' ];
 			?>
 			<div class="flexmls-portal-container">
 				<div class="flexmls-portal-body">
 					<?php if( 1 == $instance[ 'listing_carts' ] ): ?>
+						<p><strong>My Listing Carts</strong></p>
 						<ul>
-							<li><strong>My Listing Carts</strong></li>
 							<li><?php
 								$favorites = $Oauth->get_portal_favorites();
-								$url = $base_url . '/' . $favorites[ 0 ][ 'Id' ];
-								printf( '<a href="%s" title="%s">%s (%s)</a>', $url, $favorites[ 0 ][ 'Name' ], $favorites[ 0 ][ 'Name' ], $favorites[ 0 ][ 'ListingCount' ] );
+								$url = $base_url . '/cart/' . $favorites[ 'Id' ];
+								printf( '<a href="%s" title="%s">%s (<span class="portal-cart-count" data-cartid="%s">%s</span>)</a>', $url, $favorites[ 'Name' ], $favorites[ 'Name' ], $favorites[ 'Id' ], $favorites[ 'ListingCount' ] );
 							?></li>
 							<li><?php
-								$favorites = $Oauth->get_portal_rejects();
-								$url = $base_url . '/' . $favorites[ 0 ][ 'Id' ];
-								printf( '<a href="%s" title="%s">%s (%s)</a>', $url, $favorites[ 0 ][ 'Name' ], $favorites[ 0 ][ 'Name' ], $favorites[ 0 ][ 'ListingCount' ] );
+								$rejects = $Oauth->get_portal_rejects();
+								$url = $base_url . '/cart/' . $rejects[ 'Id' ];
+								printf( '<a href="%s" title="%s">%s (<span class="portal-cart-count" data-cartid="%s">%s</span>)</a>', $url, $rejects[ 'Name' ], $rejects[ 'Name' ], $rejects[ 'Id' ], $rejects[ 'ListingCount' ] );
 							?></li>
 						</ul>
 					<?php endif; ?>
-				</div>
-				<div class="flexmls-portal-footer">
-					<button type="button" class="flexmls-button flexmls-button-primary">Sign up or Sign In</button>
+					<?php if( 1 == $instance[ 'saved_searches' ] ): ?>
+						<?php
+							$saved_searches = $Oauth->get_portal_saved_searches( $get_me[ 'Id' ] );
+							if( $saved_searches ):
+						?>
+							<p><strong>My Saved Searches</strong></p>
+							<ul>
+								<?php foreach( $saved_searches as $saved_search ): ?>
+									<li><?php printf( '<a href="%s" title="%s">%s</a>', $base_url . '/' . $saved_search[ 'Id' ], $saved_search[ 'Name' ], $saved_search[ 'Name' ] ); ?></li>
+								<?php endforeach; ?>
+							</ul>
+						<?php endif; ?>
+					<?php endif; ?>
 				</div>
 			</div>
 			<?php

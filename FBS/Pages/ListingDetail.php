@@ -148,20 +148,29 @@ class ListingDetail extends Page {
 
 	function generate_previous_and_next_listings(){
 		global $wp_query;
-		$IDXLinks = new \SparkAPI\IDXLinks();
-		$this->idx_link_details = $IDXLinks->get_idx_link_details( $wp_query->query_vars[ 'idxsearch_id' ] );
 		$this->next_listing_url = false;
 		$this->previous_listing_url = false;
-		if( !$this->idx_link_details ){
-			return;
+		if( 'standard' == $wp_query->query_vars[ 'idxsearch_type' ] ){
+			$IDXLinks = new \SparkAPI\IDXLinks();
+			$this->idx_link_details = $IDXLinks->get_idx_link_details( $wp_query->query_vars[ 'idxsearch_id' ] );
+			if( !$this->idx_link_details ){
+				return;
+			}
+			if( isset( $this->idx_link_details[ 'Filter' ] ) ){
+				$this->search_filter = $this->idx_link_details[ 'Filter' ];
+			} else {
+				$SavedSearches = new \SparkAPI\SavedSearches();
+				$saved_search_details = $SavedSearches->get_saved_search_details( $this->idx_link_details[ 'SearchId' ] );
+				$this->search_filter = $saved_search_details[ 'Filter' ];
+			}
+		} elseif( 'cart' == $wp_query->query_vars[ 'idxsearch_type' ] ){
+			$Oauth = new \SparkAPI\Oauth();
+			$this->idx_link_details[ 'Name' ] = 'My Cart';
+			if( $Oauth->is_user_logged_in() ){
+				$this->search_filter = 'ListingCart Eq \'' . $wp_query->query_vars[ 'idxsearch_id' ] . '\'';
+			}
 		}
-		if( isset( $this->idx_link_details[ 'Filter' ] ) ){
-			$this->search_filter = $this->idx_link_details[ 'Filter' ];
-		} else {
-			$SavedSearches = new \SparkAPI\SavedSearches();
-			$saved_search_details = $SavedSearches->get_saved_search_details( $this->idx_link_details[ 'SearchId' ] );
-			$this->search_filter = $saved_search_details[ 'Filter' ];
-		}
+
 		if( empty( $this->search_filter ) ){
 			return;
 		}
@@ -238,6 +247,7 @@ class ListingDetail extends Page {
 								if( !empty( $address[ 1 ] ) ){
 									$address_text .= '<span class="listing-address-line-2">' . $address[ 1 ] . '</span>';
 								}
+								$content .= '<div class="print-only print-address">' . $address_text . '</div>';
 								if( 'active' != strtolower( $this->listing[ 'StandardFields' ][ 'MlsStatus' ] ) ){
 									// The visitor can assume it's an active listing. If it's not, show the status.
 									$content .= '<p class="status status-' . sanitize_title_with_dashes( $this->listing[ 'StandardFields' ][ 'MlsStatus' ] ) . '">' . $this->listing[ 'StandardFields' ][ 'MlsStatus' ] . '</p>';
@@ -295,18 +305,18 @@ class ListingDetail extends Page {
 										$media = array();
 										if( isset( $this->listing[ 'StandardFields' ][ 'PhotosCount' ] ) ){
 											$photo_count = intval( $this->listing[ 'StandardFields' ][ 'PhotosCount' ] );
-											$photo_text = _n( 'Photo', 'Photos', $photo_count );
-											$media[] = '<li class="listing-photos-link"><a href="#" class="flexmls-magnific-media" data-listingid="' . $this->listing[ 'Id' ] . '" data-mediatype="photos" title="View ' . $photo_text . '"><i class="fbsicon fbsicon-picture-o"></i> View ' . $photo_text . '</a></li>';
+											$photo_text = sprintf( _n( 'Enlarge Photo', '%s Photos', $photo_count ), $photo_count );
+											$media[] = '<li class="listing-photos-link"><a href="#" class="flexmls-magnific-media" data-listingid="' . $this->listing[ 'Id' ] . '" data-mediatype="photos" title="' . $photo_text . '"><i class="fbsicon fbsicon-picture-o"></i> ' . $photo_text . '</a></li>';
 										}
 										if( isset( $this->listing[ 'StandardFields' ][ 'VideosCount' ] ) ){
 											$video_count = intval( $this->listing[ 'StandardFields' ][ 'VideosCount' ] );
-											$video_text = _n( 'Video', 'Videos', $video_count );
-											$media[] = '<li class="listing-videos-link"><a href="#" title="View ' . $video_text . '"><i class="fbsicon fbsicon-play-circle-o"></i> View ' . $video_text . '</a></li>';
+											$video_text = sprintf( _n( 'Watch Video', '%s Videos', $video_count ), $video_count );
+											$media[] = '<li class="listing-videos-link"><a href="#" class="flexmls-magnific-media" data-listingid="' . $this->listing[ 'Id' ] . '" data-mediatype="videos" title="' . $video_text . '"><i class="fbsicon fbsicon-play-circle-o"></i> ' . $video_text . '</a></li>';
 										}
 										if( isset( $this->listing[ 'StandardFields' ][ 'VirtualToursCount' ] ) ){
 											$tour_count = intval( $this->listing[ 'StandardFields' ][ 'VirtualToursCount' ] );
-											$tour_text = _n( 'Virtual Tour', 'Virtual Tours', $tour_count );
-											$media[] = '<li class="listing-virtualtours-link"><a href="#" title="View ' . $tour_text . '"><i class="fbsicon fbsicon-video-camera"></i> View ' . $tour_text . '</a></li>';
+											$tour_text = sprintf( _n( 'Virtual Tour', '%s Virtual Tours', $tour_count ), $tour_count );
+											$media[] = '<li class="listing-virtualtours-link"><a href="#" class="flexmls-magnific-media" data-listingid="' . $this->listing[ 'Id' ] . '" data-mediatype="virtualtours" title="' . $tour_text . '"><i class="fbsicon fbsicon-video-camera"></i> ' . $tour_text . '</a></li>';
 										}
 										$content .= '<div class="listing-action-buttons">';
 										if( count( $media ) ){
@@ -731,6 +741,9 @@ class ListingDetail extends Page {
 		}
 		$flexmls_settings = get_option( 'flexmls_settings' );
 		$this->base_url = untrailingslashit( get_permalink() );
+		if( 'cart' == $wp_query->query_vars[ 'idxsearch_type' ] ){
+			$this->base_url .= '/cart';
+		}
 		if( $wp_query->query_vars[ 'idxsearch_id' ] != $flexmls_settings[ 'general' ][ 'search_results_default' ] ){
 			$this->base_url .= '/' . $wp_query->query_vars[ 'idxsearch_id' ];
 		}

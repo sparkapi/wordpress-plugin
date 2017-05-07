@@ -249,21 +249,21 @@ class ListingSummary extends Page {
 										<p class="price">$' . \FBS\Admin\Utilities::gentle_price_rounding( $listing[ 'StandardFields' ][ 'ListPrice' ] ) . '</p>';
 										// Check to see if we have baths, beds, and/or sq footage
 										$listing_quickfacts = array();
-										if( isset( $listing[ 'StandardFields' ][ 'BedsTotal' ] ) && \FBS\Admin\Utilities::is_not_blank_or_restricted( $listing[ 'StandardFields' ][ 'BedsTotal' ] ) ){
+										if( array_key_exists( 'BedsTotal', $listing[ 'StandardFields' ] ) ){
 											$listing_quickfacts[] = sprintf( _n(
 												'%s bed',
 												'%s beds',
 												$listing[ 'StandardFields' ][ 'BedsTotal' ]
 											), $listing[ 'StandardFields' ][ 'BedsTotal' ] );
 										}
-										if( isset( $listing[ 'StandardFields' ][ 'BathsTotal' ] ) && \FBS\Admin\Utilities::is_not_blank_or_restricted( $listing[ 'StandardFields' ][ 'BathsTotal' ] ) ){
+										if( array_key_exists( 'BathsTotal', $listing[ 'StandardFields' ] ) ){
 											$listing_quickfacts[] = sprintf( _n(
 												'%s bath',
 												'%s baths',
 												$listing[ 'StandardFields' ][ 'BathsTotal' ]
 											), $listing[ 'StandardFields' ][ 'BathsTotal' ] );
 										}
-										if( isset( $listing[ 'StandardFields' ][ 'BuildingAreaTotal' ] ) && \FBS\Admin\Utilities::is_not_blank_or_restricted( $listing[ 'StandardFields' ][ 'BuildingAreaTotal' ] ) ){
+										if( array_key_exists( 'BuildingAreaTotal', $listing[ 'StandardFields' ] ) ){
 											if( false === strpos( $listing[ 'StandardFields' ][ 'BuildingAreaTotal' ], '.' ) ){
 												$listing_quickfacts[] = number_format( $listing[ 'StandardFields' ][ 'BuildingAreaTotal' ], 0 ) . ' sq ft';
 											} else {
@@ -279,7 +279,7 @@ class ListingSummary extends Page {
 									$content .= '</header>';
 									$content .= '<div class="media-container">';
 										$photo = '<a href="' . $this_permalink . '" title="View ' . $address[ 0 ] . '"><img src="' . FLEXMLS_PLUGIN_DIR_URL . '/dist/assets/photo_not_available.png" alt="Photo not available"></a>';
-										if( isset( $listing[ 'StandardFields' ][ 'Photos' ] ) && count( $listing[ 'StandardFields' ][ 'Photos' ] ) ){
+										if( array_key_exists( 'Photos', $listing[ 'StandardFields' ] ) && count( $listing[ 'StandardFields' ][ 'Photos' ] ) ){
 											$p = $listing[ 'StandardFields' ][ 'Photos' ][ 0 ];
 											$photo = '<a href="' . $this_permalink . '" title="View ' . $address[ 0 ] . '"><img src="' . $p[ 'Uri640' ] . '" alt="" srcset="' . $p[ 'Uri800' ] . ' 800w,' . $p[ 'Uri1024' ] . ' 1024w,' . $p[ 'Uri1280' ] . ' 1280w,' . $p[ 'Uri1600' ] . ' 1600w,' . $p[ 'Uri2048' ] . ' 2048w"></a>';
 											if( isset( $p[ 'Caption' ] ) && !empty( $p[ 'Caption' ] ) ){
@@ -291,20 +291,20 @@ class ListingSummary extends Page {
 										$content .= '<figure class="featured-image">' . $photo . '</figure>';
 
 										$media = array();
-										if( isset( $listing[ 'StandardFields' ][ 'PhotosCount' ] ) && !empty( $listing[ 'StandardFields' ][ 'PhotosCount' ] ) && 0 < $listing[ 'StandardFields' ][ 'PhotosCount' ] ){
+										if( array_key_exists( 'PhotosCount', $listing[ 'StandardFields' ] ) && 0 < $listing[ 'StandardFields' ][ 'PhotosCount' ] ){
 											$photo_count = intval( $listing[ 'StandardFields' ][ 'PhotosCount' ] );
-											$photo_text = _n( 'Photo', 'Photos', $photo_count );
-											$media[] = '<li class="listing-photos-link"><a href="#" class="flexmls-magnific-media" data-listingid="' . $listing[ 'Id' ] . '" data-mediatype="photos" title="View ' . $photo_text . '"><i class="fbsicon fbsicon-picture-o"></i> View ' . $photo_text . '</a></li>';
+											$photo_text = sprintf( _n( 'View Photo', '%s Photos', $photo_count ), $photo_count );
+											$media[] = '<li class="listing-photos-link"><a href="#" class="flexmls-magnific-media" data-listingid="' . $listing[ 'Id' ] . '" data-mediatype="photos" title="' . $photo_text . '"><i class="fbsicon fbsicon-picture-o"></i> ' . $photo_text . '</a></li>';
 										}
-										if( isset( $listing[ 'StandardFields' ][ 'VideosCount' ] ) && !empty( $listing[ 'StandardFields' ][ 'VideosCount' ] ) && 0 < $listing[ 'StandardFields' ][ 'VideosCount' ] ){
+										if( array_key_exists( 'VideosCount', $listing[ 'StandardFields' ] ) && 0 < $listing[ 'StandardFields' ][ 'VideosCount' ] ){
 											$video_count = intval( $listing[ 'StandardFields' ][ 'VideosCount' ] );
-											$video_text = _n( 'Video', 'Videos', $video_count );
-											$media[] = '<li class="listing-videos-link"><a href="#" title="View ' . $video_text . '"><i class="fbsicon fbsicon-play-circle-o"></i> View ' . $video_text . '</a></li>';
+											$video_text = sprintf( _n( 'View Video', '%s Videos', $video_count ), $video_count );
+											$media[] = '<li class="listing-videos-link"><a href="#" class="flexmls-magnific-media" data-listingid="' . $listing[ 'Id' ] . '" data-mediatype="videos" title="' . $video_text . '"><i class="fbsicon fbsicon-play-circle-o"></i> ' . $video_text . '</a></li>';
 										}
-										if( isset( $listing[ 'StandardFields' ][ 'VirtualToursCount' ] ) && !empty( $listing[ 'StandardFields' ][ 'VirtualToursCount' ] ) && 0 < $listing[ 'StandardFields' ][ 'VirtualToursCount' ] ){
+										if( array_key_exists( 'VirtualToursCount', $listing[ 'StandardFields' ] ) && 0 < $listing[ 'StandardFields' ][ 'VirtualToursCount' ] ){
 											$tour_count = intval( $listing[ 'StandardFields' ][ 'VirtualToursCount' ] );
-											$tour_text = _n( 'Virtual Tour', 'Virtual Tours', $tour_count );
-											$media[] = '<li class="listing-virtualtours-link"><a href="#" title="View ' . $tour_text . '"><i class="fbsicon fbsicon-video-camera"></i> View ' . $tour_text . '</a></li>';
+											$tour_text = sprintf( _n( 'Virtual Tour', '% Virtual Tours', $tour_count ), $tour_count );
+											$media[] = '<li class="listing-virtualtours-link"><a href="#" class="flexmls-magnific-media" data-listingid="' . $listing[ 'Id' ] . '" data-mediatype="virtualtours" title="View ' . $tour_text . '"><i class="fbsicon fbsicon-video-camera"></i> ' . $tour_text . '</a></li>';
 										}
 										if( count( $media ) ){
 											$content .= '<ul class="listing-media">' . implode( '', $media ) . '</ul>';
@@ -313,7 +313,7 @@ class ListingSummary extends Page {
 
 									$content .= '<div class="content-container">';
 
-										if( isset( $listing[ 'StandardFields' ][ 'PublicRemarks' ] ) ){
+										if( array_key_exists( 'PublicRemarks', $listing[ 'StandardFields' ] ) ){
 											$content .= '<div class="listing-description">' . wpautop( $listing[ 'StandardFields' ][ 'PublicRemarks' ] ) . '</div>';
 										}
 										$content .= '<ul class="action-buttons">
@@ -322,7 +322,7 @@ class ListingSummary extends Page {
 													</ul>';
 										$content .= '<dl class="listing-table">';
 										foreach( $listing[ 'StandardFields' ] as $key => $val ){
-											if( array_key_exists( $key, $flexmls_settings[ 'general' ][ 'search_results_fields' ] ) && \FBS\Admin\Utilities::is_not_blank_or_restricted( $val ) ){
+											if( array_key_exists( $key, $flexmls_settings[ 'general' ][ 'search_results_fields' ] ) ){
 												$label = $flexmls_settings[ 'general' ][ 'search_results_fields' ][ $key ];
 												switch( $key ){
 													case 'BuildingAreaTotal':
@@ -349,35 +349,34 @@ class ListingSummary extends Page {
 										$last_update = '';
 										$idx_logo = '';
 
-										foreach( $this->query->possible_compliance_fields() as $label => $val ){
-											if( \FBS\Admin\Utilities::is_not_blank_or_restricted( $val ) ){
-												switch( $label ){
-													case 'IDXLogo':
-													case 'IDXLogoSmall':
-														if( isset( $listing[ 'DisplayCompliance' ] ) && isset( $listing[ 'DisplayCompliance' ][ $label ] ) ){
-															$val = '<img src="' . $listing[ 'DisplayCompliance' ][ $label ][ 'LogoUri' ] . '" alt="IDX">';
-														} else {
-															$val = 'IDX';
-														}
-														$idx_logo = '<div class="flexmls-idx-logo">' . $val . '</div>';
-														continue 2;
-														break;
-													case 'ListingUpdateTimestamp';
-														$formatted_label = $val;
-														$val = date( 'F j, Y', strtotime( $listing[ 'StandardFields' ][ $label ] ) );
-														$label = $formatted_label;
-														$last_update = '<p class="listing-updated">' . $label . ' ' . $val . '</p>';
-														continue 2;
-														break;
-													default:
-														$temp_val = $listing[ 'StandardFields' ][ $label ];
-														$val = $temp_val;
-												}
-												if( !empty( $label ) ){
-													$content .= '<dt class="flexmls-listing-table-label flexmls-listing-table-' . sanitize_title_with_dashes( $label ) . '">' . $label . '</dt>';
-												}
-												$content .= '<dd class="flexmls-listing-table-value flexmls-listing-table-' . sanitize_title_with_dashes( $label ) . '">' . $val . '</dd>';
+										// Not getting the required View. Why?
+										foreach( $listing[ 'DisplayCompliance' ] as $label => $val ){
+											switch( $label ){
+												case 'IDXLogo':
+												case 'IDXLogoSmall':
+													if( isset( $listing[ 'DisplayCompliance' ] ) && isset( $listing[ 'DisplayCompliance' ][ $label ] ) ){
+														$val = '<img src="' . $listing[ 'DisplayCompliance' ][ $label ][ 'LogoUri' ] . '" alt="IDX">';
+													} else {
+														$val = 'IDX';
+													}
+													$idx_logo = '<div class="flexmls-idx-logo">' . $val . '</div>';
+													continue 2;
+													break;
+												case 'ListingUpdateTimestamp';
+													$formatted_label = $val;
+													$val = date( 'F j, Y', strtotime( $listing[ 'StandardFields' ][ 'ModificationTimestamp' ] ) );
+													$label = $formatted_label;
+													$last_update = '<p class="listing-updated">' . $label . ' ' . $val . '</p>';
+													continue 2;
+													break;
+												default:
+													$temp_val = $listing[ 'StandardFields' ][ $label ];
+													$val = $temp_val;
 											}
+											if( !empty( $label ) ){
+												$content .= '<dt class="flexmls-listing-table-label flexmls-listing-table-' . sanitize_title_with_dashes( $label ) . '">' . $label . '</dt>';
+											}
+											$content .= '<dd class="flexmls-listing-table-value flexmls-listing-table-' . sanitize_title_with_dashes( $label ) . '">' . $val . '</dd>';
 										}
 										$content .= '</dl>'; // end .listing-table
 										$content .= $idx_logo;
@@ -407,26 +406,39 @@ class ListingSummary extends Page {
 
 	function wp(){
 		global $wp_query;
-		$IDXLinks = new \SparkAPI\IDXLinks();
-		$this->idx_link_details = $IDXLinks->get_idx_link_details( $wp_query->query_vars[ 'idxsearch_id' ] );
-		if( $this->idx_link_details ){
-			if( isset( $this->idx_link_details[ 'Filter' ] ) ){
-				$this->search_filter = $this->idx_link_details[ 'Filter' ];
-			} else {
-				$SavedSearches = new \SparkAPI\SavedSearches();
-				$saved_search_details = $SavedSearches->get_saved_search_details( $this->idx_link_details[ 'SearchId' ] );
-				$this->search_filter = $saved_search_details[ 'Filter' ];
-			}
-			if( !empty( $this->search_filter ) ){
-				$this->query->results = $this->query->get_listings( $this->search_filter, $wp_query->query_vars[ 'idxsearch_page' ] );
-				if( !empty( $this->query->results ) ){
-					$flexmls_settings = get_option( 'flexmls_settings' );
-					$this->base_url = untrailingslashit( get_permalink() );
-					if( $wp_query->query_vars[ 'idxsearch_id' ] != $flexmls_settings[ 'general' ][ 'search_results_default' ] ){
-						$this->base_url .= '/' . $wp_query->query_vars[ 'idxsearch_id' ];
-					}
-					return;
+		if( 'standard' == $wp_query->query_vars[ 'idxsearch_type' ] ){
+			$IDXLinks = new \SparkAPI\IDXLinks();
+			$this->idx_link_details = $IDXLinks->get_idx_link_details( $wp_query->query_vars[ 'idxsearch_id' ] );
+			if( $this->idx_link_details ){
+				if( isset( $this->idx_link_details[ 'Filter' ] ) ){
+					$this->search_filter = $this->idx_link_details[ 'Filter' ];
+				} else {
+					$SavedSearches = new \SparkAPI\SavedSearches();
+					$saved_search_details = $SavedSearches->get_saved_search_details( $this->idx_link_details[ 'SearchId' ] );
+					$this->search_filter = $saved_search_details[ 'Filter' ];
 				}
+			}
+		} elseif( 'cart' == $wp_query->query_vars[ 'idxsearch_type' ] ){
+			$Oauth = new \SparkAPI\Oauth();
+			$this->idx_link_details[ 'Name' ] = 'My Cart';
+
+			if( $Oauth->is_user_logged_in() ){
+				$this->search_filter = 'ListingCart Eq \'' . $wp_query->query_vars[ 'idxsearch_id' ] . '\'';
+			}
+		}
+
+		if( !empty( $this->search_filter ) ){
+			$this->query->results = $this->query->get_listings( $this->search_filter, $wp_query->query_vars[ 'idxsearch_page' ] );
+			if( !empty( $this->query->results ) ){
+				$flexmls_settings = get_option( 'flexmls_settings' );
+				$this->base_url = untrailingslashit( get_permalink() );
+				if( 'cart' == $wp_query->query_vars[ 'idxsearch_type' ] ){
+					$this->base_url .= '/cart';
+				}
+				if( $wp_query->query_vars[ 'idxsearch_id' ] != $flexmls_settings[ 'general' ][ 'search_results_default' ] ){
+					$this->base_url .= '/' . $wp_query->query_vars[ 'idxsearch_id' ];
+				}
+				return;
 			}
 		}
 		$wp_query->set_404();

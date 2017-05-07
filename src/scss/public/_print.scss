@@ -1,0 +1,61 @@
+.print-only {
+	display: none;
+}
+@media print {
+	body * {
+		visibility: hidden;
+
+		.listing-listing {
+			left: 5%;
+			position: absolute;
+			top: 5%;
+			width: 90%;
+		}
+
+		.listing-listing,
+		.listing-listing * {
+			font-family: arial, sans-serif;
+			font-size: 11pt;
+			visibility: visible !important;
+
+			.print-only {
+				display: block;
+			}
+			.print-address {
+				font-size: 14pt;
+				font-weight: 600;
+			}
+
+			.flexmls-carts-buttons,
+			.listing-action-buttons,
+			.listing-prev-next,
+			#flexmls-listing-map {
+				display: none !important;
+			}
+
+			.listing-column-half {
+				width: 75%;
+				&:first-child {
+					width: 25%;
+				}
+				h2,
+				h3 {
+					border: none !important;
+					margin: 0 !important;
+					padding: 0 0 12pt !important;
+				}
+			}
+
+			.listing-details {
+				column-count: 2;
+				column-gap: 0.25in;
+			}
+
+			.listing-details-group {
+				break-inside: avoid;
+				page-break-inside: avoid;
+			}
+
+		}
+	}
+}

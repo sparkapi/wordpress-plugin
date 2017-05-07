@@ -215,9 +215,9 @@ class MarketStats extends \WP_Widget {
 							type: '<?php echo $chart_type; ?>',
 							data: {
 								labels: [<?php
-									$dates = array_reverse( $data[ 'Dates' ] );
+									$dates = array_reverse( array_slice( $data[ 'Dates' ], 0, $time_period ) );
 									$dates_formatted = array();
-									for( $i = 0; $i < $time_period; $i++ ){
+									for( $i = 0; $i < count( $dates ); $i++ ){
 										list($m,$d,$y) = explode( '/', $dates[ $i ] );
 										$dates_formatted[] = date( 'M Y', mktime( 1,0,0,$m,$d,$y ) );
 									}
@@ -232,7 +232,7 @@ class MarketStats extends \WP_Widget {
 										if( 'Dates' == $key ){
 											continue;
 										}
-										$vals = array_reverse( $vals );
+										$vals = array_reverse( array_slice( $vals, 0, $time_period ) );
 										$vals_to_display = array();
 										for( $i = 0; $i < $time_period; $i++ ){
 											$vals_to_display[] = $vals[ $i ];

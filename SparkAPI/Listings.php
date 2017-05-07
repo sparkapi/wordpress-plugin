@@ -17,6 +17,13 @@ class Listings extends Core {
 		return $this->get_first_result( $this->get_from_api( 'GET', 'listings/' . $listing_id, 30 * MINUTE_IN_SECONDS, $expansions ) );
 	}
 
+	function get_listing_cart_listing_ids( $listing_cart_id = null ){
+		if( !$listing_cart_id ){
+			return;
+		}
+		return $this->get_first_result( $this->get_from_api( 'GET', 'listingcarts/' . $listing_cart_id, 30 * MINUTE_IN_SECONDS ) );
+	}
+
 	function get_listing_cart_listings( $listing_cart_id = null, $expansions = array( '_expand' => 'PrimaryPhoto' ) ){
 		if( !$listing_cart_id ){
 			return;
@@ -32,12 +39,36 @@ class Listings extends Core {
 		return $this->get_all_results( $this->get_from_api( 'GET', 'listings/' . $listing_id . '/photos', 30 * MINUTE_IN_SECONDS ) );
 	}
 
-	function get_listings( $filter, $page_number = 1 ){
+	function get_listing_media( $listing_id = null, $media = 'photos' ){
+		if( !$listing_id ){
+			return;
+		}
+		$media = $this->get_all_results( $this->get_from_api( 'GET', 'listings/' . $listing_id . '/' . $media, 30 * MINUTE_IN_SECONDS ) );
+		if( $media ){
+			foreach( $media as $key => $medium ){
+				if( array_key_exists( 'ObjectHtml', $medium ) ){
+					preg_match( '/src=[\'|"]([^\'|"]+)[\'|"]/', $medium[ 'ObjectHtml' ], $match );
+
+					// Need to convert youtube embeds to watch code for magnific popup
+					if( false !== strpos( $match[ 1 ], 'embed' ) ){
+						$video_id = str_replace( '/embed/', '', parse_url( $match[ 1 ], PHP_URL_PATH ) );
+						$media[ $key ][ 'Uri' ] = '//www.youtube.com/watch?rel=0&controls=0&v=' . $video_id;
+					} else {
+						$media[ $key ][ 'Uri' ] = $match[ 1 ];
+					}
+				}
+			}
+		}
+		return $media;
+	}
+
+	function get_listings( $filter, $page_number = 1, $return_transient_params = false ){
 		global $Flexmls;
 		$flexmls_settings = get_option( 'flexmls_settings' );
 		$search_results_fields = $flexmls_settings[ 'general' ][ 'search_results_fields' ];
 		$formatted_search_results_fields = array(
 			'City',
+			'DisplayCompliance',
 			'Latitude',
 			'ListPrice',
 			'Longitude',
@@ -71,6 +102,9 @@ class Listings extends Core {
 			'_page' => $page_number,
 			'_select' => implode( ',', $formatted_search_results_fields )
 		);
+		if( $return_transient_params ){
+			return $params;
+		}
 		return $this->get_all_results( $this->get_from_api( 'GET', 'listings', 30 * MINUTE_IN_SECONDS, $params ) );
 	}
 

@@ -121,6 +121,24 @@
 		}
 	}
 
+	ul.listing-buttons {
+		font-size: 0;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+
+		li {
+			display: inline-block;
+			font-size: 1rem;
+			margin: 0 0.5rem 0.5rem 0;
+			padding: 0;
+
+			&:last-child {
+				margin-right: 0;
+			}
+		}
+	}
+
 	.content-container {
 		@media (min-width: $tablet){
 			float: right;
@@ -203,11 +221,10 @@
 					}
 				}
 			}
-
-			.listing-detail-value {
-				border-top: 1px dotted $brand-grey-xlt;
-				padding: 0.5rem 1rem;
-			}
+		}
+		.listing-detail-value {
+			border-top: 1px dotted $brand-grey-xlt;
+			padding: 0.5rem 1rem;
 		}
 	}
 

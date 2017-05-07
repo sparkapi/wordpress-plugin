@@ -30,6 +30,7 @@ class Oauth extends Core {
 
 	public static function custom_rewrite_rules(){
 		add_rewrite_rule( 'oauth/callback/?', 'index.php?flexmls_oauth_tag=login', 'top' );
+		add_rewrite_rule( 'oauth/callback/logout/?', 'index.php?flexmls_oauth_tag=logout', 'top' );
 		add_rewrite_tag( '%flexmls_oauth_tag%', '([^&]+)' );
 	}
 
@@ -86,7 +87,7 @@ class Oauth extends Core {
 					'token_expiration' => time() + intval( $json[ 'expires_in' ] )
 				);
 				$Flexmls->oauth_tokens = $auth_token;
-				setcookie( 'flexmls_oauth_tokens', json_encode( $auth_token ), time() + MONTH_IN_SECONDS, '/' );
+				setcookie( 'flexmls_oauth_tokens', json_encode( $auth_token ), time() + MONTH_IN_SECONDS, COOKIEPATH );
 			} else {
 				$this->oauth_token_failures++;
 				if( false !== $retry ){
@@ -108,11 +109,15 @@ class Oauth extends Core {
 	}
 
 	function get_portal_favorites(){
-		return $this->get_all_results( $this->get_from_api( 'GET', 'listingcarts/portal/favorites', DAY_IN_SECONDS ) );
+		return $this->get_first_result( $this->get_from_api( 'GET', 'listingcarts/portal/favorites', DAY_IN_SECONDS ) );
 	}
 
 	function get_portal_rejects(){
-		return $this->get_all_results( $this->get_from_api( 'GET', 'listingcarts/portal/rejects', DAY_IN_SECONDS ) );
+		return $this->get_first_result( $this->get_from_api( 'GET', 'listingcarts/portal/rejects', DAY_IN_SECONDS ) );
+	}
+
+	function get_portal_saved_searches(){
+		return $this->get_all_results( $this->get_from_api( 'GET', 'savedsearches', DAY_IN_SECONDS ) );
 	}
 
 	function get_portal_url( $signup = false, $additional_state_params = array(), $page_override = null ){
@@ -181,10 +186,18 @@ class Oauth extends Core {
 	function logout(){
 		global $Flexmls;
 		$Flexmls->oauth_tokens = array();
-		//setcookie( 'flexmls_oauth_tokens', json_encode( $Flexmls->oauth_tokens ), time() - DAY_IN_SECONDS, '/' );
 		foreach( $_COOKIE as $key => $value ){
-			setcookie( $key, '', time() - DAY_IN_SECONDS, '/' );
+			setcookie( $key, '', time() - DAY_IN_SECONDS, COOKIEPATH );
 		}
+		// Portal url may have been redirected. This could have been another WordPress
+		// or plugin rule interferring, or if the portal expects https but the
+		// site is http (or vice versa). In any event, to be safe we'll to pull the
+		// GET parameters manually.
+		parse_str( $_SERVER[ 'QUERY_STRING' ], $manual_get );
+		if( array_key_exists( 'redirect_to', $manual_get ) ){
+			exit( '<meta http-equiv="refresh" content="0; url=' . $manual_get[ 'redirect_to' ] . '">' );
+		}
+
 	}
 
 	public static function test_if_oauth_action( $query ){
@@ -194,12 +207,92 @@ class Oauth extends Core {
 					$Oauth = new \SparkAPI\Oauth();
 					$Oauth->login();
 					break;
+				case 'logout':
+					$Oauth = new \SparkAPI\Oauth();
+					$Oauth->logout();
+					break;
 			}
 		}
 		return $query;
 	}
 
+	public static function toggle_cart_status(){
+		$id = preg_replace( '/[^0-9]/', '', $_POST[ 'id' ] );
+		$cart = preg_replace( '/[^0-9]/', '', $_POST[ 'cart' ] );
+		$carts = array_filter( $_POST[ 'carts' ], function( $v ){
+			return $v == preg_replace( '/[^0-9]/', '', $v );
+		} );
+		$status = intval( $_POST[ 'status' ] );
+		$response = array(
+			'success' => 0
+		);
+
+		$Oauth = new \SparkAPI\Oauth();
+		$method = 'DELETE';
+		if( 0 == $status ){
+			$method = 'POST';
+		}
+		$update_carts = $Oauth->update_carts( $method, $id, $cart, $carts );
+		$response = array(
+			'success' => 1,
+			'update' => $update_carts
+		);
+		exit( json_encode( $response ) );
+	}
+
+	function update_carts( $method = 'DELETE', $listing_id, $cart, $carts = array() ){
+		$result = array();
+		$Listings = new \SparkAPI\Listings();
+		if( 'DELETE' == $method ){
+			$response = $this->get_first_result( $this->get_from_api( 'DELETE', 'listingcarts/' . $cart . '/listings/' . $listing_id ) );
+			if( $response ){
+				$result[] = array(
+					'cart' => $cart,
+					'count' => $response[ 'ListingCount' ]
+				);
+				$sf = 'ListingCart Eq \'' . $cart . '\'';
+				$transient_params = $Listings->get_listings( $sf, 1, true );
+				$t = $this->get_transient_name( 'GET', 'listings', 30 * MINUTE_IN_SECONDS, $transient_params );
+				delete_transient( $t );
+			}
+		} elseif( 'POST' == $method ){
+			$data = array( 'ListingIds' => array( $listing_id ) );
+			$response = $this->get_first_result( $this->get_from_api( 'POST', 'listingcarts/' . $cart, 0, array(), $this->make_sendable_body( $data ) ) );
+			if( $response ){
+				$result[] = array(
+					'cart' => $cart,
+					'count' => $response[ 'ListingCount' ]
+				);
+				$sf = 'ListingCart Eq \'' . $cart . '\'';
+				$transient_params = $Listings->get_listings( $sf, 1, true );
+				$t = $this->get_transient_name( 'GET', 'listings', 30 * MINUTE_IN_SECONDS, $transient_params );
+				delete_transient( $t );
+			}
+			foreach( $carts as $c ){
+				if( $cart !== $c ){
+					$response = $this->get_first_result( $this->get_from_api( 'DELETE', 'listingcarts/' . $c . '/listings/' . $listing_id ) );
+					if( $response ){
+						$result[] = array(
+							'cart' => $c,
+							'count' => $response[ 'ListingCount' ]
+						);
+						$sf = 'ListingCart Eq \'' . $cart . '\'';
+						$transient_params = $Listings->get_listings( $sf, 1, true );
+						$t = $this->get_transient_name( 'GET', 'listings', 30 * MINUTE_IN_SECONDS, $transient_params );
+						delete_transient( $t );
+					}
+				}
+			}
+		}
+		$t = $this->get_transient_name( 'GET', 'listingcarts/portal/favorites', DAY_IN_SECONDS );
+		delete_transient( $t );
+		$t = $this->get_transient_name( 'GET', 'listingcarts/portal/rejects', DAY_IN_SECONDS );
+		write_log( $result );
+		return $result;
+	}
+
 	function trigger_oauth_404(){
+		write_log( 'You must log in!' );
 		global $wp_query;
 		$wp_query->set_404();
 		status_header( 404 );

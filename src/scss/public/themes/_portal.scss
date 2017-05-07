@@ -6,7 +6,7 @@
 		}
 
 		&.favorite {
-			&.in-cart a,
+			a[data-status="1"],
 			a:hover,
 			a:focus {
 				color: $wordpress-red;
@@ -14,11 +14,61 @@
 		}
 
 		&.reject {
-			&.in-cart a,
+			a[data-status="1"],
 			a:hover,
 			a:focus {
 				color: $brand-grey-alt;
 			}
 		}
+	}
+}
+#flexmls-portal-popup {
+	background: #ffffff;
+	box-shadow: 0 0 2px $brand-grey-alt;
+	padding: 0;
+	margin: 20px auto;
+	max-width: 500px;
+	position: relative;
+	width: auto;
+
+	.mfp-close {
+		color: #fff;
+	}
+
+	header {
+		background: $brand-blue;
+		color: #fff;
+		font-size: 18px;
+		font-weight: bold;
+		line-height: 44px;
+		padding: 0 20px;
+	}
+
+	.flexmls-portal-popup-content {
+		line-height: normal;
+		padding: 20px;
+	}
+
+	p {
+		margin: 0 0 1rem;
+		padding: 0;
+	}
+
+	ol,
+	ul {
+		margin: 0 0 1rem 2rem;
+		padding: 0;
+	}
+
+	ol {
+		list-style: decimal;
+	}
+
+	ul {
+		list-style: disc;
+	}
+
+	footer {
+		padding: 0 20px 20px;
 	}
 }

@@ -56,6 +56,9 @@ class Enqueue {
 	}
 
 	static function wp_enqueue_scripts(){
+		if( defined( 'DOING_CRON' ) ){
+			return;
+		}
 		$flexmls_settings = get_option( 'flexmls_settings' );
 
 		if( !empty( $flexmls_settings[ 'gmaps' ][ 'api_key' ] ) && 0 == $flexmls_settings[ 'gmaps' ][ 'no_js' ] ){

@@ -140,6 +140,13 @@ class Core {
 		return $auth_token;
 	}
 
+	function get_all_results( $response = array() ){
+		if( isset( $response[ 'success' ] ) && $response[ 'success' ] ){
+			return $response[ 'results' ];
+		}
+		return false;
+	}
+
 	function get_first_result( $response ){
 		if( isset( $response[ 'success' ] ) && true == $response[ 'success' ] ){
 			if( count( $response[ 'results' ] ) ){
@@ -149,11 +156,19 @@ class Core {
 		return false;
 	}
 
-	function get_all_results( $response = array() ){
-		if( isset( $response[ 'success' ] ) && $response[ 'success' ] ){
-			return $response[ 'results' ];
-		}
-		return false;
+	function get_transient_name( $method, $service, $seconds_to_cache = 15 * MINUTE_IN_SECONDS, $params = array(), $post_data = null ){
+		$method = sanitize_text_field( $method );
+		$request = array(
+			'cache_duration' => $seconds_to_cache,
+			'method' => $method,
+			'params' => $params,
+			'post_data' => $post_data,
+			'service' => $service
+		);
+
+		$request = $this->sign_request( $request );
+
+		return 'flexmls_query_' . $request[ 'transient_name' ];
 	}
 
 	function get_from_api( $method, $service, $seconds_to_cache = 15 * MINUTE_IN_SECONDS, $params = array(), $post_data = null, $a_retry = false ){
@@ -180,15 +195,8 @@ class Core {
 		$transient_name = 'flexmls_query_' . $request[ 'transient_name' ];
 
 		$return = array();
-		$json = false;
 
-		if( array_key_exists( 'Authorization', $this->api_headers ) && isset( $_COOKIE[ $transient_name ] ) ){
-			$json = json_decode( stripslashes( $_COOKIE[ $transient_name ] ), true );
-		} else {
-			$json = get_transient( $transient_name );
-		}
-
-		if( false === $json ){
+		if( false === ( $json = get_transient( $transient_name ) ) ){
 			$url = $this->api_base . '/' . $this->api_version . '/' . $service . '?' . $request[ 'query_string' ];
 			$json = array();
 			$args = array(
@@ -200,6 +208,8 @@ class Core {
 			);
 			$response = wp_remote_request( $url, $args );
 
+			//write_log( $response, $service );
+
 			$return = array(
 				'http_code' => wp_remote_retrieve_response_code( $response )
 			);
@@ -208,7 +218,6 @@ class Core {
 				add_action( 'admin_notices', array( $this, 'admin_notices_error_wordpress' ) );
 				return $return;
 			}
-			//write_log( $response, $request[ 'service' ] );
 			$json = json_decode( wp_remote_retrieve_body( $response ), true );
 			if( !is_array( $json ) ){
 				// The response wasn't JSON as expected so bail out with the original, unparsed body
@@ -217,12 +226,8 @@ class Core {
 			}
 			$json = $this->remove_blank_and_restricted_fields( $json );
 			if( array_key_exists( 'D', $json ) ){
-				if( true == $json[ 'D' ][ 'Success' ] && 'GET' == strtoupper( $method ) ){
-					if( array_key_exists( 'Authorization', $this->api_headers ) ){
-						setcookie( $transient_name, json_encode( $json ), time() + $seconds_to_cache, '/' );
-					} else {
-						set_transient( $transient_name, $json, $seconds_to_cache );
-					}
+				if( array_key_exists( 'Success', $json[ 'D' ] ) && true == $json[ 'D' ][ 'Success' ] && 'GET' == $method ){
+					set_transient( $transient_name, $json, $seconds_to_cache );
 				} elseif( isset( $json[ 'D' ][ 'Code' ] ) && 1020 == $json[ 'D' ][ 'Code' ] ){
 					delete_transient( 'flexmls_auth_token' );
 					if( array_key_exists( 'Authorization', $this->api_headers ) ){
@@ -254,7 +259,7 @@ class Core {
 				$this->total_pages = null;
 				$this->current_page = null;
 			}
-			if( true == $json[ 'D' ][ 'Success' ] ){
+			if( array_key_exists( 'Success', $json[ 'D' ] ) && true == $json[ 'D' ] && array_key_exists( 'Results', $json[ 'D' ] ) ){
 				$return[ 'success' ] = true;
 				$return[ 'results' ] = $json[ 'D' ][ 'Results' ];
 			} else {
@@ -297,7 +302,7 @@ class Core {
 		}
 
 		$mls_id = $system_info[ 'MlsId' ];
-		$compliance_list = $system_info[ 'DisplayCompliance' ][ $mls_id ][ 'View' ][ $listing_type ][ 'DisplayCompliance' ];
+		$compliance_list = array_key_exists( 'View', $system_info[ 'DisplayCompliance' ] ) ? $system_info[ 'DisplayCompliance' ][ $mls_id ][ 'View' ][ $listing_type ][ 'DisplayCompliance' ] : array();
 
 		$logo = '';
 		if( $system_info[ 'Configuration' ][ 0 ][ 'IdxLogoSmall' ] ){

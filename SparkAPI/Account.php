@@ -25,11 +25,4 @@ class Account extends Core {
 		return $this->get_first_result( $this->get_from_api( 'GET', 'my/account', DAY_IN_SECONDS, $params ) );
 	}
 
-	function GetAccounts($params = array()) {
-	return $this->return_all_results( $this->MakeAPICall("GET", "accounts", '1h', $params) );
-	}
-
-	function UpdateMyAccount($data) {
-	return $this->return_all_results( $this->MakeAPICall("PUT", "my/account", '1h', array(), $this->make_sendable_body($data) ) );
-	}
 }

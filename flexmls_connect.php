@@ -144,6 +144,9 @@ class Flexmls {
 		add_action( 'wp_ajax_get_listing_media', array( 'FBS\Pages\Page', 'listing_media' ) );
 		add_action( 'wp_ajax_nopriv_get_listing_media', array( 'FBS\Pages\Page', 'listing_media' ) );
 		add_action( 'wp_ajax_tinymce_popup', array( 'FBS\Admin\TinyMCE', 'tinymce_popup' ) );
+		add_action( 'wp_ajax_toggle_cart_status', array( 'SparkAPI\Oauth', 'toggle_cart_status' ) );
+		add_action( 'wp_ajax_nopriv_toggle_cart_status', array( 'SparkAPI\Oauth', 'toggle_cart_status' ) );
+
 		add_action( 'wp_enqueue_scripts', array( 'FBS\Admin\Enqueue', 'wp_enqueue_scripts' ) );
 		add_action( 'wp_trash_post', array( $this, 'prevent_delete_flexmls_search_page' ), 10, 1 );
 
@@ -207,8 +210,4 @@ class Flexmls {
 
 register_activation_hook( __FILE__, array( 'Flexmls', 'activate' ) );
 
-//if( !defined( 'DOING_CRON' ) ){
-	$Flexmls = new Flexmls();
-//}
-//global $wp_query;
-//wp_schedule_single_event( time() - DAY_IN_SECONDS, 'preload_related_search_results', array( $wp_query->query_vars[ 'idxsearch_id' ] ) );
+$Flexmls = new Flexmls();

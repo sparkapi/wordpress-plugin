@@ -9,9 +9,26 @@ class Page {
 		global $Flexmls, $wp_query;
 		$this->listings_order_by = $Flexmls->listings_order_by;
 		$this->listings_per_page = $Flexmls->listings_per_page;
+		$this->favorites = array();
+		$this->rejects = array();
+
+		$Oauth = new \SparkAPI\Oauth;
+		if( $Oauth->is_user_logged_in() ){
+			$favorites = $Oauth->get_portal_favorites();
+			if( is_array( $favorites ) ){
+				$this->favorites = $favorites;
+			}
+			$rejects = $Oauth->get_portal_rejects();
+			if( is_array( $rejects ) ){
+				$this->rejects = $rejects;
+			}
+		}
 
 		add_action( 'shutdown', array( $this, 'schedule_preload_of_related_results' ) );
+		add_action( 'wp_head', array( $this, 'dns_prefetch' ), 9 );
+		add_action( 'wp_head', array( $this, 'maybe_create_oauth_cart_variable' ) );
 		add_action( 'wp_footer', array( $this, 'place_loading_spinner' ) );
+		add_action( 'wp_footer', array( $this, 'place_portal_popup' ) );
 
 		add_filter( 'get_canonical_url', array( $this, 'get_canonical_url' ) );
 		add_filter( 'wpseo_opengraph_type', array( $this, 'wpseo_opengraph_type' ) );
@@ -31,23 +48,30 @@ class Page {
 		$search_results_page = get_post( $flexmls_settings[ 'general' ][ 'search_results_page' ] );
 		$search_results_default = !empty( $flexmls_settings[ 'general' ][ 'search_results_default' ] ) ? $flexmls_settings[ 'general' ][ 'search_results_default' ] : '';
 
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/map/page/([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=' . $search_results_default . '&idxpage_view=map&idxsearch_page=$matches[1]', 'top' );
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/page/([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=' . $search_results_default . '&idxpage_view=list&idxsearch_page=$matches[1]', 'top' );
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/map/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=' . $search_results_default . '&idxpage_view=map&idxsearch_page=1', 'top' );
+		add_rewrite_rule( '^' . $search_results_page->post_name . '/map/page/([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=' . $search_results_default . '&idxpage_view=map&idxsearch_page=$matches[1]', 'top' );
+		add_rewrite_rule( '^' . $search_results_page->post_name . '/page/([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=' . $search_results_default . '&idxpage_view=list&idxsearch_page=$matches[1]', 'top' );
+		add_rewrite_rule( '^' . $search_results_page->post_name . '/map/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=' . $search_results_default . '&idxpage_view=map&idxsearch_page=1', 'top' );
 
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/map/page/([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=$matches[1]&idxpage_view=map&idxsearch_page=$matches[2]', 'top' );
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/page/([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=$matches[1]&idxpage_view=list&idxsearch_page=$matches[2]', 'top' );
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/map/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=$matches[1]&idxpage_view=map&idxsearch_page=1', 'top' );
+		add_rewrite_rule( '^' . $search_results_page->post_name . '/cart/([^/]*)/map/page/([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=cart&idxsearch_id=$matches[1]&idxpage_view=map&idxsearch_page=$matches[2]', 'top' );
+		add_rewrite_rule( '^' . $search_results_page->post_name . '/cart/([^/]*)/page/([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=cart&idxsearch_id=$matches[1]&idxpage_view=list&idxsearch_page=$matches[2]', 'top' );
+		add_rewrite_rule( '^' . $search_results_page->post_name . '/cart/([^/]*)/map/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=cart&idxsearch_id=$matches[1]&idxpage_view=map&idxsearch_page=1', 'top' );
+
+		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/map/page/([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=$matches[1]&idxpage_view=map&idxsearch_page=$matches[2]', 'top' );
+		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/page/([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=$matches[1]&idxpage_view=list&idxsearch_page=$matches[2]', 'top' );
+		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/map/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=$matches[1]&idxpage_view=map&idxsearch_page=1', 'top' );
 
 		//add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/[^/]*_([0-9]+)/map/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=$matches[1]&idxpage_view=map&idxlisting_id=$matches[2]', 'top' );
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/[^/]*_([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=$matches[1]&idxpage_view=list&idxlisting_id=$matches[2]', 'top' );
+		add_rewrite_rule( '^' . $search_results_page->post_name . '/cart/([^/]*)/[^/]*_([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=cart&idxsearch_id=$matches[1]&idxpage_view=list&idxlisting_id=$matches[2]', 'top' );
+		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/[^/]*_([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=$matches[1]&idxpage_view=list&idxlisting_id=$matches[2]', 'top' );
 		//add_rewrite_rule( '^' . $search_results_page->post_name . '/[^/]*_([0-9]+)/map/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=$matches[1]&idxpage_view=map&idxlisting_id=$matches[2]', 'top' );
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/[^/]*_([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=' . $search_results_default . '&idxpage_view=list&idxlisting_id=$matches[1]', 'top' );
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=$matches[1]&idxpage_view=list&idxsearch_page=1', 'top' );
+		add_rewrite_rule( '^' . $search_results_page->post_name . '/[^/]*_([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=' . $search_results_default . '&idxpage_view=list&idxlisting_id=$matches[1]', 'top' );
+		add_rewrite_rule( '^' . $search_results_page->post_name . '/cart/([^/]*)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=cart&idxsearch_id=$matches[1]&idxpage_view=list&idxsearch_page=1', 'top' );
+		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=$matches[1]&idxpage_view=list&idxsearch_page=1', 'top' );
 
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_id=' . $search_results_default . '&idxpage_view=list&idxsearch_page=1', 'top' );
+		add_rewrite_rule( '^' . $search_results_page->post_name . '/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=' . $search_results_default . '&idxpage_view=list&idxsearch_page=1', 'top' );
 
 		add_rewrite_tag( '%idxsearch_id%', '([^&]+)' );
+		add_rewrite_tag( '%idxsearch_type%', '([^&]+)' );
 		add_rewrite_tag( '%idxlisting_id%', '([^&]+)' );
 		add_rewrite_tag( '%idxsearch_page%', '(d+)' );
 		add_rewrite_tag( '%idxpage_view%', '([^&]+)' );
@@ -56,12 +80,28 @@ class Page {
 	function display_carts_buttons( $listing_id = null ){
 		$Oauth = new \SparkAPI\Oauth();
 		$url = $Oauth->is_user_logged_in() ? '#' : $Oauth->get_portal_url();
+		if( !array_key_exists( 'Id', $this->favorites ) ){
+			$this->favorites[ 'Id' ] = '';
+		}
+		if( !array_key_exists( 'ListingIds', $this->favorites ) ){
+			$this->favorites[ 'ListingIds' ] = array();
+		}
+		if( !array_key_exists( 'Id', $this->rejects ) ){
+			$this->rejects[ 'Id' ] = '';
+		}
+		if( !array_key_exists( 'ListingIds', $this->rejects ) ){
+			$this->rejects[ 'ListingIds' ] = array();
+		}
 
 		$buttons  = '<ul class="flexmls-carts-buttons">';
-		$buttons .= '<li class="favorite"><a href="' . $url . '" title="Add to favorites" data-portalaction="' . ( !$Oauth->is_user_logged_in() ? 'login' : 'favorite' ) . '" data-listingid="' . $listing_id . '"><i class="fbsicon fbsicon-heart"></i></a></li>';
-		$buttons .= '<li class="reject"><a href="' . $url . '" title="Add to rejects" data-portalaction="' . ( !$Oauth->is_user_logged_in() ? 'login' : 'reject' ) . '" data-listingid="' . $listing_id . '"><i class="fbsicon fbsicon-thumbs-down"></i></a></li>';
+		$buttons .= '<li class="favorite"><a href="' . $url . '" title="Add to favorites" data-portalaction="' . ( !$Oauth->is_user_logged_in() ? 'login' : 'toggle' ) . '" data-listingid="' . $listing_id . '" data-listingcart="' . $this->favorites[ 'Id' ] . '" data-status="' . ( in_array( $listing_id, $this->favorites[ 'ListingIds' ] ) ? 1 : 0 ) . '"><i class="fbsicon fbsicon-heart"></i></a></li>';
+		$buttons .= '<li class="reject"><a href="' . $url . '" title="Add to rejects" data-portalaction="' . ( !$Oauth->is_user_logged_in() ? 'login' : 'toggle' ) . '" data-listingid="' . $listing_id . '" data-listingcart="' . $this->rejects[ 'Id' ] . '" data-status="' . ( in_array( $listing_id, $this->rejects[ 'ListingIds' ] ) ? 1 : 0 ) . '"><i class="fbsicon fbsicon-thumbs-down"></i></a></li>';
 		$buttons .= '</ul>';
 		return $buttons;
+	}
+
+	function dns_prefetch(){
+		echo '<link rel="dns-prefetch" href="//cdn.resize.sparkplatform.com">' . PHP_EOL;
 	}
 
 	public static function listing_media(){
@@ -77,18 +117,43 @@ class Page {
 			$response[ 'message' ] = 'Invalid listing id';
 			exit( json_encode( $response ) );
 		}
+		$media = $Listings->get_listing_media( $listing_id, $media_type );
+		if( !$media ){
+			$response[ 'message' ] = 'Problem retrieving media. Please try again later.';
+			exit( json_encode( $response ) );
+		}
+
+		$response[ 'message' ] = '';
+
 		switch( $media_type ){
 			case 'photos':
-				$photos = $Listings->get_listing_photos( $listing_id );
-				if( !$photos ){
-					$response[ 'message' ] = 'Problem retrieving photos. Please try again later.';
-					exit( json_encode( $response ) );
-				}
-				$response[ 'items' ] = $photos;
+				$response[ 'items' ] = $media;
+				$response[ 'success' ] = 1;
+				break;
+			case 'videos':
+				$response[ 'items' ] = $media;
+				$response[ 'success' ] = 1;
+				break;
+			case 'virtualtours':
+				$response[ 'items' ] = $media;
 				$response[ 'success' ] = 1;
 				break;
 		}
 		exit( json_encode( $response ) );
+	}
+
+	function maybe_create_oauth_cart_variable(){
+		$Oauth = new \SparkAPI\Oauth();
+		if( $Oauth->is_user_logged_in() ){
+			$vars = array();
+			if( array_key_exists( 'Id', $this->favorites ) ){
+				$vars[] = $this->favorites[ 'Id' ];
+			}
+			if( array_key_exists( 'Id', $this->rejects ) ){
+				$vars[] = $this->rejects[ 'Id' ];
+			}
+			echo '<script type="text/javascript">var flexmls_carts=' . json_encode( $vars ) . ';</script>';
+		}
 	}
 
 	public static function maybe_update_permalink( $post_ID, $post_after, $post_before ){
@@ -129,6 +194,32 @@ class Page {
 		echo '<div id="flexmls-loading-spinner"><svg width="74px" height="74px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="uil-cube"><rect x="0" y="0" width="100" height="100" fill="none" class="bk"></rect><g transform="translate(25 25)"><rect x="-20" y="-20" width="40" height="40" fill="#4b6ed0" opacity="0.9" class="cube"><animateTransform attributeName="transform" type="scale" from="1.5" to="1" repeatCount="indefinite" begin="0s" dur="1s" calcMode="spline" keySplines="0.2 0.8 0.2 0.8" keyTimes="0;1"></animateTransform></rect></g><g transform="translate(75 25)"><rect x="-20" y="-20" width="40" height="40" fill="#4b6ed0" opacity="0.8" class="cube"><animateTransform attributeName="transform" type="scale" from="1.5" to="1" repeatCount="indefinite" begin="0.1s" dur="1s" calcMode="spline" keySplines="0.2 0.8 0.2 0.8" keyTimes="0;1"></animateTransform></rect></g><g transform="translate(25 75)"><rect x="-20" y="-20" width="40" height="40" fill="#4b6ed0" opacity="0.7" class="cube"><animateTransform attributeName="transform" type="scale" from="1.5" to="1" repeatCount="indefinite" begin="0.3s" dur="1s" calcMode="spline" keySplines="0.2 0.8 0.2 0.8" keyTimes="0;1"></animateTransform></rect></g><g transform="translate(75 75)"><rect x="-20" y="-20" width="40" height="40" fill="#4b6ed0" opacity="0.6" class="cube"><animateTransform attributeName="transform" type="scale" from="1.5" to="1" repeatCount="indefinite" begin="0.2s" dur="1s" calcMode="spline" keySplines="0.2 0.8 0.2 0.8" keyTimes="0;1"></animateTransform></rect></g></svg></div>';
 	}
 
+	function place_portal_popup(){
+		if( current_user_can( 'manage_options' ) ){
+			return;
+		}
+		$Oauth = new \SparkAPI\Oauth();
+		if( $Oauth->is_user_logged_in() ){
+			return;
+		}
+		global $wp_query;
+		$flexmls_settings = get_option( 'flexmls_settings' );
+		if( isset( $wp_query->query_vars[ 'idxlisting_id' ] ) && 0 == $flexmls_settings[ 'portal' ][ 'popup_details' ] ){
+			return;
+		}
+		if( !isset( $wp_query->query_vars[ 'idxlisting_id' ] ) && 0 == $flexmls_settings[ 'portal' ][ 'popup_summaries' ] ){
+			return;
+		}
+		$delay = $flexmls_settings[ 'portal' ][ 'delay' ];
+		?>
+		<div id="flexmls-portal-popup" class="mfp-hide" data-modal="<?php echo $flexmls_settings[ 'portal' ][ 'require_login' ]; ?>" data-detail="<?php echo $delay[ 'detail_page_views' ]; ?>" data-summary="<?php echo $delay[ 'summary_page_views' ]; ?>" data-page="<?php echo $delay[ 'time_on_page' ]; ?>" data-site="<?php echo $delay[ 'time_on_site' ]; ?>">
+			<header><?php echo ( $flexmls_settings[ 'portal' ][ 'portal_title' ] ? $flexmls_settings[ 'portal' ][ 'portal_title' ] : '&nbsp;' ); ?></header>
+			<div class="flexmls-portal-popup-content"><?php echo wpautop( wptexturize( $flexmls_settings[ 'portal' ][ 'registration_text' ] ) ); ?></div>
+			<footer><a href="<?php echo $Oauth->get_portal_url(); ?>" class="flexmls-button flexmls-button-primary" title="Sign In or Create An Account">Sign In or Create An Account</a></footer>
+		</div>
+		<?php
+	}
+
 	public static function preload_related_search_results( $search_id ){
 		$IDXLinks = new \SparkAPI\IDXLinks();
 		$idx_link_details = $IDXLinks->get_idx_link_details( $search_id );
@@ -166,12 +257,15 @@ class Page {
 		$flexmls_settings = get_option( 'flexmls_settings' );
 		if( $post->ID == $flexmls_settings[ 'general' ][ 'search_results_page' ] ){
 			echo '<div class="notice notice-warning inline"><p>You are currently editing the page that shows your Flexmls&reg; IDX search results. Content on this page will be automatically generated by the Flexmls&reg; IDX plugin. You should not delete or unpublish this page.</p></div>';
+			remove_post_type_support( 'page', 'editor' );
+			/*
 			// If the only content is the old idx_frame shortcode or if there is no content,
 			// hide the WYSIWYG
 			$page_content = preg_replace( '/^(\[idx_frame(?:.*)\])$/', '', $post->post_content );
 			if( empty( $page_content ) ){
 				remove_post_type_support( 'page', 'editor' );
 			}
+			*/
 		}
 	}
 
