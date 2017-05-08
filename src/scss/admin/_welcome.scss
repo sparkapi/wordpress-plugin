@@ -1,11 +1,11 @@
 .about-flexmls {
 	.wp-badge {
 		background-color: $brand-blue;
-		background-image: url(assets/flexmls_pin.png);
+		background-image: url(../assets/flexmls_pin.png);
 		background-size: auto 80px;
 
 		.svg & {
-			background-image: url(assets/flexmls_pin.svg);
+			background-image: url(../assets/flexmls_pin.svg);
 		}
 	}
 
