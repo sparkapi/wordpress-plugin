@@ -47,6 +47,9 @@ class Page {
 		$flexmls_settings = get_option( 'flexmls_settings' );
 		$search_results_page = get_post( $flexmls_settings[ 'general' ][ 'search_results_page' ] );
 		$search_results_default = !empty( $flexmls_settings[ 'general' ][ 'search_results_default' ] ) ? $flexmls_settings[ 'general' ][ 'search_results_default' ] : '';
+		if( 0 == $search_results_page ){
+			return;
+		}
 
 		add_rewrite_rule( '^' . $search_results_page->post_name . '/map/page/([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=' . $search_results_default . '&idxpage_view=map&idxsearch_page=$matches[1]', 'top' );
 		add_rewrite_rule( '^' . $search_results_page->post_name . '/page/([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=' . $search_results_default . '&idxpage_view=list&idxsearch_page=$matches[1]', 'top' );

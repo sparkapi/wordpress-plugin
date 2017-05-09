@@ -67,10 +67,10 @@ class Flexmls {
 
 	public static $default_options = array(
 		'credentials' => array(
-			'api_key',
-			'api_secret',
-			'oauth_key',
-			'oauth_secret'
+			'api_key' => '',
+			'api_secret' => '',
+			'oauth_key' => '',
+			'oauth_secret' => ''
 		),
 		'general' => array(
 			'default_search_link' => '',

@@ -7,6 +7,7 @@ class Settings {
 
 	public static function credentials(){
 		$flexmls_settings = get_option( 'flexmls_settings' );
+		write_log( $flexmls_settings );
 
 		?>
 		<h3>Flexmls&reg; Credentials</h3>
