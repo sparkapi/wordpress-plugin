@@ -47,7 +47,7 @@ class Page {
 		$flexmls_settings = get_option( 'flexmls_settings' );
 		$search_results_page = get_post( $flexmls_settings[ 'general' ][ 'search_results_page' ] );
 		$search_results_default = !empty( $flexmls_settings[ 'general' ][ 'search_results_default' ] ) ? $flexmls_settings[ 'general' ][ 'search_results_default' ] : '';
-		if( empty( $search_results_page ) || empty( $search_results_fields ) ){
+		if( empty( $search_results_page ) || empty( $search_results_default ) ){
 			return;
 		}
 
