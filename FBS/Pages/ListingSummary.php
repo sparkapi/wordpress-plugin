@@ -410,12 +410,14 @@ class ListingSummary extends Page {
 			$IDXLinks = new \SparkAPI\IDXLinks();
 			$this->idx_link_details = $IDXLinks->get_idx_link_details( $wp_query->query_vars[ 'idxsearch_id' ] );
 			if( $this->idx_link_details ){
-				if( isset( $this->idx_link_details[ 'Filter' ] ) ){
+				if( array_key_exists( 'Filter', $this->idx_link_details ) ){
 					$this->search_filter = $this->idx_link_details[ 'Filter' ];
 				} else {
 					$SavedSearches = new \SparkAPI\SavedSearches();
 					$saved_search_details = $SavedSearches->get_saved_search_details( $this->idx_link_details[ 'SearchId' ] );
-					$this->search_filter = $saved_search_details[ 'Filter' ];
+					if( array_key_exists( 'Filter', $saved_search_details ) ){
+						$this->search_filter = $saved_search_details[ 'Filter' ];
+					}
 				}
 			}
 		} elseif( 'cart' == $wp_query->query_vars[ 'idxsearch_type' ] ){

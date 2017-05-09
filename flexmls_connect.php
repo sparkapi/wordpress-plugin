@@ -179,7 +179,7 @@ class Flexmls {
 				'post_title' => 'Real Estate Listings Powered By Flexmls&reg;',
 				'post_type' => 'page'
 			) );
-			$flexmls_settings[ 'search_results_page' ] = $post_id;
+			$flexmls_settings[ 'general' ][ 'search_results_page' ] = $post_id;
 			update_option( 'flexmls_settings', $flexmls_settings );
 			add_action( 'shutdown', '\flush_rewrite_rules' );
 			return;

@@ -31,7 +31,7 @@ class Upgrade {
 			$flexmls_settings[ 'general' ][ 'display_widget_titles' ] = isset( $fmc_settings[ 'default_titles' ] ) ? intval( $fmc_settings[ 'default_titles' ] ) : 1;
 			$flexmls_settings[ 'general' ][ 'lead_notify' ] = isset( $fmc_settings[ 'contact_notifications' ] ) ? intval( $fmc_settings[ 'contact_notifications' ] ) : 1;
 			$flexmls_settings[ 'general' ][ 'listing_not_available' ] = ( 'page' == $fmc_settings[ 'listpref' ] ? 'custom_404' : 'std_404' );
-			$flexmls_settings[ 'general' ][ 'listing_not_available_page' ] = isset( $fmc_settings[ 'listlink' ] ) ? intval( $fmc_settings[ 'listlink' ] ) : '' );
+			$flexmls_settings[ 'general' ][ 'listing_not_available_page' ] = isset( $fmc_settings[ 'listlink' ] ) ? intval( $fmc_settings[ 'listlink' ] ) : '';
 			$flexmls_settings[ 'general' ][ 'multiple_summaries' ] = isset( $fmc_settings[ 'multiple_summaries' ] ) ? intval( $fmc_settings[ 'multiple_summaries' ] ) : 0;
 			$flexmls_settings[ 'general' ][ 'sold_listings' ] = isset( $fmc_settings[ 'allow_sold_searching' ] ) ? intval( $fmc_settings[ 'allow_sold_searching' ] ) : 0;
 			$flexmls_settings[ 'general' ][ 'search_results_fields' ] = $fmc_settings[ 'search_results_fields' ];
@@ -74,7 +74,7 @@ class Upgrade {
 
 			// Transfer SEO (permabase) setting
 			$flexmls_settings[ 'portal' ][ 'permalink_base' ] = $fmc_settings[ 'permabase' ];
-			add_action( 'shutdown', array( '\FBS\Admin\Settings', 'flush_rewrite_rules' ) );
+			add_action( 'shutdown', '\flush_rewrite_rules' );
 
 			// Clean up old options no longer used or moved to the 'flexmls_settings' option
 			delete_option( 'fmc_cache_version' );

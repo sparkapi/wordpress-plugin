@@ -27,7 +27,7 @@ class Core {
 		);
 
 		global $Flexmls;
-		$stored_tokens = is_array( $Flexmls->oauth_tokens ) ? $Flexmls->oauth_tokens : array();
+		$stored_tokens = ( isset( $Flexmls->oauth_tokens ) && is_array( $Flexmls->oauth_tokens ) ) ? $Flexmls->oauth_tokens : array();
 		if( empty( $stored_tokens ) && isset( $_COOKIE[ 'flexmls_oauth_tokens' ] ) ){
 			$stored_tokens = json_decode( stripslashes( $_COOKIE[ 'flexmls_oauth_tokens' ] ), true );
 			$Flexmls->oauth_tokens = $stored_tokens;

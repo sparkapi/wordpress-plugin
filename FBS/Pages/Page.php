@@ -47,7 +47,7 @@ class Page {
 		$flexmls_settings = get_option( 'flexmls_settings' );
 		$search_results_page = get_post( $flexmls_settings[ 'general' ][ 'search_results_page' ] );
 		$search_results_default = !empty( $flexmls_settings[ 'general' ][ 'search_results_default' ] ) ? $flexmls_settings[ 'general' ][ 'search_results_default' ] : '';
-		if( 0 == $search_results_page ){
+		if( empty( $search_results_page ) || empty( $search_results_fields ) ){
 			return;
 		}
 
@@ -81,6 +81,10 @@ class Page {
 	}
 
 	function display_carts_buttons( $listing_id = null ){
+		$flexmls_settings = get_option( 'flexmls_settings' );
+		if( empty( $flexmls_settings[ 'credentials' ][ 'oauth_key' ] ) || empty( $flexmls_settings[ 'credentials' ][ 'oauth_secret' ] ) ){
+			return;
+		}
 		$Oauth = new \SparkAPI\Oauth();
 		$url = $Oauth->is_user_logged_in() ? '#' : $Oauth->get_portal_url();
 		if( !array_key_exists( 'Id', $this->favorites ) ){
