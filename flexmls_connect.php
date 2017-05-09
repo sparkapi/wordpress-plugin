@@ -124,6 +124,7 @@ class Flexmls {
 
 	function __construct(){
 		//add_action( 'admin_head-nav-menus.php', array( 'FBS\Admin\NavMenus', 'add_saved_searches_meta_boxes' ) );
+		add_action( 'admin_init', array( $this, 'init_and_maybe_flush_permalinks' ) );
 		add_action( 'admin_menu', array( 'FBS\Admin\Settings', 'admin_menu' ) );
 		add_action( 'admin_notices', array( 'FBS\Admin\Settings', 'notice_test_environment' ), 9 );
 		add_action( 'admin_enqueue_scripts', array( 'FBS\Admin\Enqueue', 'admin_enqueue_scripts' ) );
@@ -196,6 +197,16 @@ class Flexmls {
 		$classes[] = 'flexmls-theme-default';
 		$classes[] = 'flexmls-no-js';
 		return $classes;
+	}
+
+
+	function init_and_maybe_flush_permalinks(){
+		// We have to flush permalinks early on the next request if the admin changed
+		// the main search page slug because it can't happen on the save_post action
+		if( get_option( 'flexmls_do_flush_permalinks' ) ){
+			\flush_rewrite_rules();
+			delete_option( 'flexmls_do_flush_permalinks' );
+		}
 	}
 
 	function prevent_delete_flexmls_search_page( $post_id ){

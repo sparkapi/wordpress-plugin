@@ -167,7 +167,7 @@ class Page {
 		$flexmls_settings = get_option( 'flexmls_settings' );
 		if( $post_ID == $flexmls_settings[ 'general' ][ 'search_results_page' ] ){
 			if( $post_after->post_name != $post_before->post_name ){
-				add_action( 'shutdown', '\flush_rewrite_rules' );
+				update_option( 'flexmls_do_flush_permalinks', 1 );
 			}
 		}
 	}
