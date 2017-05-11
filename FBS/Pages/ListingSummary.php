@@ -303,7 +303,7 @@ class ListingSummary extends Page {
 										}
 										if( array_key_exists( 'VirtualToursCount', $listing[ 'StandardFields' ] ) && 0 < $listing[ 'StandardFields' ][ 'VirtualToursCount' ] ){
 											$tour_count = intval( $listing[ 'StandardFields' ][ 'VirtualToursCount' ] );
-											$tour_text = sprintf( _n( 'Virtual Tour', '% Virtual Tours', $tour_count ), $tour_count );
+											$tour_text = sprintf( _n( 'Virtual Tour', '%s Virtual Tours', $tour_count ), $tour_count );
 											$media[] = '<li class="listing-virtualtours-link"><a href="#" class="flexmls-magnific-media" data-listingid="' . $listing[ 'Id' ] . '" data-mediatype="virtualtours" title="View ' . $tour_text . '"><i class="fbsicon fbsicon-video-camera"></i> ' . $tour_text . '</a></li>';
 										}
 										if( count( $media ) ){
