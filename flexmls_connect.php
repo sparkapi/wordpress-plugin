@@ -135,7 +135,7 @@ class Flexmls {
 		add_action( 'init', array( 'SparkAPI\Oauth', 'custom_rewrite_rules' ), 10, 0 );
 		add_action( 'parse_request', array( 'SparkAPI\Oauth', 'test_if_oauth_action' ) );
 		add_action( 'preload_related_search_results', array( 'FBS\Pages\Page', 'preload_related_search_results' ) );
-		add_action( 'plugins_loaded', array( '\FBS\Admin\Settings', 'update_settings' ), 9 );
+		add_action( 'plugins_loaded', array( 'FBS\Admin\Settings', 'update_settings' ), 9 );
 		add_action( 'post_updated', array( 'FBS\Pages\Page', 'maybe_update_permalink' ), 10, 3 );
 		add_action( 'widgets_init', array( 'FBS\Widgets\Widgets', 'widgets_init' ) );
 		add_action( 'wp', array( 'FBS\Pages\Page', 'test_if_idx_page' ), 9 );
@@ -188,8 +188,8 @@ class Flexmls {
 		}
 
 		// This is a plugin reactivation or upgrade.
-		\FBS\Admin\Upgrade::maybe_do_upgrade();
-		$SparkAPI = new \SparkAPI\Core();
+		FBS\Admin\Upgrade::maybe_do_upgrade();
+		$SparkAPI = new SparkAPI\Core();
 		$SparkAPI->clear_cache( true );
 	}
 
