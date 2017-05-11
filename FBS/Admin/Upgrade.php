@@ -8,13 +8,10 @@ class Upgrade {
 	public static function maybe_do_upgrade(){
 		// Current options from v4 and up
 		$flexmls_settings = get_option( 'flexmls_settings' );
-
-		// Options from v3 and below
-		$fmc_settings = get_option( 'fmc_settings' );
-		$fmc_plugin_version = get_option( 'fmc_plugin_version', 3 );
+		$flexmls_version = get_option( 'flexmls_version', '0.0.1' );
 
 		// TO VERSION 4.0.0
-		if( $fmc_plugin_version && version_compare( $fmc_plugin_version, '4.0.0', '<' ) ){
+		if( version_compare( $flexmls_version, '4.0.0', '<' ) ){
 			// Do the upgrade/transition to v4
 			$flexmls_settings = \Flexmls::$default_options;
 			// These are the old options from v3 and prior
@@ -82,6 +79,8 @@ class Upgrade {
 			delete_option( 'fmc_settings' );
 			delete_option( 'fmc_plugin_version' );
 		}
+
+		update_option( 'flexmls_version', FLEXMLS_PLUGIN_VERSION, false );
 	}
 
 }

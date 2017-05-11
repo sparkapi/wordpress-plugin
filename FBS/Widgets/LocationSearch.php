@@ -15,10 +15,13 @@ class LocationSearch extends \WP_Widget {
 	public function form( $instance ){
 		$flexmls_settings = get_option( 'flexmls_settings' );
 		$search_results_default = !empty( $flexmls_settings[ 'general' ][ 'search_results_default' ] ) ? $flexmls_settings[ 'general' ][ 'search_results_default' ] : '';
-
 		$title = !isset( $instance[ 'title' ] ) ? '1-Click Searches' : $instance[ 'title' ];
 		$idx_link = !isset( $instance[ 'idx_link' ] ) ? $search_results_default : $instance[ 'idx_link' ];
 		$property_type = !isset( $instance[ 'property_type' ] ) ? '' : $instance[ 'property_type' ];
+		$location_field_name_to_display = !isset( $instance[ 'location_field_name_to_display' ] ) ? '' : $instance[ 'location_field_name_to_display' ];
+		$location_field_name_to_search = !isset( $instance[ 'location_field_name_to_search' ] ) ? '' : $instance[ 'location_field_name_to_search' ];
+		$location_field_value_to_search = !isset( $instance[ 'location_field_value_to_search' ] ) ? '' : $instance[ 'location_field_value_to_search' ];
+		write_log( $instance, 'INSTANCE' );
 
 		$IDXLinks = new \SparkAPI\IDXLinks();
 		$all_idx_links = $IDXLinks->get_all_idx_links( true );
@@ -70,11 +73,7 @@ class LocationSearch extends \WP_Widget {
 	public function update( $new_instance, $old_instance ){
 		$instance = array();
 		$instance[ 'title' ] = !empty( $new_instance[ 'title' ] ) ? sanitize_text_field( $new_instance[ 'title' ] ) : '';
-		if( isset( $new_instance[ 'idx_link' ] ) && is_array( $new_instance[ 'idx_link' ] ) ){
-			$instance[ 'idx_link' ] = $new_instance[ 'idx_link' ];
-		} else {
-			$instance[ 'idx_link' ] = array();
-		}
+		$instance[ 'idx_link' ] = !empty( $new_instance[ 'idx_link' ] ) ? sanitize_text_field( $new_instance[ 'idx_link' ] ) : '';
 		return $instance;
 	}
 
