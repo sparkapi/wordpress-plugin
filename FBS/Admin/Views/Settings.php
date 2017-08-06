@@ -375,6 +375,52 @@ class Settings {
 		<?php
 	}
 
+	public static function neighborhoods(){
+		$flexmls_settings = get_option( 'flexmls_settings' );
+		?>
+		<form action="<?php echo admin_url( 'admin.php?page=flexmls_settings&tab=neighborhoods' ); ?>" method="post">
+			<h2>Neighborhood Page Template</h2>
+			<p>With the Flexmls&reg; IDX Plugin, you can create a neighborhood <em>template</em> out of shortcodes, and then use that template on individual pages to create uniform but dynamic neighborhood pages. Simply select which page should serve as your neighborhood template below. Then, go to the page and set up your shortcodes.</p>
+			<p>When you&#8217;re done, come back here to create new pages from your template layout.</p>
+			<table class="form-table">
+				<tbody>
+					<tr>
+						<th scope="row">
+							<label for="neighorhood_template">Neighborhood Template</label>
+						</th>
+						<td>
+							<?php
+								$selected = isset( $flexmls_settings[ 'general' ][ 'neighborhood_template' ] ) ? $flexmls_settings[ 'general' ][ 'neighborhood_template' ] : 'flexmls_create_new';
+								wp_dropdown_pages( array(
+									'class' => 'regular-text',
+									'exclude' => $flexmls_settings[ 'general' ][ 'search_results_page' ],
+									'id' => 'neighborhood_template_page',
+									'name' => 'flexmls_settings[general][neighborhood_template]',
+									'selected' => $selected,
+									'show_option_none' => 'Create a New Page',
+									'option_none_value' => 'flexmls_create_new',
+									'post_status' => 'draft,private,publish'
+								) );
+							?>
+							<p class="description">If you choose an existing page, it will be set to <em>Draft</em> status.</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label for="new_neighborhood_page">Create Neighborhood</label>
+						</th>
+						<td>
+							<select class="flexmls-locations-selector" name="new_neighborhood_page" id="new_neighborhood_page" data-allow-clear="true" data-placeholder="Neighborhood or Area" style="display: block; width: 300px;"></select>
+							<p class="description">To select a neighborhood or area, begin typing a name above. You can delete a neighborhood by deleting the page itself.</p>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<?php wp_nonce_field( 'save_neighborhood_settings', 'flexmls_nonce' ); ?>
+			<p><button type="submit" class="button-primary">Save Settings</button></p>
+		<?php
+	}
+
 	public static function seo(){
 		add_thickbox();
 		$SparkFields = new \SparkAPI\StandardFields();
@@ -386,36 +432,7 @@ class Settings {
 		?>
 		<form action="<?php echo admin_url( 'admin.php?page=flexmls_settings&tab=seo' ); ?>" method="post">
 			<h2>Search Engine Optimization</h2>
-			<?php if( 1 === 2 ): ?>
-				<table class="form-table">
-					<tbody>
-						<tr>
-							<th scope="row">
-								<label for="search_results_seo_title_default">Search Results Title</label>
-							</th>
-							<td>
-								<p>
-									<label for="search_results_seo_title_default"><input type="radio" name="flexmls_settings[search_results_seo_title]" id="search_results_seo_title_default" value="default"> Search Results</label><br />
-									<label for="search_results_seo_title_default_plus_name"><input type="radio" name="flexmls_settings[search_results_seo_title]" id="search_results_seo_title_default_plus_name" value="default_plus_name"> Search Results for <code>%%LINK_NAME%%</code></label><br />
-									<label for="search_results_seo_title_name_plus_default"><input type="radio" name="flexmls_settings[search_results_seo_title]" id="search_results_seo_title_name_plus_default" value="name_plus_default"> <code>%%LINK_NAME%%</code> Search Results</label><br />
-									<label for="search_results_seo_title_custom"><input type="radio" name="flexmls_settings[search_results_seo_title]" id="search_results_seo_title_custom" value="custom"> Custom:</label> <input type="text" class="regular-text" name="flexmls_settings[search_results_seo_title_custom]" placeholder="eg, New %%LINK_NAME%% for Sale">
-								</p>
-								<p class="description"><code>%%LINK_NAME%%</code> is the name you set up for the link(s) inside Flexmls&reg;</p>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row">
-								<label for="search_results_seo_description">Search Results Description</label>
-							</th>
-							<td>
-								<textarea name="flexmls_settings[search_results_description]" id="search_results_seo_description" rows="6" class="large-text" placeholder="eg, %%BedsTotal%% homes in %%City%% available from %%ListOfficeName%%"></textarea>
-								<p class="description"><a href="#TB_inline?height=500&width=600&inlineId=flexmlsseotags" title="Available SEO Tags" class="thickbox">See this list of available tags</a>. It is up to the search engines and social media sites whether or not to display this information.</p>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			<?php endif; ?>
-			<p>You may enter custom structures for your listings, search results, and IDX URLs here. For example, using <code>real-estate</code> as your idx permalink base would make your idx links like <code><?php echo site_url( 'real-estate/search' ); ?></code>.</p>
+			<p>With the Flexmls&reg; IDX plugin, you have even more control of your Search Engine Optimization than ever before.</p>
 			<table class="form-table">
 				<tbody>
 					<tr>
@@ -423,8 +440,24 @@ class Settings {
 							<label for="permalink_base">IDX Permalink Base</label>
 						</th>
 						<td>
-							<code><?php echo site_url( $search_results_page->post_name ); ?></code>
-							<p class="description">You can edit your link structure by directly editing the <strong>Permalink</strong> on <a href="<?php echo admin_url( 'post.php?post=' . $search_results_page->ID . '&action=edit' ); ?>">your search results page listed in <em>Pages</em></a>.</p>
+							<p><code><?php echo site_url( $search_results_page->post_name ); ?></code></p>
+							<p class="description">You can edit your link structure by directly editing the <strong>Permalink</strong> on <a href="<?php echo admin_url( 'post.php?post=' . $search_results_page->ID . '&action=edit' ); ?>">your search results page listed in <em>Pages</em></a>. For example, using <code>real-estate</code> as your idx permalink base would make your idx links look something like <code><?php echo site_url( 'real-estate/search' ); ?></code>.</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label>Listing Summaries</label>
+						</th>
+						<td>
+							<p class="description">To edit the title and description of your listing summary pages, log into Flexmls&reg; to create and edit <em>Saved Searches</em>. Titles and descriptions you set in Flexmls&reg; will appear on your site as well.</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label>Breadcrumbs</label>
+						</th>
+						<td>
+							<p class="description">The Flexmls&reg; IDX plugin works with <a href="<?php echo admin_url( 'plugin-install.php?s=wp-seo&tab=search&type=term' ); ?>">the Yoast SEO plugin</a> to provide you with working breadcrumbs on your site.</p>
 						</td>
 					</tr>
 				</tbody>
@@ -476,6 +509,7 @@ class Settings {
 					<a href="<?php echo admin_url( 'admin.php?page=flexmls_settings&tab=general' ); ?>" class="nav-tab<?php echo ( 'general' == $tab ? ' nav-tab-active' : '' ); ?>">General Settings</a>
 					<a href="<?php echo admin_url( 'admin.php?page=flexmls_settings&tab=portal' ); ?>" class="nav-tab<?php echo ( 'portal' == $tab ? ' nav-tab-active' : '' ); ?>">Portal Settings</a>
 					<a href="<?php echo admin_url( 'admin.php?page=flexmls_settings&tab=maps' ); ?>" class="nav-tab<?php echo ( 'maps' == $tab ? ' nav-tab-active' : '' ); ?>">Google Maps</a>
+					<a href="<?php echo admin_url( 'admin.php?page=flexmls_settings&tab=neighborhoods' ); ?>" class="nav-tab<?php echo ( 'neighborhoods' == $tab ? ' nav-tab-active' : '' ); ?>">Neighborhoods</a>
 					<a href="<?php echo admin_url( 'admin.php?page=flexmls_settings&tab=seo' ); ?>" class="nav-tab<?php echo ( 'seo' == $tab ? ' nav-tab-active' : '' ); ?>">SEO</a>
 					<!--<a href="<?php echo admin_url( 'admin.php?page=flexmls_settings&tab=theme' ); ?>" class="nav-tab<?php echo ( 'theme' == $tab ? ' nav-tab-active' : '' ); ?>">Colors &amp; Styles</a>-->
 				<?php endif; ?>

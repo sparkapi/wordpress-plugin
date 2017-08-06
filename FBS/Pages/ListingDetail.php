@@ -324,8 +324,8 @@ class ListingDetail extends Page {
 										}
 										$content .= '<ul class="listing-buttons">
 											<li><button type="button" class="flexmls-button flexmls-button-primary flexmls-button-print"><i class="fbsicon fbsicon-fw fbsicon-print"></i> Print</button></li>
-											<li><button type="button" class="flexmls-button flexmls-button-primary flexmls-button-schedule-showing"><i class="fbsicon fbsicon-fw fbsicon-calendar"></i> Schedule Showing</a></li>
-											<li><button type="button" class="flexmls-button flexmls-button-primary flexmls-button-ask-question"><i class="fbsicon fbsicon-fw fbsicon-question-circle-o"></i> Ask a Question</a></li>
+											<li><button type="button" class="flexmls-button flexmls-button-primary flexmls-button-schedule-showing" data-listingid="' . $this->listing[ 'Id' ] . '" data-listingaddress1="' . $address[ 0 ] . '" data-listingaddress2="' . $address[ 1 ] . '"><i class="fbsicon fbsicon-fw fbsicon-calendar"></i> Schedule Showing</a></li>
+											<li><button type="button" class="flexmls-button flexmls-button-primary flexmls-button-ask-question" data-listingid="' . $this->listing[ 'Id' ] . '" data-listingaddress1="' . $address[ 0 ] . '" data-listingaddress2="' . $address[ 1 ] . '"><i class="fbsicon fbsicon-fw fbsicon-question-circle-o"></i> Ask a Question</a></li>
 										</ul>';
 										$content .= '</div>'; // end .listing-action-buttons
 									$content .= '</div>'; // end .listing-body-first
@@ -657,7 +657,6 @@ class ListingDetail extends Page {
 												$val,
 												date( 'F j, Y \a\t g:ia', strtotime( $this->listing[ 'StandardFields' ][ 'ListingUpdateTimestamp' ] ) )
 											);
-											//2017-05-04T15:41:38Z
 											break;
 										default:
 											if( array_key_exists( $key, $this->listing[ 'StandardFields' ] ) ){

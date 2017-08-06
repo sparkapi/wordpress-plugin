@@ -14,7 +14,7 @@ class Preferences extends Core {
 		$records = array();
 		if( is_array( $response ) ){
 			foreach( $response as $pref ){
-				$records[ $pref[ 'Name' ] ] = $pref[ 'Value' ];
+				$records[ $pref[ 'Name' ] ] = isset( $pref[ 'Value' ] ) ? $pref[ 'Value' ] : array();
 			}
 		}
 		return $records;

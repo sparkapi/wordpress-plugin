@@ -149,27 +149,34 @@ class Settings {
 				$flexmls_settings[ 'portal' ][ 'allow_carts' ] = isset( $_POST[ 'flexmls_settings' ][ 'portal' ][ 'allow_carts' ] ) ? 1 : 0;
 			}
 
-			/*
-			if( wp_verify_nonce( $_POST[ 'flexmls_nonce' ], 'save_seo_settings' ) ){
-				$flexmls_settings[ 'seo' ][ 'permalink_base' ] = untrailingslashit( ltrim( sanitize_title_with_dashes( $_POST[ 'flexmls_settings' ][ 'seo' ][ 'permalink_base' ] ), '/' ) );
-				$proposed_permabase = $_POST[ 'flexmls_settings' ][ 'seo' ][ 'permalink_base' ];
-				$url_pieces = array_filter( explode( '/', $proposed_permabase ) );
-				if( $url_pieces ){
-					for( $i = 0; $i < count( $url_pieces ); $i++ ){
-						$url_pieces[ $i ] = sanitize_title_with_dashes( $url_pieces[ $i ] );
-					}
-					$proposed_permabase = implode( '/', $url_pieces );
+			if( wp_verify_nonce( $_POST[ 'flexmls_nonce' ], 'save_neighborhood_settings' ) ){
+				$template_page = sanitize_text_field( $_POST[ 'flexmls_settings' ][ 'general' ][ 'neighborhood_template' ] );
+				if( 'flexmls_create_new' == $template_page ){
+					$id = wp_insert_post( array(
+						'post_status' => 'draft',
+						'post_title' => 'Flexmls&reg; Neighborhood Template',
+						'post_type' => 'page'
+					) );
+					$flexmls_settings[ 'general' ][ 'neighborhood_template' ] = $id;
 				} else {
-					$proposed_permabase = sanitize_title_with_dashes( $proposed_permabase );
+					$flexmls_settings[ 'general' ][ 'neighborhood_template' ] = absint( $template_page );
+					wp_update_post( array(
+						'ID' => $template_page,
+						'post_status' => 'draft'
+					) );
 				}
-				$proposed_permabase = trim( $proposed_permabase, '/' );
-				if( empty( $proposed_permabase ) ){
-					$proposed_permabase = 'idx';
+
+				$new_neighborhood_page = sanitize_text_field( $_POST[ 'new_neighborhood_page' ] );
+				if( !empty( $new_neighborhood_page ) ){
+					$new_neighborhood_page_pieces = explode( '***', $new_neighborhood_page );
+					$id = wp_insert_post( array(
+						'post_content' => '[flexmls_neighborhood area="' . $new_neighborhood_page_pieces[ 0 ] . '" type="' . $new_neighborhood_page_pieces[ 1 ] . '"]',
+						'post_status' => 'publish',
+						'post_title' => $new_neighborhood_page_pieces[ 0 ],
+						'post_type' => 'page'
+					) );
 				}
-				$flexmls_settings[ 'seo' ][ 'permalink_base' ] = $proposed_permabase;
-				add_action( 'shutdown', array( '\FBS\Admin\Settings', 'flush_rewrite_rules' ) );
 			}
-			*/
 
 			update_option( 'flexmls_settings', $flexmls_settings, 'yes' );
 			add_action( 'admin_notices', array( '\FBS\Admin\Settings', 'notice_settings_saved' ) );

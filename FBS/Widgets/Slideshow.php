@@ -36,11 +36,10 @@ class Slideshow extends \WP_Widget {
 		$grid_horizontal = !isset( $instance[ 'grid_horizontal' ] ) ? 1 : $instance[ 'grid_horizontal' ];
 		$grid_vertical = !isset( $instance[ 'grid_vertical' ] ) ? 1 : $instance[ 'grid_vertical' ];
 		$autoplay = !isset( $instance[ 'autoplay' ] ) ? 5 : $instance[ 'autoplay' ];
+		$source = !isset( $instance[ 'source' ] ) ? 'my' : $instance[ 'source' ];
 		$property_type = !isset( $instance[ 'property_type' ] ) ? '' : $instance[ 'property_type' ];
-		$display_selected = !isset( $instance[ 'display_selected' ] ) ? 'all' : $instance[ 'display_selected' ];
-		$location_field_name_to_display = !isset( $instance[ 'location_field_name_to_display' ] ) ? '' : $instance[ 'location_field_name_to_display' ];
-		$location_field_name_to_search = !isset( $instance[ 'location_field_name_to_search' ] ) ? '' : $instance[ 'location_field_name_to_search' ];
-		$location_field_value_to_search = !isset( $instance[ 'location_field_value_to_search' ] ) ? '' : $instance[ 'location_field_value_to_search' ];
+		$display_selected = !isset( $instance[ 'display' ] ) ? 'all' : $instance[ 'display' ];
+		$locations_field = !isset( $instance[ 'locations_field' ] ) ? array() : $instance[ 'locations_field' ];
 		?>
 		<?php if( !$all_idx_links ): ?>
 			<p>You do not have any saved searches in Flexmls&reg;. Create saved searches in your Flexmls&reg; account, and then come back here to select which ones you want to show on your site.</p>
@@ -93,7 +92,7 @@ class Slideshow extends \WP_Widget {
 						}
 						foreach( $source_options as $key => $val ):
 					?>
-						<option value="<?php echo $key; ?>" <?php selected( $all_idx_link[ 'Id' ], $saved_search ); ?>><?php echo $val; ?></option>
+						<option value="<?php echo $key; ?>" <?php selected( $key, $source ); ?>><?php echo $val; ?></option>
 					<?php endforeach; ?>
 				</select>
 			</p>
@@ -125,80 +124,241 @@ class Slideshow extends \WP_Widget {
 				<small># of days for activity to be considered <em>new</em></small>
 			</p>
 			<p>
-				<label>Select Location(s)</label>
-				<input type="text" class="widefat" name="<?php echo esc_attr( $this->get_field_name( 'location_field_name_to_display' ) ); ?>" value="<?php echo $location_field_name_to_display; ?>" readonly>
-				<input type="hidden" name="<?php echo esc_attr( $this->get_field_name( 'location_field_name_to_search' ) ); ?>" value="<?php echo $location_field_name_to_search; ?>">
-				<input type="hidden" name="<?php echo esc_attr( $this->get_field_name( 'location_field_value_to_search' ) ); ?>" value="<?php echo $location_field_value_to_search; ?>">
-				<button
-					type="button"
-					class="widefat button-secondary flexmls-location-selector"
-					data-name-to-display="<?php echo $this->get_field_name( 'location_field_name_to_display' ); ?>"
-					data-name-to-search="<?php echo $this->get_field_name( 'location_field_name_to_search' ); ?>"
-					data-value-to-search="<?php echo $this->get_field_name( 'location_field_value_to_search' ); ?>"
-					data-target="<?php echo $this->get_field_id( 'location_popup' ); ?>">Select Location(s)</button>
+				<label for="<?php echo esc_attr( $this->get_field_id( 'locations_field' ) ); ?>">Select Location(s)</label>
+				<select name="<?php echo esc_attr( $this->get_field_name( 'locations_field' ) ); ?>[]" id="<?php echo esc_attr( $this->get_field_id( 'locations_field' ) ); ?>" class="flexmls-locations-selector" data-tags="true" multiple="multiple" style="display: block; width: 100%;">
+					<?php
+						foreach( $locations_field as $location_field ){
+							$location_field_pieces = explode( '***', $location_field );
+							echo '<option selected="selected" value="' . $location_field . '">' . $location_field_pieces[ 0 ] . ' (' . $location_field_pieces[ 1 ] . ')</option>';
+						}
+					?>
+				</select>
 			</p>
-			<?php \FBS\Admin\Utilities::location_popup( $this->get_field_id( 'location_popup' ) ); ?>
-		<?php endif; ?>
 		<?php
-/*
+		endif;
+	}
 
-      <p>
-        <label for='".$this->get_field_id('additional_fields')."'>" . __('Additional Fields to Show:') . "</label>
+	public static function get_background_slides(){
+		$listings = new \SparkAPI\Listings();
+		$search_filter = sanitize_text_field( stripslashes( $_POST[ 'params' ][ 'search_filter' ] ) );
+		$addl_params = array_map( 'sanitize_text_field', wp_unslash( $_POST[ 'params' ][ 'addl_params' ] ) );
+		$pages = absint( $_POST[ 'params' ][ 'pages' ] );
+		$base_url = esc_url( $_POST[ 'base_url' ] );
+		$slides = array();
+		for( $i = 2; $i < ( $pages + 2 ); $i++ ){
+			$slide_listings = $listings->get_listings( $search_filter, $i, false, $addl_params );
+			if( $slide_listings ){
+				foreach( $slide_listings as $listing ){
+					$address = \FBS\Admin\Utilities::format_listing_street_address( $listing );
+					$address_text = $address[ 0 ];
+					if( !empty( $address[ 1 ] ) ){
+						$address_text .= '<br />' . $address[ 1 ];
+					}
 
-        ";
+					$this_permalink = $base_url . '/' . sanitize_title_with_dashes( $address[ 0 ] . ' ' . $address[ 1 ] ) . '_' . $listing[ 'Id' ];
+					$primary_photo = '';
+					if( isset( $listing[ 'StandardFields' ][ 'Photos' ] ) ){
+						foreach( $listing[ 'StandardFields' ][ 'Photos' ] as $photo ){
+							if( 1 == $photo[ 'Primary' ] ){
+								$primary_photo = $photo[ 'Uri1024' ];
+							}
+						}
+						if( empty( $primary_photo ) ){
+							$primary_photo = $listing[ 'StandardFields' ][ 'Photos' ][ 0 ][ 'Uri1024' ];
+						}
+					} else {
+						$primary_photo = FLEXMLS_PLUGIN_DIR_URL . '/dist/assets/photo_not_available.png';
+					}
+					$photos = $listing[ 'StandardFields' ][ 'Photos' ];
 
-    foreach ($additional_field_options as $k => $v) {
-      $return .= "<div>";
-      $this_checked = (in_array($k, $additional_fields_selected)) ? $checked_code : "";
-      $return .= " &nbsp; &nbsp; &nbsp; <input fmc-field='additional_fields' fmc-type='checkbox' type='checkbox' name='".$this->get_field_name('additional_fields')."[{$k}]' value='{$k}' id='".$this->get_field_id('additional_fields')."-".$k."'{$this_checked} /> ";
-      $return .= "<label for='".$this->get_field_id('additional_fields')."-".$k."'>{$v}</label>";
-      $return .= "</div>";
-    }
+					$listing_quickfacts = array();
+					$listing_quickfacts_list = '';
+					if( array_key_exists( 'BedsTotal', $listing[ 'StandardFields' ] ) ){
+						$listing_quickfacts[] = $listing[ 'StandardFields' ][ 'BedsTotal' ] . 'BR';
+					}
+					if( array_key_exists( 'BathsTotal', $listing[ 'StandardFields' ] ) ){
+						$listing_quickfacts[] = $listing[ 'StandardFields' ][ 'BathsTotal' ] . 'BA';
+					}
+					if( array_key_exists( 'BuildingAreaTotal', $listing[ 'StandardFields' ] ) ){
+						if( false === strpos( $listing[ 'StandardFields' ][ 'BuildingAreaTotal' ], '.' ) ){
+							$listing_quickfacts[] = number_format( $listing[ 'StandardFields' ][ 'BuildingAreaTotal' ], 0 ) . 'SF';
+						} else {
+							$listing_quickfacts[] = number_format( $listing[ 'StandardFields' ][ 'BuildingAreaTotal' ], 1 ) . 'SF';
+						}
+					}
+					if( $listing_quickfacts ){
+						$listing_quickfacts_list = '<ul><li>' . implode( '</li><li>', $listing_quickfacts ) . '</li></ul>';
+					}
+					$slides[] = '	<div>
+										<a href="' . $this_permalink . '">
+											<div class="slideshow-photo-bg" style="background-image:url(' . $primary_photo . ');"></div>
+											<div class="slideshow-listing-details">
+												<p class="slideshow-listing-address">' . $address_text . '</p>
+												<p class="slideshow-listing-quickfacts">' . implode( '/', $listing_quickfacts ) . '</p>
+											</div>
+										</a>
+									</div>';
+				}
+			}
+		}
 
-    $return .= "
-      </p>
+		exit( json_encode( $slides ) );
+	}
 
-      <p>
-        <label for='".$this->get_field_id('destination')."'>" . __('Send users to:') . "</label>
-        <select fmc-field='destination' fmc-type='select' id='".$this->get_field_id('destination')."' name='".$this->get_field_name('destination')."'>
-            ";
+	public function update( $new_instance, $old_instance ){
+		$instance = array();
+		$instance[ 'title' ] = !isset( $new_instance[ 'title' ] ) ? 'Listing Photos' : sanitize_text_field( $new_instance[ 'title' ] );
+		$instance[ 'saved_search' ] = sanitize_text_field( $new_instance[ 'saved_search' ] );
+		$instance[ 'grid_horizontal' ] = !isset( $new_instance[ 'grid_horizontal' ] ) ? 1 : absint( $new_instance[ 'grid_horizontal' ] );
+		$instance[ 'grid_vertical' ] = !isset( $new_instance[ 'grid_vertical' ] ) ? 1 : absint( $new_instance[ 'grid_vertical' ] );
+		$instance[ 'autoplay' ] = !isset( $new_instance[ 'autoplay' ] ) ? 5 : absint( $new_instance[ 'autoplay' ] );
+		$instance[ 'source' ] = sanitize_text_field( $new_instance[ 'source' ] );
+		$instance[ 'property_type' ] = sanitize_text_field( $new_instance[ 'property_type' ] );
+		$instance[ 'display' ] = sanitize_text_field( $new_instance[ 'display' ] );
+		$instance[ 'days_back' ] = !isset( $new_instance[ 'days_back' ] ) ? 0 : absint( $new_instance[ 'days_back' ] );
+		$instance[ 'locations_field' ] = array();
+		if( is_array( $new_instance[ 'locations_field' ] ) ){
+			foreach( $new_instance[ 'locations_field' ] as $lf ){
+				$instance[ 'locations_field' ][] = sanitize_text_field( $lf );
+			}
+		}
 
-    foreach ($possible_destinations as $dk => $dv) {
-      $is_selected = ($dk == $destination) ? " selected='selected'" : "";
-      $return .= "<option value='{$dk}'{$is_selected}>{$dv}</option>";
-    }
-
-    $return .= "
-          </select>
-      </p>
-
-      <img src='x' class='flexmls_connect__bootloader' onerror='flexmls_connect.location_setup(this);' />
-
-          ";
-
-    $return .= "<p><label for='".$this->get_field_id('send_to')."'>" . __('When Slideshow Photo Is Clicked Send Users To:') . "</label>";
-    $return .= "<select fmc-field='send_to' id='".$this->get_field_id('send_to')."' name='".$this->get_field_name('send_to')."' fmc-type='select'>";
-    $selected = ($send_to == 'photo') ? 'selected' : '';
-    $return .= "<option $selected value='photo'>Large Photo View</option>";
-    $selected = ($send_to == 'detail') ? 'selected' : '';
-    $return .= "<option $selected value='detail'>Listing Detail</option>";
-    $return .= "</select>";
-    $return .= "</p>";
-
-    if ($fmc_api->HasBasicRole()) {
-      $return .= "<p><span style='color:red;'>Note:</span> <a href='http://flexmls.com/' target='_blank'>flexmls&reg; IDX subscription</a> is required in order to show IDX listings and to link listings to full detail pages.</p>";
-    }
-
-
-    $return .= "<input type='hidden' name='shortcode_fields_to_catch' value='title,link,horizontal,vertical,auto_rotate,source,property_type,location,display,sort,additional_fields,destination,agent,days,image_size,send_to' />";
-    $return .= "<input type='hidden' name='widget' value='". get_class($this) ."' />";
-
-    return $return;
-    */
-		?>
-		<?php
+		$instance[ 'grid_horizontal' ] = min( $instance[ 'grid_horizontal' ], 25 );
+		if( 25 < ( $instance[ 'grid_horizontal' ] * $instance[ 'grid_vertical' ] ) ){
+			$instance[ 'grid_vertical' ] = absint( floor( 25 / $instance[ 'grid_horizontal' ] ) );
+		}
+		return $instance;
 	}
 
 	public function widget( $args, $instance ){
+
+		if( !isset( $instance[ 'saved_search' ] ) ){
+			return;
+		}
+
+		echo $args[ 'before_widget' ];
+		if( !empty( $instance[ 'title' ] ) ){
+			echo $args[ 'before_title' ] . apply_filters( 'widget_title', $instance[ 'title' ] ) . $args[ 'after_title' ];
+		}
+
+		$listings = new \SparkAPI\Listings();
+		$search_filter = '';
+
+		$IDXLinks = new \SparkAPI\IDXLinks();
+		$idx_link_details = $IDXLinks->get_idx_link_details( $instance[ 'saved_search' ] );
+		if( $idx_link_details ){
+			if( array_key_exists( 'Filter', $idx_link_details ) ){
+				$search_filter = $idx_link_details[ 'Filter' ];
+			} else {
+				$SavedSearches = new \SparkAPI\SavedSearches();
+				$saved_search_details = $SavedSearches->get_saved_search_details( $idx_link_details[ 'SearchId' ] );
+				if( array_key_exists( 'Filter', $saved_search_details ) ){
+					$search_filter = $saved_search_details[ 'Filter' ];
+				}
+			}
+		}
+
+		$addl_filters = array( $search_filter );
+
+		if( isset( $instance[ 'locations_field' ] ) && is_array( $instance[ 'locations_field' ] ) ){
+			foreach( $instance[ 'locations_field' ] as $loc_field ){
+				$loc_field_pieces = explode( '***', $loc_field );
+				$addl_filters[] = $loc_field_pieces[ 1 ] . ' Eq \'' . $loc_field_pieces[ 0 ] . '\'';
+			}
+		}
+
+		$search_filter = implode( ' And ', $addl_filters );
+
+		$addl_params = array(
+			'_limit' => 25,
+			'endpoint' => $instance[ 'source' ]
+		);
+
+		$slides = $listings->get_listings( $search_filter, 1, false, $addl_params );
+		if( empty( $slides ) ){
+			echo '<p>No listings found.</p>';
+			return;
+		}
+		$flexmls_settings = get_option( 'flexmls_settings' );
+		$base_url = untrailingslashit( get_permalink( $flexmls_settings[ 'general' ][ 'search_results_page' ] ) );
+		if( $instance[ 'saved_search' ] != $flexmls_settings[ 'general' ][ 'search_results_default' ] ){
+			$base_url .= '/' . $instance[ 'saved_search' ];
+		}
+
+		if( 1 < $listings->total_pages ){
+			$json = array(
+				'addl_params' => $addl_params,
+				'base_url' => $base_url,
+				'pages' => $listings->total_pages - 1,
+				'search_filter' => $search_filter
+			);
+			echo '<script>var ' . str_replace( '-', '_', $args[ 'widget_id' ] ) . '=' . json_encode( $json ) . '</script>';
+		}
+
+		echo '<div class="flexmls-slideshow-count">';
+		printf( _n(
+			'%s result',
+			'%s results',
+			$listings->last_count
+		), number_format( $listings->last_count, 0 ) );
+		echo '</div>';
+
+		echo '<div class="flexmls-slideshow">';
+		echo '<div data-ajax="' . str_replace( '-', '_', $args[ 'widget_id' ] ) . '" data-cols="' . $instance[ 'grid_horizontal' ] . '" data-rows="' . $instance[ 'grid_vertical' ] . '" data-autoplay="' . $instance[ 'autoplay' ] . '">';
+		foreach( $slides as $listing ){
+			$address = \FBS\Admin\Utilities::format_listing_street_address( $listing );
+			$address_text = $address[ 0 ];
+			if( !empty( $address[ 1 ] ) ){
+				$address_text .= '<br />' . $address[ 1 ];
+			}
+
+			$this_permalink = $base_url . '/' . sanitize_title_with_dashes( $address[ 0 ] . ' ' . $address[ 1 ] ) . '_' . $listing[ 'Id' ];
+			$primary_photo = '';
+			if( isset( $listing[ 'StandardFields' ][ 'Photos' ] ) ){
+				foreach( $listing[ 'StandardFields' ][ 'Photos' ] as $photo ){
+					if( 1 == $photo[ 'Primary' ] ){
+						$primary_photo = $photo[ 'Uri1024' ];
+					}
+				}
+				if( empty( $primary_photo ) ){
+					$primary_photo = $listing[ 'StandardFields' ][ 'Photos' ][ 0 ][ 'Uri1024' ];
+				}
+			} else {
+				$primary_photo = FLEXMLS_PLUGIN_DIR_URL . '/dist/assets/photo_not_available.png';
+			}
+			$photos = $listing[ 'StandardFields' ][ 'Photos' ];
+
+			$listing_quickfacts = array();
+			$listing_quickfacts_list = '';
+			if( array_key_exists( 'BedsTotal', $listing[ 'StandardFields' ] ) ){
+				$listing_quickfacts[] = $listing[ 'StandardFields' ][ 'BedsTotal' ] . 'BR';
+			}
+			if( array_key_exists( 'BathsTotal', $listing[ 'StandardFields' ] ) ){
+				$listing_quickfacts[] = $listing[ 'StandardFields' ][ 'BathsTotal' ] . 'BA';
+			}
+			if( array_key_exists( 'BuildingAreaTotal', $listing[ 'StandardFields' ] ) ){
+				if( false === strpos( $listing[ 'StandardFields' ][ 'BuildingAreaTotal' ], '.' ) ){
+					$listing_quickfacts[] = number_format( $listing[ 'StandardFields' ][ 'BuildingAreaTotal' ], 0 ) . 'SF';
+				} else {
+					$listing_quickfacts[] = number_format( $listing[ 'StandardFields' ][ 'BuildingAreaTotal' ], 1 ) . 'SF';
+				}
+			}
+			if( $listing_quickfacts ){
+				$listing_quickfacts_list = '<ul><li>' . implode( '</li><li>', $listing_quickfacts ) . '</li></ul>';
+			}
+			echo '	<div>
+						<a href="' . $this_permalink . '">
+							<div class="slideshow-photo-bg" style="background-image:url(' . $primary_photo . ');"></div>
+							<div class="slideshow-listing-details">
+								<p class="slideshow-listing-address">' . $address_text . '</p>
+								<p class="slideshow-listing-quickfacts">' . implode( '/', $listing_quickfacts ) . '</p>
+							</div>
+						</a>
+					</div>';
+		}
+		echo '</div>';
+		echo '</div>';
+
+		echo $args[ 'after_widget' ];
 	}
 }

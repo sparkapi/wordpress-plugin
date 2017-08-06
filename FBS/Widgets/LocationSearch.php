@@ -18,10 +18,7 @@ class LocationSearch extends \WP_Widget {
 		$title = !isset( $instance[ 'title' ] ) ? '1-Click Searches' : $instance[ 'title' ];
 		$idx_link = !isset( $instance[ 'idx_link' ] ) ? $search_results_default : $instance[ 'idx_link' ];
 		$property_type = !isset( $instance[ 'property_type' ] ) ? '' : $instance[ 'property_type' ];
-		$location_field_name_to_display = !isset( $instance[ 'location_field_name_to_display' ] ) ? '' : $instance[ 'location_field_name_to_display' ];
-		$location_field_name_to_search = !isset( $instance[ 'location_field_name_to_search' ] ) ? '' : $instance[ 'location_field_name_to_search' ];
-		$location_field_value_to_search = !isset( $instance[ 'location_field_value_to_search' ] ) ? '' : $instance[ 'location_field_value_to_search' ];
-		write_log( $instance, 'INSTANCE' );
+		$locations_field = !isset( $instance[ 'locations_field' ] ) ? array() : $instance[ 'locations_field' ];
 
 		$IDXLinks = new \SparkAPI\IDXLinks();
 		$all_idx_links = $IDXLinks->get_all_idx_links( true );
@@ -52,20 +49,16 @@ class LocationSearch extends \WP_Widget {
 				</select>
 			</p>
 			<p>
-				<label>Select a Location</label>
-				<input type="text" class="widefat" name="<?php echo esc_attr( $this->get_field_name( 'location_field_name_to_display' ) ); ?>" value="<?php echo $location_field_name_to_display; ?>" readonly>
-				<input type="hidden" name="<?php echo esc_attr( $this->get_field_name( 'location_field_name_to_search' ) ); ?>" value="<?php echo $location_field_name_to_search; ?>">
-				<input type="hidden" name="<?php echo esc_attr( $this->get_field_name( 'location_field_value_to_search' ) ); ?>" value="<?php echo $location_field_value_to_search; ?>">
-				<button
-					type="button"
-					class="widefat button-secondary flexmls-location-selector"
-					data-limit="1"
-					data-name-to-display="<?php echo $this->get_field_name( 'location_field_name_to_display' ); ?>"
-					data-name-to-search="<?php echo $this->get_field_name( 'location_field_name_to_search' ); ?>"
-					data-value-to-search="<?php echo $this->get_field_name( 'location_field_value_to_search' ); ?>"
-					data-target="<?php echo $this->get_field_id( 'location_popup' ); ?>">Select Location</button>
+				<label for="<?php echo esc_attr( $this->get_field_id( 'locations_field' ) ); ?>">Select Location(s)</label>
+				<select name="<?php echo esc_attr( $this->get_field_name( 'locations_field' ) ); ?>[]" id="<?php echo esc_attr( $this->get_field_id( 'locations_field' ) ); ?>" class="flexmls-locations-selector" data-tags="true" multiple="multiple" style="display: block; width: 100%;">
+					<?php
+						foreach( $locations_field as $location_field ){
+							$location_field_pieces = explode( '***', $location_field );
+							echo '<option selected="selected" value="' . $location_field . '">' . $location_field_pieces[ 0 ] . ' (' . $location_field_pieces[ 1 ] . ')</option>';
+						}
+					?>
+				</select>
 			</p>
-			<?php \FBS\Admin\Utilities::location_popup( $this->get_field_id( 'location_popup' ) ); ?>
 		<?php
 			endif;
 	}
@@ -74,6 +67,13 @@ class LocationSearch extends \WP_Widget {
 		$instance = array();
 		$instance[ 'title' ] = !empty( $new_instance[ 'title' ] ) ? sanitize_text_field( $new_instance[ 'title' ] ) : '';
 		$instance[ 'idx_link' ] = !empty( $new_instance[ 'idx_link' ] ) ? sanitize_text_field( $new_instance[ 'idx_link' ] ) : '';
+		$instance[ 'property_type' ] = !empty( $new_instance[ 'property_type' ] ) ? sanitize_text_field( $new_instance[ 'property_type' ] ) : '';
+		$instance[ 'locations_field' ] = array();
+		if( is_array( $new_instance[ 'locations_field' ] ) ){
+			foreach( $new_instance[ 'locations_field' ] as $lf ){
+				$instance[ 'locations_field' ][] = sanitize_text_field( $lf );
+			}
+		}
 		return $instance;
 	}
 
@@ -82,23 +82,37 @@ class LocationSearch extends \WP_Widget {
 			$flexmls_settings = get_option( 'flexmls_settings' );
 			$search_results_page = get_post( $flexmls_settings[ 'general' ][ 'search_results_page' ] );
 			$search_results_default = !empty( $flexmls_settings[ 'general' ][ 'search_results_default' ] ) ? $flexmls_settings[ 'general' ][ 'search_results_default' ] : '';
+			$base_url = untrailingslashit( get_permalink( $search_results_page ) );
+
 			$IDXLinks = new \SparkAPI\IDXLinks();
+			$idx_link_details = $IDXLinks->get_idx_link_details( $instance[ 'idx_link' ] );
+			if( !$idx_link_details ){
+				return;
+			}
+			$link_url = $base_url;
+			if( $search_results_default != $instance[ 'idx_link' ] ){
+				$link_url .= '/' . $instance[ 'idx_link' ];
+			}
+
+			$locations_field = !isset( $instance[ 'locations_field' ] ) ? array() : $instance[ 'locations_field' ];
+
+			if( !count( $locations_field ) ){
+				return;
+			}
 
 			echo $args[ 'before_widget' ];
 			if( !empty( $instance[ 'title' ] ) ){
 				echo $args[ 'before_title' ] . apply_filters( 'widget_title', $instance[ 'title' ] ) . $args[ 'after_title' ];
 			}
+
 			echo '<ul>';
-			$base_url = untrailingslashit( get_permalink( $search_results_page ) );
-			foreach( $instance[ 'idx_link' ] as $idx_link ){
-				$idx_link_details = $IDXLinks->get_idx_link_details( $idx_link );
-				if( $idx_link_details ){
-					$link_url = $base_url;
-					if( $search_results_default != $idx_link ){
-						$link_url .= '/' . $idx_link;
-					}
-					echo '<li><a href="' . $link_url . '" title="' . $idx_link_details[ 'Name' ] . '">' . $idx_link_details[ 'Name' ] . '</a></li>';
-				}
+
+			foreach( $locations_field as $location_field){
+				$location_field_pieces = explode( '***', $location_field );
+				$this_url = $link_url . '?' . build_query( array(
+					urlencode( $location_field_pieces[ 1 ] ) => urlencode( $location_field_pieces[ 0 ] )
+				) );
+				echo '<li><a href="' . $this_url . '" title="' . $location_field_pieces[ 0 ] . '">' . $location_field_pieces[ 0 ] . '</a></li>';
 			}
 			echo '</ul>';
 			echo $args[ 'after_widget' ];

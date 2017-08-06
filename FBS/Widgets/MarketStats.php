@@ -60,7 +60,7 @@ class MarketStats extends \WP_Widget {
 	public function __construct(){
 		parent::__construct( 'flexmls_market_stats', 'Flexmls&reg;: Market Statistics', array(
 			'classname' => 'flexmls_market_stats',
-			'description' => 'Monthly summary listing data about the market, displayed graphs.',
+			'description' => 'Monthly summary listing data about the market in beautifully displayed graphs',
 		) );
 	}
 
@@ -75,6 +75,7 @@ class MarketStats extends \WP_Widget {
 		$location_field_name_to_display = !isset( $instance[ 'location_field_name_to_display' ] ) ? '' : $instance[ 'location_field_name_to_display' ];
 		$location_field_name_to_search = !isset( $instance[ 'location_field_name_to_search' ] ) ? '' : $instance[ 'location_field_name_to_search' ];
 		$location_field_value_to_search = !isset( $instance[ 'location_field_value_to_search' ] ) ? '' : $instance[ 'location_field_value_to_search' ];
+		$location_field = !isset( $instance[ 'location_field' ] ) ? '' : $instance[ 'location_field' ];
 		$flexmls_settings = get_option( 'flexmls_settings' );
 		?>
 		<p>
@@ -94,7 +95,7 @@ class MarketStats extends \WP_Widget {
 		</p>
 		<p>
 			<label for="<?php echo esc_attr( $this->get_field_id( 'chart_data' ) ); ?>">What data would you like to display?</label>
-			<select multiple class="widefat flexmls-widget-market-stat-options" id="<?php echo esc_attr( $this->get_field_id( 'chart_data' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'chart_data' ) ); ?>[]">
+			<select multiple class="widefat flexmls-widget-market-stat-options" id="<?php echo esc_attr( $this->get_field_id( 'chart_data' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'chart_data' ) ); ?>[]" size="5">
 				<?php
 					$selectOptions = self::$stat_options[ $stat_type ];
 					foreach( $selectOptions as $k => $v ){
@@ -127,21 +128,17 @@ class MarketStats extends \WP_Widget {
 			</select>
 		</p>
 		<p>
-			<label>Select a Location</label>
-			<input type="text" class="widefat" name="<?php echo esc_attr( $this->get_field_name( 'location_field_name_to_display' ) ); ?>" value="<?php echo $location_field_name_to_display; ?>" readonly>
-			<input type="hidden" name="<?php echo esc_attr( $this->get_field_name( 'location_field_name_to_search' ) ); ?>" value="<?php echo $location_field_name_to_search; ?>">
-			<input type="hidden" name="<?php echo esc_attr( $this->get_field_name( 'location_field_value_to_search' ) ); ?>" value="<?php echo $location_field_value_to_search; ?>">
-			<button
-				type="button"
-				class="widefat button-secondary flexmls-location-selector"
-				data-limit="1"
-				data-name-to-display="<?php echo $this->get_field_name( 'location_field_name_to_display' ); ?>"
-				data-name-to-search="<?php echo $this->get_field_name( 'location_field_name_to_search' ); ?>"
-				data-value-to-search="<?php echo $this->get_field_name( 'location_field_value_to_search' ); ?>"
-				data-target="<?php echo $this->get_field_id( 'location_popup' ); ?>">Select Location</button>
+			<label for="<?php echo esc_attr( $this->get_field_id( 'location_field' ) ); ?>">Select Location</label>
+			<select name="<?php echo esc_attr( $this->get_field_name( 'location_field' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'location_field' ) ); ?>" class="flexmls-locations-selector" style="display: block; width: 100%;">
+				<?php
+					if( !empty( $location_field ) ){
+						$location_field_pieces = explode( '***', $location_field );
+						echo '<option selected="selected" value="' . $location_field . '">' . $location_field_pieces[ 0 ] . ' (' . $location_field_pieces[ 1 ] . ')</option>';
+					}
+				?>
+			</select>
 		</p>
 		<?php
-		\FBS\Admin\Utilities::location_popup( $this->get_field_id( 'location_popup' ) );
 	}
 
 	public function update( $new_instance, $old_instance ){
@@ -175,10 +172,11 @@ class MarketStats extends \WP_Widget {
 		}
 		$instance[ 'chart_type' ] = 'bar' == $new_instance[ 'chart_type' ] ? 'bar' : 'line';
 		$instance[ 'property_type' ] = sanitize_text_field( $new_instance[ 'property_type' ] );
-		$instance[ 'time_period' ] = min( 12, max( 1, intval( $new_instance[ 'time_period' ] ) ) );
-		$instance[ 'location_field_name_to_display' ] = !isset( $new_instance[ 'location_field_name_to_display' ] ) ? '' : sanitize_text_field( $new_instance[ 'location_field_name_to_display' ] );
-		$instance[ 'location_field_name_to_search' ] = !isset( $new_instance[ 'location_field_name_to_search' ] ) ? '' : sanitize_text_field( $new_instance[ 'location_field_name_to_search' ] );
-		$instance[ 'location_field_value_to_search' ] = !isset( $new_instance[ 'location_field_value_to_search' ] ) ? '' : sanitize_text_field( $new_instance[ 'location_field_value_to_search' ] );
+		$instance[ 'time_period' ] = min( 12, max( 1, absint( $new_instance[ 'time_period' ] ) ) );
+		//$instance[ 'location_field_name_to_display' ] = !isset( $new_instance[ 'location_field_name_to_display' ] ) ? '' : sanitize_text_field( $new_instance[ 'location_field_name_to_display' ] );
+		//$instance[ 'location_field_name_to_search' ] = !isset( $new_instance[ 'location_field_name_to_search' ] ) ? '' : sanitize_text_field( $new_instance[ 'location_field_name_to_search' ] );
+		//$instance[ 'location_field_value_to_search' ] = !isset( $new_instance[ 'location_field_value_to_search' ] ) ? '' : sanitize_text_field( $new_instance[ 'location_field_value_to_search' ] );
+		$instance[ 'location_field' ] = !isset( $new_instance[ 'location_field' ] ) ? '' : sanitize_text_field( $new_instance[ 'location_field' ] );
 
 		return $instance;
 	}
@@ -191,8 +189,14 @@ class MarketStats extends \WP_Widget {
 		$chart_type = $instance[ 'chart_type' ];
 		$property_type = $instance[ 'property_type' ];
 		$time_period = $instance[ 'time_period' ];
-		$location_field_name_to_search = isset( $instance[ 'location_field_name_to_search' ] ) ? $instance[ 'location_field_name_to_search' ] : null;
-		$location_field_value_to_search = isset( $instance[ 'location_field_value_to_search' ] ) ? $instance[ 'location_field_value_to_search' ] : null;
+		$location_field = isset( $instance[ 'location_field' ] ) ? $instance[ 'location_field' ] : null;
+		$location_field_name_to_search = '';
+		$location_field_value_to_search = '';
+		if( $location_field ){
+			$location_field_pieces = explode( '***', $location_field );
+			$location_field_name_to_search = $location_field_pieces[ 1 ];
+			$location_field_value_to_search = $location_field_pieces[ 0 ];
+		}
 
 		$MarketStats = new \SparkAPI\MarketStats();
 		$data = $MarketStats->get_market_data( $stat_type, $chart_data, $property_type, $location_field_name_to_search, $location_field_value_to_search );

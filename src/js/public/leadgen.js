@@ -2,7 +2,7 @@
 
 	var doLeadgen = function(){
 		$( 'button[data-flexmls-button="leadgen"]' ).on( 'click', function(){
-			$( '.flexmls-leadgen-notice' ).remove();
+			$( '.flexmls-form-notice' ).remove();
 			var btn = $( this );
 			var btnHtml = $( btn ).html();
 			$( btn ).html( 'Sending' ).attr( 'disabled', true );
@@ -31,7 +31,7 @@
 				if( 1 === response.success ){
 					noticeClass = 'success';
 				}
-				$( form ).prepend( '<div class="flexmls-leadgen-notice flexmls-leadgen-notice-' + noticeClass + '">' + response.message + '</div>' );
+				$( form ).prepend( '<div class="flexmls-form-notice flexmls-form-notice-' + noticeClass + '">' + response.message + '</div>' );
 				$( btn ).html( btnHtml ).removeAttr( 'disabled' );
 			}, 'json' );
 		});

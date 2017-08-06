@@ -9,29 +9,57 @@
 				title: 'Add Flexmls Widget',
 				image: flexmls.pluginurl + '/dist/assets/tinymce_flexmls_pin.png',
 				onclick: function(){
+					var selectedShortcode = tinyMCE.activeEditor.selection.getContent({format : 'text'});
+					var gotoShortcode;
+					var mainScreen;
+					if( true === !!selectedShortcode ){
+						var clean_parse = selectedShortcode.replace(/^\[/, "");
+						clean_parse = clean_parse.replace(/\]$/, "");
+						clean_parse = clean_parse.split(" ");
+						gotoShortcode = clean_parse[ 0 ].replace(/flexmls_/, "");
+					}
+
 					$.post( ajaxurl, {action: 'tinymce_popup'}, function( response ){
+						mainScreen = response;
 						$( '#flexmls-tinymce-shortcode-generator' ).html( response );
 						tb_show( 'Flexmls&reg; Shortcode Generator', '#TB_inline?height=550&width=500&inlineId=flexmls-tinymce-shortcode-generator' );
+						$( '#TB_ajaxContent' ).css({
+							'height' : '100%',
+							'overflow-y' : 'scroll',
+							'position' : 'relative',
+							'width' : 'auto'
+						});
+						if( true === !!gotoShortcode ){
+							if( $( '.flexmls-shortcode-selector[data-shortcode="' + gotoShortcode + '"]' ).length ){
+								$( '.flexmls-shortcode-selector[data-shortcode="' + gotoShortcode + '"]' ).trigger( 'click' );
+							}
+						}
 					}, 'html' );
-					//editor.selection.setContent('[myshortcode]');
+
+					var shortcode;
+
+					$( 'body' ).on( 'click', '.flexmls-shortcode-selector', function( ev ){
+						ev.preventDefault();
+						var c = $( this ).data( 'class' );
+						shortcode = $( this ).data( 'shortcode' );
+						$.post( ajaxurl, {action: 'tinymce_popup_shortcode', class: c, shortcode: shortcode}, function( res ){
+							//console.log( res );
+							$( '#TB_ajaxContent' ).html( res );
+						}, 'html' );
+					} );
+
+					$( 'body' ).on( 'click', '.flexmls-shortcode-back', function( ev ){
+						ev.preventDefault();
+						$( '#TB_ajaxContent' ).html( mainScreen );
+					} );
+
+					$( 'body' ).on( 'click', '.flexmls-insert-shortcode', function(){
+						editor.selection.setContent('[flexmls_' + shortcode + ' once testing is complete]');
+						tb_remove();
+					} );
+
 				}
 			} );
-			   /**
-			   * Adds HTML tag to selected content
-			   */
-			   /*
-			   ed.addButton( 'button_green', {
-					title : 'Add span',
-					image : '../wp-includes/images/smilies/icon_mrgreen.gif',
-					cmd: 'button_green_cmd'
-			   });
-			   ed.addCommand( 'button_green_cmd', function() {
-					var selected_text = ed.selection.getContent();
-					var return_text = '';
-					return_text = '<h1>' + selected_text + '</h1>';
-					ed.execCommand('mceInsertContent', 0, return_text);
-			   });
-			   */
 		  },
 		  createControl : function(n, cm) {
 			   return null;

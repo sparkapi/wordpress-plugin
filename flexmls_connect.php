@@ -129,22 +129,31 @@ class Flexmls {
 		add_action( 'admin_notices', array( 'FBS\Admin\Settings', 'notice_test_environment' ), 9 );
 		add_action( 'admin_enqueue_scripts', array( 'FBS\Admin\Enqueue', 'admin_enqueue_scripts' ) );
 		add_action( 'before_delete_post', array( $this, 'prevent_delete_flexmls_search_page' ), 10, 1 );
+		add_action( 'edit_form_after_title', array( 'FBS\Pages\Page', 'neighborhood_template_page_notice' ), 9 );
 		add_action( 'edit_form_after_title', array( 'FBS\Pages\Page', 'search_results_page_notice' ), 9 );
+		add_action( 'init', array( 'FBS\Admin\Settings', 'update_settings' ), 9 );
 		add_action( 'init', array( 'FBS\Pages\Page', 'custom_rewrite_rules' ), 10, 0 );
 		add_action( 'init', array( 'FBS\Pages\Page', 'set_global_listing_vars' ) );
 		add_action( 'init', array( 'SparkAPI\Oauth', 'custom_rewrite_rules' ), 10, 0 );
 		add_action( 'parse_request', array( 'SparkAPI\Oauth', 'test_if_oauth_action' ) );
 		add_action( 'preload_related_search_results', array( 'FBS\Pages\Page', 'preload_related_search_results' ) );
-		add_action( 'plugins_loaded', array( 'FBS\Admin\Settings', 'update_settings' ), 9 );
 		add_action( 'post_updated', array( 'FBS\Pages\Page', 'maybe_update_permalink' ), 10, 3 );
+		add_action( 'publish_page', array( $this, 'prevent_publish_flexmls_neighborhood_page' ), 10, 2 );
 		add_action( 'widgets_init', array( 'FBS\Widgets\Widgets', 'widgets_init' ) );
 		add_action( 'wp', array( 'FBS\Pages\Page', 'test_if_idx_page' ), 9 );
 		add_action( 'wp_ajax_clear_spark_api_cache', array( $this, 'ajax_clear_cache' ) );
 		add_action( 'wp_ajax_flexmls_leadgen', array( 'FBS\Widgets\LeadGeneration', 'flexmls_leadgen' ) );
 		add_action( 'wp_ajax_nopriv_flexmls_leadgen', array( 'FBS\Widgets\LeadGeneration', 'flexmls_leadgen' ) );
+		add_action( 'wp_ajax_flexmls_listing_ask_question', array( 'FBS\Pages\Page', 'ask_question' ) );
+		add_action( 'wp_ajax_nopriv_flexmls_listing_ask_question', array( 'FBS\Pages\Page', 'ask_question' ) );
+		add_action( 'wp_ajax_flexmls_get_background_slides', array( 'FBS\Widgets\Slideshow', 'get_background_slides' ) );
+		add_action( 'wp_ajax_nopriv_flexmls_get_background_slides', array( 'FBS\Widgets\Slideshow', 'get_background_slides' ) );
 		add_action( 'wp_ajax_get_listing_media', array( 'FBS\Pages\Page', 'listing_media' ) );
 		add_action( 'wp_ajax_nopriv_get_listing_media', array( 'FBS\Pages\Page', 'listing_media' ) );
+		add_action( 'wp_ajax_flexmls_listing_schedule_showing', array( 'FBS\Pages\Page', 'schedule_showing' ) );
+		add_action( 'wp_ajax_nopriv_flexmls_listing_schedule_showing', array( 'FBS\Pages\Page', 'schedule_showing' ) );
 		add_action( 'wp_ajax_tinymce_popup', array( 'FBS\Admin\TinyMCE', 'tinymce_popup' ) );
+		add_action( 'wp_ajax_tinymce_popup_shortcode', array( 'FBS\Admin\TinyMCE', 'tinymce_popup_shortcode' ) );
 		add_action( 'wp_ajax_toggle_cart_status', array( 'SparkAPI\Oauth', 'toggle_cart_status' ) );
 		add_action( 'wp_ajax_nopriv_toggle_cart_status', array( 'SparkAPI\Oauth', 'toggle_cart_status' ) );
 
@@ -216,6 +225,22 @@ class Flexmls {
 		if( $post_id == $search_results_page ){
 			wp_die( '<h2>Flexmls&reg; Plugin Notice</h2><p>This page is required by your Flexmls&reg; IDX plugin. To delete it, you must first <a href="' . admin_url( 'admin.php?page=flexmls_settings' ) . '">set a different page as your Flexmls&reg; search results page</a>.</p><p>If you want to temporarily disable IDX searches and listings on your site, you can unpublish this page (set it to <em>draft</em> status); however, to delete it entirely, you must first set a new page as your search results page or disable the Flexmls&reg; IDX plugin entirely.</p><p><a href="' . admin_url( 'edit.php?post_type=page' ) . '">&larr; Back to Pages</a></p>', 'Flexmls Plugin Warning' );
 		}
+	}
+
+	function prevent_publish_flexmls_neighborhood_page( $ID, $post ){
+		$flexmls_settings = get_option( 'flexmls_settings' );
+		$neighborhood_template = 0;
+		if( isset( $flexmls_settings[ 'general' ][ 'neighborhood_template' ] ) ){
+			$neighborhood_template = $flexmls_settings[ 'general' ][ 'neighborhood_template' ];
+		}
+		if( $ID == $neighborhood_template ){
+			wp_update_post( array(
+				'ID' => $neighborhood_template,
+				'post_status' => 'draft'
+			) );
+			wp_die( '<h2>Flexmls&reg; Plugin Notice</h2><p>This page is the neighborhood template of your Flexmls&reg; plugin and must remain as a draft. To publish it, you must first <a href="' . admin_url( 'admin.php?page=flexmls_settings&tab=neighborhoods' ) . '">set a different page as your Flexmls&reg; neighborhood template page</a>.</p><p><a href="' . admin_url( 'edit.php?post_type=page' ) . '">&larr; Back to Pages</a></p>', 'Flexmls Plugin Warning' );
+		}
+
 	}
 
 }

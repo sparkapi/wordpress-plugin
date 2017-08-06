@@ -14,11 +14,23 @@ class Contacts extends Core {
 		if( 1 == $flexmls_settings[ 'general' ][ 'lead_notify' ] ){
 			$notify = true;
 		}
+		if( is_email( $contact_data[ 'PrimaryEmail' ] ) ){
+			$sender = $this->get_first_result( $this->get_from_api( 'GET', 'contacts', 0, array(
+				'_select' => 'Id',
+				'_filter' => 'PrimaryEmail Eq \'' . $contact_data[ 'PrimaryEmail' ] . '\''
+			) ) );
+			if( is_array( $sender ) && isset( $sender[ 'Id' ] ) ){
+				// Contact already exists. Don't add another
+				return $sender[ 'Id' ];
+			}
+		}
+		// No contact matches that email address. Create a new one.
 		$data = array(
 			'Contacts' => array( $contact_data ),
 			'Notify' => $notify
 		);
-		return $this->get_all_results( $this->get_from_api( 'POST', 'contacts', 0, array(), $this->make_sendable_body( $data ) ) );
+		$contact = $this->get_first_result( $this->get_from_api( 'POST', 'contacts', 0, array(), $this->make_sendable_body( $data ) ) );
+		return $contact[ 'Id' ];
 	}
 
 	function add_message( $content ){
@@ -27,7 +39,7 @@ class Contacts extends Core {
 		return $x[ 'success' ];
 	}
 
-	function get_contacts( $tags = null, $params = array() ){
+	function get_contacts( $params = array(), $tags = null ){
 		if( !is_null( $tags ) ){
 			return $this->get_all_results( $this->get_from_api( 'GET', 'contacts/tags/' . rawurlencode( $tags ), 0, $params ) );
 		} else {
@@ -35,21 +47,20 @@ class Contacts extends Core {
 		}
 	}
 
-	function message_me( $subject, $body, $from_email ){
+	function message_me( $message_type, $subject, $body, $from_id, $listing_id = null ){
 		$Account = new \SparkAPI\Account();
 		$my_account = $Account->get_my_account();
-		$sender_params = array(
-			'_select' => 'Id',
-			'_filter' => 'PrimaryEmail Eq ' . $from_email
-		);
-		$sender = $this->get_contacts( null, $sender_params );
-		return $this->add_message( array(
-			'Type'       => 'General',
+		$message = array(
+			'Type'       => $message_type,
 			'Subject'    => $subject,
 			'Body'       => $body,
 			'Recipients' => array( $my_account[ 'Id' ] ),
-			'SenderId'   => $sender[ 0 ][ 'Id' ]
-		) );
+			'SenderId'   => $from_id
+		);
+		if( $listing_id ){
+			$message[ 'ListingId' ] = $listing_id;
+		}
+		return $this->add_message( $message );
 	}
 
 }

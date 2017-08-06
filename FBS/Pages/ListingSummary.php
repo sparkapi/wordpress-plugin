@@ -100,6 +100,10 @@ class ListingSummary extends Page {
 			return;
 		}
 		global $wp_query;
+		$qs = '';
+		if( isset( $_SERVER[ 'QUERY_STRING' ] ) ){
+			$qs = '?' . $_SERVER[ 'QUERY_STRING' ];
+		}
 
 		$links_to_show = apply_filters( 'flexmls_pagination_links_to_show', 3 );
 
@@ -117,8 +121,8 @@ class ListingSummary extends Page {
 		}
 
 		if( 1 < $this->query->current_page ){
-			$pagination .= '<li class="first"><a href="' . $pagination_base_url . '"><i class="fbsicon fbsicon-angle-double-left"></i></a></li>';
-			$pagination .= '<li class="previous"><a href="' . $pagination_base_url . '/page/' . $previous_page . '"><i class="fbsicon fbsicon-angle-left"></i></a></li>';
+			$pagination .= '<li class="first"><a href="' . $pagination_base_url . $qs . '"><i class="fbsicon fbsicon-angle-double-left"></i></a></li>';
+			$pagination .= '<li class="previous"><a href="' . $pagination_base_url . '/page/' . $previous_page . $qs . '"><i class="fbsicon fbsicon-angle-left"></i></a></li>';
 		}
 
 		if( 1 < ( $this->query->current_page - $links_to_show ) ){
@@ -130,7 +134,7 @@ class ListingSummary extends Page {
 			if( $page_number < 1 ){
 				continue;
 			}
-			$page_link = '/page/' . $page_number;
+			$page_link = '/page/' . $page_number . $qs;
 			if( 1 == $page_number ){
 				$page_link = '';
 			}
@@ -144,7 +148,7 @@ class ListingSummary extends Page {
 			if( $this->query->total_pages < $page_number ){
 				continue;
 			}
-			$page_link = '/page/' . $page_number;
+			$page_link = '/page/' . $page_number . $qs;
 			$pagination .= '<li><a href="' . $pagination_base_url . $page_link . '">' . number_format( $page_number, 0 ) . '</a></li>';
 		}
 
@@ -153,8 +157,8 @@ class ListingSummary extends Page {
 		}
 
 		if( $this->query->current_page < $this->query->total_pages ){
-			$pagination .= '<li class="next"><a href="' . $pagination_base_url . '/page/' . $next_page . '"><i class="fbsicon fbsicon-angle-right"></i></a></li>';
-			$pagination .= '<li class="last"><a href="' . $pagination_base_url . '/page/' . $this->query->total_pages . '"><i class="fbsicon fbsicon-angle-double-right"></i></a></li>';
+			$pagination .= '<li class="next"><a href="' . $pagination_base_url . '/page/' . $next_page . $qs . '"><i class="fbsicon fbsicon-angle-right"></i></a></li>';
+			$pagination .= '<li class="last"><a href="' . $pagination_base_url . '/page/' . $this->query->total_pages . $qs . '"><i class="fbsicon fbsicon-angle-double-right"></i></a></li>';
 		}
 
 		$pagination .= '</ul></nav>';
@@ -318,7 +322,7 @@ class ListingSummary extends Page {
 										}
 										$content .= '<ul class="action-buttons">
 														<li class="view-details"><a href="' . $this_permalink . '" title="View Details">View Details</a></li>
-														<li class="ask-question"><a href="#" title="Ask Question">Ask Question</a></li>
+														<li class="ask-question"><a href="#" title="Ask Question" data-listingid="' . $listing[ 'Id' ] . '" data-listingaddress1="' . $address[ 0 ] . '" data-listingaddress2="' . $address[ 1 ] . '">Ask Question</a></li>
 													</ul>';
 										$content .= '<dl class="listing-table">';
 										foreach( $listing[ 'StandardFields' ] as $key => $val ){
@@ -370,7 +374,7 @@ class ListingSummary extends Page {
 													continue 2;
 													break;
 												default:
-													$temp_val = $listing[ 'StandardFields' ][ $label ];
+													$temp_val = $listing[ 'DisplayCompliance' ][ $label ];
 													$val = $temp_val;
 											}
 											if( !empty( $label ) ){
@@ -426,6 +430,21 @@ class ListingSummary extends Page {
 
 			if( $Oauth->is_user_logged_in() ){
 				$this->search_filter = 'ListingCart Eq \'' . $wp_query->query_vars[ 'idxsearch_id' ] . '\'';
+			}
+		}
+
+		$addl_filters = array();
+		if( $_GET ){
+			foreach( $_GET as $key => $val ){
+				$addl_filters[] = $key . ' Eq \'' . $val . '\'';
+			}
+		}
+		$addl_filters = implode( ' And ', $addl_filters );
+		if( $addl_filters ){
+			if( !empty( $this->search_filter ) ){
+				$this->search_filter = $this->search_filter . ' And ' . $addl_filters;
+			} else {
+				$this->search_filter = $addl_filters;
 			}
 		}
 

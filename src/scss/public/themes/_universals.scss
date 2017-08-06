@@ -30,6 +30,20 @@
 		pointer-events: none;
 	}
 }
+.flexmls-form-notice {
+	color: #fff;
+	margin: 0 0 1rem;
+	padding: 1rem;
+	text-align: center;
+}
+
+.flexmls-form-notice-warning {
+	background: $wordpress-red;
+}
+
+.flexmls-form-notice-success {
+	background: $wordpress-green;
+}
 #flexmls-loading-spinner {
 	background: rgba(255,255,255,0.9);
 	bottom: 0;

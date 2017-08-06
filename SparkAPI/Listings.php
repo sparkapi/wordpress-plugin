@@ -62,7 +62,7 @@ class Listings extends Core {
 		return $media;
 	}
 
-	function get_listings( $filter, $page_number = 1, $return_transient_params = false ){
+	function get_listings( $filter, $page_number = 1, $return_transient_params = false, $addl_params = array() ){
 		global $Flexmls;
 		$flexmls_settings = get_option( 'flexmls_settings' );
 		$search_results_fields = $flexmls_settings[ 'general' ][ 'search_results_fields' ];
@@ -105,7 +105,20 @@ class Listings extends Core {
 		if( $return_transient_params ){
 			return $params;
 		}
-		return $this->get_all_results( $this->get_from_api( 'GET', 'listings', 30 * MINUTE_IN_SECONDS, $params ) );
+		$endpoint = 'listings';
+		if( !empty( $addl_params ) ){
+			foreach( $addl_params as $key => $val ){
+				switch( $key ){
+					case '_limit':
+						$params[ '_limit' ] = $val;
+						break;
+				}
+			}
+		}
+		if( array_key_exists( 'endpoint', $addl_params ) ){
+			$endpoint = sanitize_text_field( $addl_params[ 'endpoint' ] ) . '/listings';
+		}
+		return $this->get_all_results( $this->get_from_api( 'GET', $endpoint, 30 * MINUTE_IN_SECONDS, $params ) );
 	}
 
 	function get_listings_ids( $filter, $page_number = 1 ){

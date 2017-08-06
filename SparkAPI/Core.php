@@ -249,9 +249,9 @@ class Core {
 				$return[ 'api_message' ] = $json[ 'D' ][ 'Message' ];
 			}
 			if( array_key_exists( 'Pagination', $json[ 'D' ] ) ){
-				$this->last_count = $json[ 'D' ][ 'Pagination' ][ 'TotalRows' ];
+				$this->last_count = isset( $json[ 'D' ][ 'Pagination' ][ 'TotalRows' ] ) ? $json[ 'D' ][ 'Pagination' ][ 'TotalRows' ] : 0;
 				$this->page_size = $json[ 'D' ][ 'Pagination' ][ 'PageSize' ];
-				$this->total_pages = $json[ 'D' ][ 'Pagination' ][ 'TotalPages' ];
+				$this->total_pages = isset( $json[ 'D' ][ 'Pagination' ][ 'TotalPages' ] ) ? $json[ 'D' ][ 'Pagination' ][ 'TotalPages' ] : 0;
 				$this->current_page = $json[ 'D' ][ 'Pagination' ][ 'CurrentPage' ];
 			} else {
 				$this->last_count = null;

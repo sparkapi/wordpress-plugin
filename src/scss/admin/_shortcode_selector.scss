@@ -1,0 +1,66 @@
+.widget-builder {
+	& *,
+	& *::before,
+	& *::after {
+		box-sizing: border-box;
+	}
+}
+.widget-list {
+	@include clearfix;
+	display: flex;
+	flex-wrap: wrap;
+	font-size: 0;
+	list-style: none;
+	overflow: hidden;
+	margin: 0 -10px !important;
+	padding: 20px 0 0;
+
+	li {
+		display: flex;
+		flex: 1 1 100%;
+		font-size: 1rem;
+		margin: 0;
+		padding: 0 10px 20px;
+
+		&::before {
+			display: none;
+		}
+
+		@media (min-width: $admin-phablet){
+			flex: 1 1 50%;
+		}
+	}
+
+	a {
+		border: 1px solid $brand-grey-lt;
+		display: flex;
+		flex-direction: column;
+		flex: 10 1 auto;
+		padding: 15px;
+		text-decoration: none;
+		transition: background-color 300ms, color 300ms;
+
+		&:hover {
+			background: $brand-blue;
+			color: #fff;
+
+			h2 {
+				color: #fff;
+			}
+		}
+	}
+
+	h2 {
+		margin: 0;
+		padding: 0;
+		transition: color 300ms;
+	}
+
+	p {
+		margin: 0;
+		padding: 0;
+	}
+}
+.flexmls-shortcode-selector {
+
+}
