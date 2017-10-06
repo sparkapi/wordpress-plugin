@@ -104,6 +104,7 @@ gulp.task( 'sass-admin', function(){
 
 gulp.task( 'scripts', [ 'lint' ], function(){
 	return gulp.src( [
+			'src/bower_components/select2/dist/js/select2.full.js',
 			'src/bower_components/slick-carousel/slick/slick.js',
 			'src/bower_components/magnific-popup/dist/jquery.magnific-popup.js',
 			'src/js/optimized-events.js',

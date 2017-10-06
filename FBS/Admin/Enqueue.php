@@ -14,6 +14,7 @@ class Enqueue {
 			'flexmls-idx_page_flexmls_support',
 			'widgets.php'
 		);
+
 		if( !in_array( $hook, $hooked_pages ) ){
 			return;
 		}
@@ -67,15 +68,29 @@ class Enqueue {
 		}
 		wp_register_script( 'chartjs', FLEXMLS_PLUGIN_DIR_URL . '/dist/js/Chart.bundle.min.js' );
 
-		wp_register_script( 'flexmls', FLEXMLS_PLUGIN_DIR_URL . '/dist/js/scripts-public.min.js', array( 'jquery' ) );
+		wp_register_script( 'flexmls', FLEXMLS_PLUGIN_DIR_URL . '/dist/js/scripts-public.min.js', array( 'jquery' ), in_flexmls_debug_mode() ? time() : FLEXMLS_PLUGIN_VERSION );
 		wp_enqueue_script( 'flexmls' );
+
+		$System = new \SparkAPI\System();
+		$system_info = $System->get_system_info();
+		$tech_id = '';
+		$ma_tech_id = '';
+		if( is_array( $system_info ) ){
+			$tech_id = $system_info[ 'Id' ];
+			$ma_tech_id = $system_info[ 'Id' ];
+			if ( array_key_exists( 'MlsId', $system_info ) ){
+				$ma_tech_id = $system_info[ 'MlsId' ];
+			}
+		}
 
 		wp_localize_script( 'flexmls', 'flexmls', array(
 			'ajaxurl' => admin_url( 'admin-ajax.php' ),
-			'pluginurl' => FLEXMLS_PLUGIN_DIR_URL
+			'ma_tech_id' => $ma_tech_id,
+			'pluginurl' => FLEXMLS_PLUGIN_DIR_URL,
+			'tech_id' => $tech_id
 		) );
 
-		wp_enqueue_style( 'flexmls', FLEXMLS_PLUGIN_DIR_URL . '/dist/css/style-public.css' );
+		wp_enqueue_style( 'flexmls', FLEXMLS_PLUGIN_DIR_URL . '/dist/css/style-public.css', null, in_flexmls_debug_mode() ? time() : FLEXMLS_PLUGIN_VERSION );
 	}
 
 }

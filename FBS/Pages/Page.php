@@ -425,11 +425,16 @@ class Page {
 				new \FBS\Pages\ListingDetail();
 			} else {
 				if( empty( $wp_query->query_vars[ 'idxsearch_id' ] ) ){
-					// No default link is set. Do a 404.
-					$wp_query->set_404();
-					status_header( 404 );
-					get_template_part( 404 );
-					exit();
+					if( 'custom_404' == $flexmls_settings[ 'general' ][ 'listing_not_available' ] ){
+						wp_redirect( get_permalink( $flexmls_settings[ 'general' ][ 'listing_not_available_page' ] ) );
+						exit();
+					} else {
+						// No default link is set. Do a 404.
+						$wp_query->set_404();
+						status_header( 404 );
+						get_template_part( 404 );
+						exit();
+					}
 				}
 				// Do search results
 				new \FBS\Pages\ListingSummary();

@@ -104,7 +104,6 @@ class ListingSummary extends Page {
 		if( isset( $_SERVER[ 'QUERY_STRING' ] ) ){
 			$qs = '?' . $_SERVER[ 'QUERY_STRING' ];
 		}
-
 		$links_to_show = apply_filters( 'flexmls_pagination_links_to_show', 3 );
 
 		$right_links = $this->query->current_page + 3;
@@ -325,6 +324,7 @@ class ListingSummary extends Page {
 														<li class="ask-question"><a href="#" title="Ask Question" data-listingid="' . $listing[ 'Id' ] . '" data-listingaddress1="' . $address[ 0 ] . '" data-listingaddress2="' . $address[ 1 ] . '">Ask Question</a></li>
 													</ul>';
 										$content .= '<dl class="listing-table">';
+										$std_fields_to_display = array();
 										foreach( $listing[ 'StandardFields' ] as $key => $val ){
 											if( array_key_exists( $key, $flexmls_settings[ 'general' ][ 'search_results_fields' ] ) ){
 												$label = $flexmls_settings[ 'general' ][ 'search_results_fields' ][ $key ];
@@ -345,8 +345,22 @@ class ListingSummary extends Page {
 														}
 														break;
 												}
-												$content .= '<dt class="flexmls-listing-table-label flexmls-listing-table-' . sanitize_title_with_dashes( $label ) . '">' . $label . '</dt>';
-												$content .= '<dd class="flexmls-listing-table-value flexmls-listing-table-' . sanitize_title_with_dashes( $label ) . '">' . $val . '</dd>';
+												$field_to_display = '<dt class="flexmls-listing-table-label flexmls-listing-table-' . sanitize_title_with_dashes( $label ) . '">' . $label . '</dt>';
+												$field_to_display .= '<dd class="flexmls-listing-table-value flexmls-listing-table-' . sanitize_title_with_dashes( $label ) . '">' . $val . '</dd>';
+												//$content .= '<dt class="flexmls-listing-table-label flexmls-listing-table-' . sanitize_title_with_dashes( $label ) . '">' . $label . '</dt>';
+												//$content .= '<dd class="flexmls-listing-table-value flexmls-listing-table-' . sanitize_title_with_dashes( $label ) . '">' . $val . '</dd>';
+												$std_fields_to_display[ $key ] = $field_to_display;
+											}
+										}
+										foreach( $flexmls_settings[ 'general' ][ 'search_results_fields' ] as $key => $val ){
+											if( array_key_exists( $key, $std_fields_to_display ) ){
+												$content .= $std_fields_to_display[ $key ];
+												unset( $std_fields_to_display[ $key ] );
+											}
+										}
+										if( count( $std_fields_to_display ) ){
+											foreach( $std_fields_to_display as $k ){
+												$content .= $k;
 											}
 										}
 
@@ -409,8 +423,10 @@ class ListingSummary extends Page {
 	}
 
 	function wp(){
-		global $wp_query;
+		global $Flexmls, $wp_query;
+		$flexmls_settings = get_option( 'flexmls_settings' );
 		if( 'standard' == $wp_query->query_vars[ 'idxsearch_type' ] ){
+			// This is the main IDX page or a saved search link
 			$IDXLinks = new \SparkAPI\IDXLinks();
 			$this->idx_link_details = $IDXLinks->get_idx_link_details( $wp_query->query_vars[ 'idxsearch_id' ] );
 			if( $this->idx_link_details ){
@@ -435,8 +451,62 @@ class ListingSummary extends Page {
 
 		$addl_filters = array();
 		if( $_GET ){
-			foreach( $_GET as $key => $val ){
-				$addl_filters[] = $key . ' Eq \'' . $val . '\'';
+			$get_params = $_GET;
+			if( isset( $get_params[ 'listings_order_by' ] ) ){
+				unset( $get_params[ 'listings_order_by' ] );
+			}
+			if( isset( $get_params[ 'listings_per_page' ] ) ){
+				unset( $get_params[ 'listings_per_page' ] );
+			}
+			if( isset( $_GET[ 'flexmls_general_search' ] ) ){
+				// This is a general search result
+				$this->idx_link_details[ 'Name' ] = 'Property Search Results';
+				unset( $get_params[ 'flexmls_general_search' ] );
+				if( isset( $get_params[ 'location_selector' ] ) ){
+					list($val, $key) = explode( '***', $get_params[ 'location_selector' ] );
+					$addl_filters[] = sanitize_text_field( $key ) . ' Eq \'' . sanitize_text_field( $val ) . '\'';
+					unset( $get_params[ 'location_selector' ] );
+				}
+				if( isset( $get_params[ 'property_types' ] ) && is_array( $get_params[ 'property_types' ] ) ){
+					$pts = array();
+					foreach( $get_params[ 'property_types' ] as $pt ){
+						$pts[] = 'PropertyType Eq \'' . $pt . '\'';
+					}
+					$addl_filters[] = '(' . implode( ' Or ', $pts ) . ')';
+					unset( $get_params[ 'property_types' ] );
+				}
+				$numeric_search_fields = array(
+					'attribute_age' => 'YearBuilt',
+					'attribute_baths' => 'BathsTotal',
+					'attribute_beds' => 'BedsTotal',
+					'attribute_square_footage' => 'BuildingAreaTotal',
+					'attribute_list_price' => 'ListPrice'
+				);
+				foreach( $numeric_search_fields as $field => $search_param ){
+					$field_test = $field . '_min';
+					if( isset( $get_params[ $field_test ] ) ){
+						$min = max( 0, floatval( $get_params[ $field . '_min' ] ) );
+						$max = max( $min, floatval( $get_params[ $field . '_max' ] ) );
+						switch( true ){
+							case 0 == $min && $max > $min:
+								$addl_filters[] = $search_param . ' Le ' . $max;
+								break;
+							case $max == $min:
+								$addl_filters[] = $search_param . ' Ge ' . $min;
+								break;
+							case $max > $min:
+								$addl_filters[] = $search_param . ' Bt ' . $min . ',' . $max;
+								break;
+						}
+						unset( $get_params[ $field . '_min' ] );
+						unset( $get_params[ $field . '_max' ] );
+					}
+				}
+			}
+			foreach( $get_params as $key => $val ){
+				if( !empty( $val ) ){
+					$addl_filters[] = $key . ' Eq \'' . $val . '\'';
+				}
 			}
 		}
 		$addl_filters = implode( ' And ', $addl_filters );
@@ -461,6 +531,10 @@ class ListingSummary extends Page {
 				}
 				return;
 			}
+		}
+		if( 'custom_404' == $flexmls_settings[ 'general' ][ 'listing_not_available' ] ){
+			wp_redirect( get_permalink( $flexmls_settings[ 'general' ][ 'listing_not_available_page' ] ) );
+			exit();
 		}
 		$wp_query->set_404();
 		status_header( 404 );
@@ -491,7 +565,12 @@ class ListingSummary extends Page {
 		}
 		$map_height = isset( $flexmls_settings[ 'gmaps' ][ 'height' ] ) ? $flexmls_settings[ 'gmaps' ][ 'height' ] : 450;
 		$map_units = isset( $flexmls_settings[ 'gmaps' ][ 'units' ] ) ? $flexmls_settings[ 'gmaps' ][ 'units' ] : 'px';
-		echo '<style type="text/css">#flexmls-listing-map{height:' . $map_height . $map_units . ';}</style>' . PHP_EOL;
+		if( 'pct' == $map_units ){
+			$map_units = '%';
+			echo '<style type="text/css">#flexmls-listing-map::before{content:\'\';display:block;padding-top:' . $map_height . $map_units . ';}</style>' . PHP_EOL;
+		} else {
+			echo '<style type="text/css">#flexmls-listing-map{height:' . $map_height . $map_units . ';}</style>' . PHP_EOL;
+		}
 	}
 
 	function wp_seo_get_bc_title( $title ){

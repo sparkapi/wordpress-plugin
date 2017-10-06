@@ -8,7 +8,6 @@ class Settings {
 	public static function admin_menu(){
 		$SparkAPI = new \SparkAPI\Core();
 		$auth_token = $SparkAPI->generate_auth_token();
-
 		add_menu_page( 'What&#8217;s New', 'Flexmls&reg; IDX', 'edit_posts', 'flexmls', array( 'FBS\Admin\Settings', 'admin_menu_cb_welcome' ), 'dashicons-location', 77 );
 		add_submenu_page( 'flexmls', 'What&#8217;s New in Flexmls&reg;', 'What&#8217;s New', 'edit_posts', 'flexmls', array( 'FBS\Admin\Settings', 'admin_menu_cb_welcome' ) );
 		if( !$auth_token ){
@@ -32,7 +31,12 @@ class Settings {
 	}
 
 	public static function notice_settings_saved(){
-		echo '<div class="notice notice-success"><p>Your settings have been saved!</p></div>';
+		global $new_neighborhood_page_id;
+		if( $new_neighborhood_page_id ){
+			echo '<div class="notice notice-success"><p>Your neighborhood page has been created! <a href="' . admin_url( 'post.php?post=' . $new_neighborhood_page_id . '&action=edit' ) . '">Click here to edit it</a> or create another neighborhood template below.</p></div>';
+		} else {
+			echo '<div class="notice notice-success"><p>Your settings have been saved!</p></div>';
+		}
 	}
 
 	public static function notice_test_environment(){
@@ -175,6 +179,8 @@ class Settings {
 						'post_title' => $new_neighborhood_page_pieces[ 0 ],
 						'post_type' => 'page'
 					) );
+					global $new_neighborhood_page_id;
+					$new_neighborhood_page_id = $id;
 				}
 			}
 

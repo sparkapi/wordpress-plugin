@@ -140,11 +140,11 @@ class Slideshow extends \WP_Widget {
 
 	public static function get_background_slides(){
 		$listings = new \SparkAPI\Listings();
+		$slides = array();
 		$search_filter = sanitize_text_field( stripslashes( $_POST[ 'params' ][ 'search_filter' ] ) );
 		$addl_params = array_map( 'sanitize_text_field', wp_unslash( $_POST[ 'params' ][ 'addl_params' ] ) );
 		$pages = absint( $_POST[ 'params' ][ 'pages' ] );
 		$base_url = esc_url( $_POST[ 'base_url' ] );
-		$slides = array();
 		for( $i = 2; $i < ( $pages + 2 ); $i++ ){
 			$slide_listings = $listings->get_listings( $search_filter, $i, false, $addl_params );
 			if( $slide_listings ){
@@ -154,7 +154,6 @@ class Slideshow extends \WP_Widget {
 					if( !empty( $address[ 1 ] ) ){
 						$address_text .= '<br />' . $address[ 1 ];
 					}
-
 					$this_permalink = $base_url . '/' . sanitize_title_with_dashes( $address[ 0 ] . ' ' . $address[ 1 ] ) . '_' . $listing[ 'Id' ];
 					$primary_photo = '';
 					if( isset( $listing[ 'StandardFields' ][ 'Photos' ] ) ){
@@ -326,7 +325,6 @@ class Slideshow extends \WP_Widget {
 			} else {
 				$primary_photo = FLEXMLS_PLUGIN_DIR_URL . '/dist/assets/photo_not_available.png';
 			}
-			$photos = $listing[ 'StandardFields' ][ 'Photos' ];
 
 			$listing_quickfacts = array();
 			$listing_quickfacts_list = '';

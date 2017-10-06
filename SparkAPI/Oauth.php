@@ -35,12 +35,11 @@ class Oauth extends Core {
 	}
 
 	function generate_oauth_token( $retry = true ){
+		global $Flexmls;
 		$flexmls_settings = get_option( 'flexmls_settings' );
 		if( empty( $flexmls_settings[ 'credentials' ][ 'oauth_key' ] ) || empty( $flexmls_settings[ 'credentials' ][ 'oauth_secret' ] ) || 1 < $this->oauth_token_failures ){
 			return false;
 		}
-
-		global $Flexmls;
 		$body = array(
 			'client_id' => $flexmls_settings[ 'credentials' ][ 'oauth_key' ],
 			'client_secret' => $flexmls_settings[ 'credentials' ][ 'oauth_secret' ],
@@ -287,12 +286,11 @@ class Oauth extends Core {
 		$t = $this->get_transient_name( 'GET', 'listingcarts/portal/favorites', DAY_IN_SECONDS );
 		delete_transient( $t );
 		$t = $this->get_transient_name( 'GET', 'listingcarts/portal/rejects', DAY_IN_SECONDS );
-		write_log( $result );
+		delete_transient( $t );
 		return $result;
 	}
 
 	function trigger_oauth_404(){
-		write_log( 'You must log in!' );
 		global $wp_query;
 		$wp_query->set_404();
 		status_header( 404 );

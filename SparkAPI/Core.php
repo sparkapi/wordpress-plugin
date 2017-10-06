@@ -208,8 +208,6 @@ class Core {
 			);
 			$response = wp_remote_request( $url, $args );
 
-			//write_log( $response, $service );
-
 			$return = array(
 				'http_code' => wp_remote_retrieve_response_code( $response )
 			);
@@ -391,7 +389,6 @@ class Core {
 		$security_string .= 'ServicePath' . rawurldecode( '/' . $this->api_version . '/' . $request[ 'service' ] );
 
 		ksort( $params );
-
 		$params_encoded = array();
 
 		foreach( $params as $key => $value ){

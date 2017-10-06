@@ -125,7 +125,6 @@ class ListingDetail extends Page {
 		add_filter( 'wpseo_title', array( $this, 'wpseo_title' ) );
 
 		remove_action( 'wp_head', 'rel_canonical' );
-
 	}
 
 	function add_property_detail_value( $element, $label, $field_group ){
@@ -724,6 +723,7 @@ class ListingDetail extends Page {
 
 	function wp(){
 		global $wp_query;
+		$flexmls_settings = get_option( 'flexmls_settings' );
 		$search_id = $wp_query->query_vars[ 'idxsearch_id' ];
 		$listing_id = $wp_query->query_vars[ 'idxlisting_id' ];
 		$Listings = new \SparkAPI\Listings();
@@ -732,6 +732,10 @@ class ListingDetail extends Page {
 			'_expand' => 'Photos,Videos,OpenHouses,VirtualTours,Documents,Rooms,CustomFields,Supplement'
 		) );
 		if( !$this->listing ){
+			if( 'custom_404' == $flexmls_settings[ 'general' ][ 'listing_not_available' ] ){
+				wp_redirect( get_permalink( $flexmls_settings[ 'general' ][ 'listing_not_available_page' ] ) );
+				exit();
+			}
 			// This is a bad or removed listing
 			$wp_query->set_404();
 			status_header( 404 );
@@ -751,6 +755,7 @@ class ListingDetail extends Page {
 
 	function wp_head(){
 		global $wp_query;
+		$flexmls_settings = get_option( 'flexmls_settings' );
 		$address = \FBS\Admin\Utilities::format_listing_street_address( $this->listing );
 		$url = $this->base_url . '/' . sanitize_title_with_dashes( $address[ 0 ] . ' ' . $address[ 1 ] ) . '_' . $this->listing[ 'Id' ];
 		echo '<link rel="canonical" href="' . esc_url( $url ) . '">' . PHP_EOL;
@@ -762,7 +767,12 @@ class ListingDetail extends Page {
 		}
 		$map_height = isset( $flexmls_settings[ 'gmaps' ][ 'height' ] ) ? $flexmls_settings[ 'gmaps' ][ 'height' ] : 450;
 		$map_units = isset( $flexmls_settings[ 'gmaps' ][ 'units' ] ) ? $flexmls_settings[ 'gmaps' ][ 'units' ] : 'px';
-		echo '<style type="text/css">#flexmls-listing-map{height:' . $map_height . $map_units . ';}</style>' . PHP_EOL;
+		if( 'pct' == $map_units ){
+			$map_units = '%';
+			echo '<style type="text/css">#flexmls-listing-map::before{content:\'\';display:block;padding-top:' . $map_height . $map_units . ';}</style>' . PHP_EOL;
+		} else {
+			echo '<style type="text/css">#flexmls-listing-map{height:' . $map_height . $map_units . ';}</style>' . PHP_EOL;
+		}
 	}
 
 	function wp_seo_get_bc_title( $title ){

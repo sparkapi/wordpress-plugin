@@ -1,0 +1,36 @@
+.flexmls-search-form-group {
+	padding-bottom: 15px;
+
+	& *,
+	& *::before,
+	& *::after {
+		box-sizing: border-box;
+	}
+
+	h4 {
+		margin-bottom: 5px;
+	}
+
+	input[type="number"],
+	input[type="search"],
+	input[type="text"] {
+		display: block;
+		width: 100%;
+	}
+	.flexmls-locations-selector {
+		width: 100%;
+	}
+}
+.flexmls-search-form-group-min-max {
+	@include clearfix;
+	margin-left: -15px;
+	margin-right: -15px;
+
+	.flexmls-search-form-group-min,
+	.flexmls-search-form-group-max {
+		float: left;
+		padding-left: 15px;
+		padding-right: 15px;
+		width: 50%;
+	}
+}

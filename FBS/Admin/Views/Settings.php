@@ -7,7 +7,6 @@ class Settings {
 
 	public static function credentials(){
 		$flexmls_settings = get_option( 'flexmls_settings' );
-
 		?>
 		<h3>Flexmls&reg; Credentials</h3>
 		<p>Enter your Flexmls&reg; API credentials below to connect your website. Your <strong>API Key</strong> and <strong>API Secret</strong> are <em>required</em> to display live IDX data on your website. Your <strong>OAuth Key</strong> and <strong>OAuth Secret</strong> are <em>optional</em>, but allow visitors to create portals &amp; save listings.</p>
@@ -158,6 +157,7 @@ class Settings {
 							<?php
 								wp_dropdown_pages( array(
 									'name' => 'flexmls_settings[general][listing_not_available_page]',
+									'selected' => isset( $flexmls_settings[ 'general' ][ 'listing_not_available_page' ] ) ? $flexmls_settings[ 'general' ][ 'listing_not_available_page' ] : 0,
 									'show_option_none' => false
 								) );
 							?>
