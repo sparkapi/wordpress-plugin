@@ -36,7 +36,9 @@ class Enqueue {
 			wp_enqueue_script( 'jquery-ui-sortable' );
 		}
 
-		wp_register_script( 'flexmls-admin', FLEXMLS_PLUGIN_DIR_URL . '/dist/js/scripts-admin.min.js', array( 'jquery' ) );
+		$version = in_flexmls_debug_mode() ? time() : FLEXMLS_PLUGIN_VERSION;
+
+		wp_register_script( 'flexmls-admin', FLEXMLS_PLUGIN_DIR_URL . '/dist/js/scripts-admin.min.js', array( 'jquery' ), $version );
 		wp_enqueue_script( 'flexmls-admin' );
 
 		wp_localize_script( 'flexmls-admin', 'flexmls', array(
@@ -45,7 +47,7 @@ class Enqueue {
 			'tech_id' => $tech_id
 		) );
 
-		wp_enqueue_style( 'flexmls-admin', FLEXMLS_PLUGIN_DIR_URL . '/dist/css/style-admin.css' );
+		wp_enqueue_style( 'flexmls-admin', FLEXMLS_PLUGIN_DIR_URL . '/dist/css/style-admin.css', null, $version );
 	}
 
 	static function script_loader_tag( $tag, $handle ){

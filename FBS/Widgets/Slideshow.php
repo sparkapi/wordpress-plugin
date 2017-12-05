@@ -71,7 +71,9 @@ class Slideshow extends \WP_Widget {
 				<label for="<?php echo $this->get_field_id( 'source' ); ?>">Listing Source</label><br />
 				<select class="widefat" id="<?php echo $this->get_field_id( 'source' ); ?>" name="<?php echo $this->get_field_name( 'source' ); ?>">
 					<?php
-						$source_options = array();
+						$source_options = array(
+							'all' => 'All Listings'
+						);
 						switch( $my_account[ 'UserType' ] ){
 							case 'Member':
 								$source_options[ 'my' ] = 'My Listings';
@@ -144,7 +146,7 @@ class Slideshow extends \WP_Widget {
 		$search_filter = sanitize_text_field( stripslashes( $_POST[ 'params' ][ 'search_filter' ] ) );
 		$addl_params = array_map( 'sanitize_text_field', wp_unslash( $_POST[ 'params' ][ 'addl_params' ] ) );
 		$pages = absint( $_POST[ 'params' ][ 'pages' ] );
-		$base_url = esc_url( $_POST[ 'base_url' ] );
+		$base_url = esc_url( $_POST[ 'params' ][ 'base_url' ] );
 		for( $i = 2; $i < ( $pages + 2 ); $i++ ){
 			$slide_listings = $listings->get_listings( $search_filter, $i, false, $addl_params );
 			if( $slide_listings ){
@@ -269,9 +271,12 @@ class Slideshow extends \WP_Widget {
 		$search_filter = implode( ' And ', $addl_filters );
 
 		$addl_params = array(
-			'_limit' => 25,
-			'endpoint' => $instance[ 'source' ]
+			'_limit' => 25
 		);
+
+		if( 'all' != $instance[ 'source' ] ){
+			$addl_params[ 'endpoint' ] = $instance[ 'source' ];
+		}
 
 		$slides = $listings->get_listings( $search_filter, 1, false, $addl_params );
 		if( empty( $slides ) ){

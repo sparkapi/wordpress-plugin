@@ -152,7 +152,7 @@ class Flexmls {
 		add_action( 'wp_ajax_nopriv_get_listing_media', array( 'FBS\Pages\Page', 'listing_media' ) );
 		add_action( 'wp_ajax_flexmls_listing_schedule_showing', array( 'FBS\Pages\Page', 'schedule_showing' ) );
 		add_action( 'wp_ajax_nopriv_flexmls_listing_schedule_showing', array( 'FBS\Pages\Page', 'schedule_showing' ) );
-		add_action( 'wp_ajax_tinymce_popup', array( 'FBS\Admin\TinyMCE', 'tinymce_popup' ) );
+		add_action( 'wp_ajax_tinymce_get_idx_links', array( 'FBS\Admin\TinyMCE', 'tinymce_get_idx_links' ) );
 		add_action( 'wp_ajax_tinymce_popup_shortcode', array( 'FBS\Admin\TinyMCE', 'tinymce_popup_shortcode' ) );
 		add_action( 'wp_ajax_toggle_cart_status', array( 'SparkAPI\Oauth', 'toggle_cart_status' ) );
 		add_action( 'wp_ajax_nopriv_toggle_cart_status', array( 'SparkAPI\Oauth', 'toggle_cart_status' ) );
@@ -166,6 +166,9 @@ class Flexmls {
 		add_filter( 'mce_external_plugins', array( 'FBS\Admin\TinyMCE', 'mce_external_plugins' ) );
 		//add_filter( 'nav_menu_meta_box_object', array( 'FBS\Admin\NavMenus', 'nav_menu_meta_box_object' ) );
 		add_filter( 'script_loader_tag', array( 'FBS\Admin\Enqueue', 'script_loader_tag' ), 10, 2 );
+
+		add_shortcode( 'flexmls_idxlinks',array( 'FBS\Widgets\Shortcodes', 'flexmls_idxlinks' ) );
+		add_shortcode( 'flexmls_leadgen',array( 'FBS\Widgets\Shortcodes', 'flexmls_leadgen' ) );
 
 	}
 

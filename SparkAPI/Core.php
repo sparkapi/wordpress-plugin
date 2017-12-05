@@ -289,6 +289,63 @@ class Core {
 		return json_encode( array( 'D' => $data ) );
 	}
 
+	function parse_search_into_filter( $qs = null ){
+		if( null == $qs ){
+			$qs = $_SERVER[ 'QUERY_STRING' ];
+		}
+		parse_str( $qs, $search );
+		$search = array_filter( $search );
+
+		$new_filter = array();
+
+		$fields = array(
+			'PropertyType',
+			'SavedSearch',
+			'MinBaths',
+			'MaxBaths',
+			'MinBeds',
+			'MaxBeds',
+			'MinSqFt',
+			'MaxSqFt',
+			'MinPrice',
+			'MaxPrice',
+			'MinYear',
+			'MaxYear'
+		);
+		$numeric_fields = array(
+			'Baths' => 'BathsTotal',
+			'Beds' => 'BedsTotal',
+			'SqFt' => 'BuildingAreaTotal',
+			'Price' => 'ListPrice',
+			'Year' => 'YearBuilt'
+		);
+
+		if( array_key_exists( 'location_selector', $search ) ){
+			list( $area, $type ) = explode( '***', $search[ 'location_selector' ] );
+			$new_filter[] = $type . ' Eq \'' . $area . '\'';
+		}
+		if( array_key_exists( 'SavedSearch', $search ) ){
+			$new_filter[] = 'SavedSearch Eq ' . $search[ 'SavedSearch' ];
+		}
+
+		foreach( $numeric_fields as $numeric_field => $search_key ){
+			$field_min = 'Min' . $numeric_field;
+			$field_max = 'Max' . $numeric_field;
+			switch( true ){
+				case array_key_exists( $field_min, $search ) && array_key_exists( $field_max, $search ):
+					$new_filter[] = $search_key . ' Bt ' . \FBS\Admin\Utilities::get_clean_number( $search[ $field_min ] ) . ',' . \FBS\Admin\Utilities::get_clean_number( $search[ $field_max ] );
+					break;
+				case array_key_exists( $field_min, $search ):
+					$new_filter[] = $search_key . ' Ge ' . \FBS\Admin\Utilities::get_clean_number( $search[ $field_min ] );
+					break;
+				case array_key_exists( $field_max, $search ):
+					$new_filter[] = $search_key . ' Le ' . \FBS\Admin\Utilities::get_clean_number( $search[ $field_max ] );
+					break;
+			}
+		}
+		return implode( ' And ', $new_filter );
+	}
+
 	function possible_compliance_fields(){
 		global $wp_query;
 		$System = new \SparkAPI\System();

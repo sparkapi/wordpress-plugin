@@ -45,6 +45,10 @@ class Utilities {
 		return number_format( $price, 0 );
 	}
 
+	public static function get_clean_number( $dirty_number ){
+		return preg_replace( '/[^0-9\.]/', '', $dirty_number );
+	}
+
 	public static function get_current_url(){
 		global $_SERVER, $wp;
 		if( $wp->did_permalink ){

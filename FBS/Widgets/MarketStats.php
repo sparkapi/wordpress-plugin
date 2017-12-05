@@ -201,7 +201,7 @@ class MarketStats extends \WP_Widget {
 		$MarketStats = new \SparkAPI\MarketStats();
 		$data = $MarketStats->get_market_data( $stat_type, $chart_data, $property_type, $location_field_name_to_search, $location_field_value_to_search );
 
-		if( !empty( $data ) ){
+		if( !empty( $data ) && 1 < count( $data ) ){
 
 			echo $args[ 'before_widget' ];
 

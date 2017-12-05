@@ -13,6 +13,11 @@
 
 	var locationSelector = function(){
 		if( $( '.flexmls-locations-selector' ).length ){
+      $( '.flexmls-locations-selector' ).each(function(){
+        if( true === !!$( this ).data( 'select2' ) ){
+          $( this ).select2( 'destroy' );
+        }
+      });
 			$( '.flexmls-locations-selector' ).select2({
 				ajax: {
 					cache: false,

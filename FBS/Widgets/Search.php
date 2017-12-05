@@ -12,19 +12,23 @@ class Search extends \WP_Widget {
 		) );
 
 		$this->attributes = array(
-			'age' => 'Year Built',
-			'baths' => 'Bathrooms',
-			'beds' => 'Bedrooms',
-			'square_footage' => 'Square Footage',
-			'list_price' => 'Price'
+			'Year' => 'Year Built',
+			'Baths' => 'Bathrooms',
+			'Beds' => 'Bedrooms',
+			'SqFt' => 'Square Footage',
+			'Price' => 'Price'
 		);
 	}
 
 	public function form( $instance ){
 		$flexmls_settings = get_option( 'flexmls_settings' );
+		$IDXLinks = new \SparkAPI\IDXLinks();
+		$all_idx_links = $IDXLinks->get_all_idx_links( true );
+
 		$title = !isset( $instance[ 'title' ] ) ? 'Search Properties' : $instance[ 'title' ];
 		$property_types_to_search = !isset( $instance[ 'property_types_to_search' ] ) ? array() : $instance[ 'property_types_to_search' ];
 		$user_property_types = !isset( $instance[ 'user_property_types' ] ) ? 'yes' : $instance[ 'user_property_types' ];
+		$idx_link_for_search = !isset( $instance[ 'idx_link_for_search' ] ) ? array() : $instance[ 'idx_link_for_search' ];
 		$attributes_to_search = !isset( $instance[ 'attributes_to_search' ] ) ? array() : $instance[ 'attributes_to_search' ];
 		$allow_sold_searches = !isset( $instance[ 'allow_sold_searches' ] ) ? 0 : $instance[ 'allow_sold_searches' ];
 		$submit_button_text = !isset( $instance[ 'submit_button_text' ] ) ? 'Search For Homes' : $instance[ 'submit_button_text' ];
@@ -59,6 +63,16 @@ class Search extends \WP_Widget {
 			</select>
 		</p>
 		<p>
+			<label for="<?php echo $this->get_field_id( 'idx_link_for_search' ); ?>">Limit Results to Saved Search</label>
+			<select class="widefat" id="<?php echo $this->get_field_id( 'idx_link_for_search' ); ?>" name="<?php echo $this->get_field_name( 'idx_link_for_search' ); ?>">
+				<option value="" <?php selected( $idx_link_for_search, '' ); ?>>Do Not Limit Results</option>
+				<?php foreach( $all_idx_links as $all_idx_link ): ?>
+					<option value="<?php echo $all_idx_link[ 'Id' ]; ?>" <?php selected( $all_idx_link[ 'Id' ], $idx_link_for_search ); ?>><?php echo $all_idx_link[ 'Name' ]; ?></option>
+				<?php endforeach; ?>
+			</select>
+			<small>You can edit these in your FlexMLS dashboard</small>
+		</p>
+		<p>
 			<label for="<?php echo esc_attr( $this->get_field_id( 'attributes_to_search' ) ); ?>">Property Attributes</label>
 			<br /><small>Which attributes do you want to allow users to search by?</small>
 			<?php
@@ -88,6 +102,7 @@ class Search extends \WP_Widget {
 			}
 		}
 		$instance[ 'user_property_types' ] = sanitize_text_field( $new_instance[ 'user_property_types' ] );
+		$instance[ 'idx_link_for_search' ] = sanitize_text_field( $new_instance[ 'idx_link_for_search' ] );
 		$instance[ 'attributes_to_search' ] = array();
 		if( !empty( $new_instance[ 'attributes_to_search' ] ) ){
 			foreach( $new_instance[ 'attributes_to_search' ] as $val ){
@@ -104,6 +119,7 @@ class Search extends \WP_Widget {
 		$title = $instance[ 'title' ];
 		$property_types_to_search = $instance[ 'property_types_to_search' ];
 		$user_property_types = $instance[ 'user_property_types' ];
+		$idx_link_for_search = $instance[ 'idx_link_for_search' ];
 		$attributes_to_search = $instance[ 'attributes_to_search' ];
 		$allow_sold_searches = $instance[ 'allow_sold_searches' ];
 		$submit_button_text = $instance[ 'submit_button_text' ];
@@ -118,6 +134,9 @@ class Search extends \WP_Widget {
 		//$search_results_page = get_post( $flexmls_settings[ 'general' ][ 'search_results_page' ] );
 		//$search_results_default = !empty( $flexmls_settings[ 'general' ][ 'search_results_default' ] ) ? $flexmls_settings[ 'general' ][ 'search_results_default' ] : '';
 		$base_url = untrailingslashit( get_permalink( $flexmls_settings[ 'general' ][ 'search_results_page' ] ) );
+		if( strlen( $idx_link_for_search ) > 0 ){
+			$base_url .= '/' . $idx_link_for_search;
+		}
 
 		$get_params = isset( $_GET ) ? $_GET : array();
 
@@ -144,7 +163,7 @@ class Search extends \WP_Widget {
 										}
 									}
 									if( array_key_exists( $property_types_to_search, $property_types ) ){
-										echo '<li><label><input type="checkbox" name="property_types[]" value="' . $property_types_to_search . '" ' . checked( $checked, true, false ) . '> ' . $property_types[ $property_types_to_search ] . '</label></li>';
+										echo '<li><label><input type="checkbox" name="PropertyType[]" value="' . $property_types_to_search . '" ' . checked( $checked, true, false ) . '> ' . $property_types[ $property_types_to_search ] . '</label></li>';
 									}
 								}
 							?>
@@ -153,16 +172,22 @@ class Search extends \WP_Widget {
 				<?php endif; ?>
 				<div class="flexmls-search-form-group">
 					<h4>Location</h4>
-					<!--<input type="text" class="oflexmls-locations-selector" name="location_selector" placeholder="City, Zip, Address or Other Location">-->
 					<select class="flexmls-locations-selector" name="location_selector" data-placeholder="City, Zip, Address or Other Location" data-allow-clear="true">
+						<?php
+							if( isset( $_GET[ 'location_selector' ] ) ){
+								$location_selector = sanitize_text_field( $_GET[ 'location_selector' ] );
+								$ls_pieces = explode( '***', $location_selector );
+								echo '<option value="' . $location_selector . '">' . $ls_pieces[ 0 ] . ' (' . $ls_pieces[ 1 ] . ')</option>';
+							}
+						?>
 					</select>
 				</div>
 				<?php if( !empty( $attributes_to_search ) ) : ?>
 					<?php foreach( $attributes_to_search as $attribute ) : ?>
 						<?php
-							$min_key = 'attribute_' . $attribute . '_min';
+							$min_key = 'Min' . $attribute;
 							$min_val = '';
-							$max_key = 'attribute_' . $attribute . '_max';
+							$max_key = 'Max' . $attribute;
 							$max_val = '';
 							if( array_key_exists( $min_key, $get_params ) ){
 								$min_val = sanitize_text_field( $get_params[ $min_key ] );
@@ -175,10 +200,10 @@ class Search extends \WP_Widget {
 							<h4><?php echo $this->attributes[ $attribute ]; ?></h4>
 							<div class="flexmls-search-form-group-min-max">
 								<div class="flexmls-search-form-group-min">
-									<input type="number" name="attribute_<?php echo $attribute; ?>_min" placeholder="Min" value="<?php echo $min_val; ?>">
+									<input type="number" name="<?php echo $min_key; ?>" placeholder="Min" value="<?php echo $min_val; ?>">
 								</div>
 								<div class="flexmls-search-form-group-max">
-									<input type="number" name="attribute_<?php echo $attribute; ?>_max" placeholder="Max" value="<?php echo $max_val; ?>">
+									<input type="number" name="<?php echo $max_key; ?>" placeholder="Max" value="<?php echo $max_val; ?>">
 								</div>
 							</div>
 						</div>
@@ -186,6 +211,21 @@ class Search extends \WP_Widget {
 				<?php endif; ?>
 				<div class="flexmls-search-form-group">
 					<input type="hidden" name="flexmls_general_search" value="1">
+					<?php
+						if( 'no' == $user_property_types || 1 == count( $instance[ 'property_types_to_search' ] ) ){
+							$property_types_letters = array();
+							$SparkPropertyTypes = new \SparkAPI\PropertyTypes();
+							$property_types = $SparkPropertyTypes->get_property_types();
+							foreach( $instance[ 'property_types_to_search' ] as $property_types_to_search ){
+								if( array_key_exists( $property_types_to_search, $property_types ) ){
+									echo '<input type="hidden" name="PropertyType[]" value="' . $property_types_to_search . '">';
+								}
+							}
+						}
+					?>
+					<?php if( strlen( $idx_link_for_search ) > 0 ) : ?>
+						<input type="hidden" name="SavedSearch" value="<?php echo $idx_link_for_search; ?>">
+					<?php endif; ?>
 					<button type="submit" class="flexmls-button flexmls-button-primary"><?php echo $submit_button_text; ?></button>
 				</div>
 			</form>

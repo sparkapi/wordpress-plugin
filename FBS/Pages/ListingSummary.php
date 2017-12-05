@@ -100,10 +100,7 @@ class ListingSummary extends Page {
 			return;
 		}
 		global $wp_query;
-		$qs = '';
-		if( isset( $_SERVER[ 'QUERY_STRING' ] ) ){
-			$qs = '?' . $_SERVER[ 'QUERY_STRING' ];
-		}
+
 		$links_to_show = apply_filters( 'flexmls_pagination_links_to_show', 3 );
 
 		$right_links = $this->query->current_page + 3;
@@ -112,6 +109,13 @@ class ListingSummary extends Page {
 		$next_page = $this->query->current_page + 1;
 
 		$pagination  = '<nav id="flexmls-pagination"><ul>';
+
+		$current_url = \FBS\Admin\Utilities::get_current_url();
+		$qs = '';
+		if( strpos( $current_url, '?' ) ){
+			list( $first_part, $qs ) = explode( '?', $current_url );
+			$qs = '?' . $qs;
+		}
 
 		$pagination_base_url = $this->base_url;
 
@@ -198,11 +202,20 @@ class ListingSummary extends Page {
 										$this->query->last_count
 									), number_format( $this->query->last_count ) );
 								if( $this->can_do_maps() ){
+
+									$current_url = \FBS\Admin\Utilities::get_current_url();
+									$qs = '';
+									if( strpos( $current_url, '?' ) ){
+										list( $first_part, $qs ) = explode( '?', $current_url );
+										$qs = '?' . $qs;
+									}
+
 									$list_url = $this->base_url;
-									$map_url = $this->base_url . '/map';
+									$map_url = $list_url . '/map';
+
 									if( 1 < $this->query->current_page ){
-										$list_url .= '/page/' . $this->query->current_page;
-										$map_url .= '/page/' . $this->query->current_page;
+										$list_url .= '/page/' . $this->query->current_page . $qs;
+										$map_url .= '/page/' . $this->query->current_page . $qs;
 									}
 									$content .= '<ul class="flexmls-listings-view-tabs">';
 									$content .= '<li class="flexmls-listings-view-tab-list' . ( 'list' == $wp_query->query_vars[ 'idxpage_view' ] ? ' tab-active' : '' ) . '"><a href="' . $list_url . '" title="List View">List View</a></li>';
@@ -449,7 +462,7 @@ class ListingSummary extends Page {
 			}
 		}
 
-		$addl_filters = array();
+		//$addl_filters = array();
 		if( $_GET ){
 			$get_params = $_GET;
 			if( isset( $get_params[ 'listings_order_by' ] ) ){
@@ -461,54 +474,14 @@ class ListingSummary extends Page {
 			if( isset( $_GET[ 'flexmls_general_search' ] ) ){
 				// This is a general search result
 				$this->idx_link_details[ 'Name' ] = 'Property Search Results';
-				unset( $get_params[ 'flexmls_general_search' ] );
-				if( isset( $get_params[ 'location_selector' ] ) ){
-					list($val, $key) = explode( '***', $get_params[ 'location_selector' ] );
-					$addl_filters[] = sanitize_text_field( $key ) . ' Eq \'' . sanitize_text_field( $val ) . '\'';
-					unset( $get_params[ 'location_selector' ] );
-				}
-				if( isset( $get_params[ 'property_types' ] ) && is_array( $get_params[ 'property_types' ] ) ){
-					$pts = array();
-					foreach( $get_params[ 'property_types' ] as $pt ){
-						$pts[] = 'PropertyType Eq \'' . $pt . '\'';
-					}
-					$addl_filters[] = '(' . implode( ' Or ', $pts ) . ')';
-					unset( $get_params[ 'property_types' ] );
-				}
-				$numeric_search_fields = array(
-					'attribute_age' => 'YearBuilt',
-					'attribute_baths' => 'BathsTotal',
-					'attribute_beds' => 'BedsTotal',
-					'attribute_square_footage' => 'BuildingAreaTotal',
-					'attribute_list_price' => 'ListPrice'
-				);
-				foreach( $numeric_search_fields as $field => $search_param ){
-					$field_test = $field . '_min';
-					if( isset( $get_params[ $field_test ] ) ){
-						$min = max( 0, floatval( $get_params[ $field . '_min' ] ) );
-						$max = max( $min, floatval( $get_params[ $field . '_max' ] ) );
-						switch( true ){
-							case 0 == $min && $max > $min:
-								$addl_filters[] = $search_param . ' Le ' . $max;
-								break;
-							case $max == $min:
-								$addl_filters[] = $search_param . ' Ge ' . $min;
-								break;
-							case $max > $min:
-								$addl_filters[] = $search_param . ' Bt ' . $min . ',' . $max;
-								break;
-						}
-						unset( $get_params[ $field . '_min' ] );
-						unset( $get_params[ $field . '_max' ] );
-					}
-				}
-			}
-			foreach( $get_params as $key => $val ){
-				if( !empty( $val ) ){
-					$addl_filters[] = $key . ' Eq \'' . $val . '\'';
+
+				if( isset( $_GET[ 'flexmls_general_search' ] ) && 1 == $_GET[ 'flexmls_general_search' ] ){
+					$SparkAPI = new \SparkAPI\Core();
+					$this->search_filter = $SparkAPI->parse_search_into_filter();
 				}
 			}
 		}
+		/*
 		$addl_filters = implode( ' And ', $addl_filters );
 		if( $addl_filters ){
 			if( !empty( $this->search_filter ) ){
@@ -517,6 +490,7 @@ class ListingSummary extends Page {
 				$this->search_filter = $addl_filters;
 			}
 		}
+		*/
 
 		if( !empty( $this->search_filter ) ){
 			$this->query->results = $this->query->get_listings( $this->search_filter, $wp_query->query_vars[ 'idxsearch_page' ] );
