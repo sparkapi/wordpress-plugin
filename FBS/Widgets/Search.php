@@ -32,6 +32,8 @@ class Search extends \WP_Widget {
 		$attributes_to_search = !isset( $instance[ 'attributes_to_search' ] ) ? array() : $instance[ 'attributes_to_search' ];
 		$allow_sold_searches = !isset( $instance[ 'allow_sold_searches' ] ) ? 0 : $instance[ 'allow_sold_searches' ];
 		$submit_button_text = !isset( $instance[ 'submit_button_text' ] ) ? 'Search For Homes' : $instance[ 'submit_button_text' ];
+		$more_search_options_link = !isset( $instance[ 'more_search_options_link' ] ) ? '' : $instance[ 'more_search_options_link' ];
+		$more_search_options_text = !isset( $instance[ 'more_search_options_text' ] ) ? '' : $instance[ 'more_search_options_text' ];
 		?>
 		<p>
 			<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>">Title</label>
@@ -89,6 +91,16 @@ class Search extends \WP_Widget {
 			<label for="<?php echo esc_attr( $this->get_field_id( 'submit_button_text' ) ); ?>">Submit Button Text</label>
 			<input placeholder="eg, Search for Homes" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'submit_button_text' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'submit_button_text' ) ); ?>" type="text" value="<?php echo esc_attr( $submit_button_text ); ?>">
 		</p>
+		<p>
+			<label for="<?php echo esc_attr( $this->get_field_id( 'more_search_options_link' ) ); ?>">More Search Options URL (optional)</label>
+			<input placeholder="eg, <?php echo home_url( 'search' ); ?>" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'more_search_options_link' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'more_search_options_link' ) ); ?>" type="text" value="<?php echo esc_attr( $more_search_options_link ); ?>">
+			<br /><small>Adds a link to the bottom of the search widget</small>
+		</p>
+		<p>
+			<label for="<?php echo esc_attr( $this->get_field_id( 'more_search_options_text' ) ); ?>">More Search Options Text (optional)</label>
+			<input placeholder="eg, More Search Options" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'more_search_options_text' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'more_search_options_text' ) ); ?>" type="text" value="<?php echo esc_attr( $more_search_options_text ); ?>">
+			<br /><small>Custom text for the above link on the bottom of the search widget</small>
+		</p>
 		<?php
 	}
 
@@ -112,6 +124,9 @@ class Search extends \WP_Widget {
 		$instance[ 'allow_sold_searches' ] = isset( $new_instance[ 'allow_sold_searches' ] ) ? 1 : 0;
 		$instance[ 'submit_button_text' ] = !empty( $new_instance[ 'submit_button_text' ] ) ? sanitize_text_field( $new_instance[ 'submit_button_text' ] ) : 'Search';
 
+		$instance[ 'more_search_options_link' ] = esc_url( $new_instance[ 'more_search_options_link' ] );
+		$instance[ 'more_search_options_text' ] = !empty( $new_instance[ 'more_search_options_text' ] ) ? sanitize_text_field( $new_instance[ 'more_search_options_text' ] ) : '';
+
 		return $instance;
 	}
 
@@ -123,6 +138,11 @@ class Search extends \WP_Widget {
 		$attributes_to_search = $instance[ 'attributes_to_search' ];
 		$allow_sold_searches = $instance[ 'allow_sold_searches' ];
 		$submit_button_text = $instance[ 'submit_button_text' ];
+		$more_search_options_link = $instance[ 'more_search_options_link' ];
+		$more_search_options_text = $instance[ 'more_search_options_text' ];
+
+		$PropertyTypes = new \SparkAPI\PropertyTypes();
+		$get_property_sub_types = $PropertyTypes->get_property_sub_types();
 
 		// Check is any property types were selected. If not, don't show the widget
 		if( empty( $instance[ 'property_types_to_search' ] ) ){
@@ -157,13 +177,42 @@ class Search extends \WP_Widget {
 								$property_types = $SparkPropertyTypes->get_property_types();
 								foreach( $instance[ 'property_types_to_search' ] as $property_types_to_search ){
 									$checked = false;
-									if( array_key_exists( 'property_types', $get_params ) ){
-										if( in_array( $property_types_to_search, $get_params[ 'property_types' ] ) ){
+									if( array_key_exists( 'PropertyType', $get_params ) && is_array( $get_params[ 'PropertyType' ] ) ){
+										if( in_array( $property_types_to_search, $get_params[ 'PropertyType' ] ) ){
 											$checked = true;
 										}
 									}
 									if( array_key_exists( $property_types_to_search, $property_types ) ){
-										echo '<li><label><input type="checkbox" name="PropertyType[]" value="' . $property_types_to_search . '" ' . checked( $checked, true, false ) . '> ' . $property_types[ $property_types_to_search ] . '</label></li>';
+										echo '<li><label><input type="checkbox" name="PropertyType[]" value="' . $property_types_to_search . '" ' . checked( $checked, true, false ) . '> ' . $property_types[ $property_types_to_search ] . '</label>';
+										if( count( $get_property_sub_types ) ){
+											$subtypes = array();
+
+											foreach( $get_property_sub_types as $get_property_sub_type ){
+												if( $get_property_sub_type[ 'Name' ] != 'Select One' ){
+													if( in_array( $property_types_to_search, $get_property_sub_type[ 'AppliesTo' ] ) ){
+														$subtypes[] = array(
+															'name' => $get_property_sub_type[ 'Name' ],
+															'value' => $get_property_sub_type[ 'Value' ]
+														);
+													}
+												}
+											}
+											if( count( $subtypes ) ){
+												echo '<ul class="flexmls-search-widget-propertysubtypes' . ( $checked ? ' open' : '' ) . '">';
+												foreach( $subtypes as $subtype ){
+													$checked = false;
+													if( array_key_exists( 'PropertySubType', $get_params ) ){
+														if( in_array( $subtype[ 'value' ], $get_params[ 'PropertySubType' ] ) ){
+															$checked = true;
+														}
+													}
+													echo '<li><label><input type="checkbox" name="PropertySubType[]" value="' . $subtype[ 'value' ] . '" ' . checked( $checked, true, false ) . '> ' . $subtype[ 'name' ] . '</label></li>';
+												}
+												echo '</ul>';
+											}
+										}
+										echo '</li>';
+
 									}
 								}
 							?>
@@ -229,6 +278,9 @@ class Search extends \WP_Widget {
 					<button type="submit" class="flexmls-button flexmls-button-primary"><?php echo $submit_button_text; ?></button>
 				</div>
 			</form>
+			<?php if( !empty( $more_search_options_link ) ) : ?>
+				<p><a href="<?php echo $more_search_options_link; ?>" title="<?php echo ( !empty( $more_search_options_text ) ? $more_search_options_text : 'More Search Options' ); ?>"><?php echo ( !empty( $more_search_options_text ) ? $more_search_options_text : 'More Search Options' ); ?></a></p>
+			<?php endif; ?>
 		</div>
 		<?php
 		echo $args[ 'after_widget' ];

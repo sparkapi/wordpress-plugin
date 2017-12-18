@@ -11385,6 +11385,7 @@ window.optimizedScroll = (function(){
 				if( 1 === response.success ){
 					noticeClass = 'success';
 				}
+        $( form ).find( 'input[type="text"], input[type="email"], textarea' ).val( '' );
 				$( form ).prepend( '<div class="flexmls-form-notice flexmls-form-notice-' + noticeClass + '">' + response.message + '</div>' );
 				$( btn ).html( btnHtml ).removeAttr( 'disabled' );
 			}, 'json' );
@@ -11520,10 +11521,11 @@ window.optimizedScroll = (function(){
 (function($){
 
 	var queryObject = {
+    c: 'Y',
 		command_line_mode: 'true',
 		cmd: 'srv+api/search/getLocations.json',
-		i: 'City,StateOrProvince,SteetAddress,PostalCode,CountyOrParish,SubdivisionName,MLSAreaMajor,ListingId,SchoolDistrict',
-		l: 8,
+		i: 'City,StateOrProvince,SteetAddress,PostalCode,CountyOrParish,SubdivisionName,MLSAreaMajor,MLSAreaMinor,StreetAddress,MapOverlay,ListingId,SchoolDistrict',
+		l: 18,
 		ma: 'x\'' + flexmls.ma_tech_id + '\'',
 		p: '',
 		std: 'Y',
@@ -11801,6 +11803,22 @@ window.optimizedScroll = (function(){
 		scheduleShowing();
 	});
 
+})(jQuery);
+(function($){
+  var togglePropertySubtypes = function(){
+    $( 'input[name^="PropertyType"]' ).on( 'change', function( ev ){
+      var subtypes = $( this ).closest( 'li' ).find( '.flexmls-search-widget-propertysubtypes' );
+      if( this.checked ){
+        $( subtypes ).addClass( 'open' );
+      } else {
+        $( subtypes ).removeClass( 'open' );
+      }
+    });
+  };
+
+  $(document).ready(function(){
+    togglePropertySubtypes();
+  });
 })(jQuery);
 (function($){
 

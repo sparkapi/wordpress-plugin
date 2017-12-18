@@ -75,7 +75,9 @@
 
                 container.append( item );
               });
+              container.renderHTML();
               container.reflow();
+
             }, 'json' );
           },
           style: 'max-height: 50vh; overflow-y: scroll',

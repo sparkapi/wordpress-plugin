@@ -29,7 +29,8 @@ class Slideshow extends \WP_Widget {
 			'price_changes' => 'Recent Price Changes',
 			'recent_sales' => 'Recent Sales'
 		);
-		$display_has_days_back = array( 'new', 'price_changes', 'recent_sales' );
+		$display_has_days_back = array( 'new', 'open_houses', 'price_changes', 'recent_sales' );
+		$days_back = !isset( $instance[ 'days_back' ] ) ? 0 : $instance[ 'days_back' ];
 
 		$title = !isset( $instance[ 'title' ] ) ? 'Listings' : $instance[ 'title' ];
 		$saved_search = !isset( $instance[ 'saved_search' ] ) ? $search_results_default : $instance[ 'saved_search' ];
@@ -118,9 +119,9 @@ class Slideshow extends \WP_Widget {
 			<p id="dependent_<?php echo $this->get_field_id( 'days_back' ); ?>" <?php if( !in_array( $display_selected, $display_has_days_back ) ): ?>style="display: none;"<?php endif; ?>>
 				<label for="<?php echo $this->get_field_id( 'days_back' ); ?>">Number of Days Back</label>
 				<select class="widefat" id="<?php echo $this->get_field_id( 'days_back' ); ?>" name="<?php echo $this->get_field_name( 'days_back' ); ?>">
-					<option value="0">1 Day (3 on Monday)</option>
+					<option value="0" <?php selected( $days_back, 0 ); ?>>1 Day (3 on Monday)</option>
 					<?php for( $i = 2; $i < 16; $i++ ): ?>
-						<option value="<?php echo $i; ?>"><?php echo $i; ?> Days</option>
+						<option value="<?php echo $i; ?>" <?php selected( $days_back, $i ); ?>><?php echo $i; ?> Days</option>
 					<?php endfor; ?>
 				</select>
 				<small># of days for activity to be considered <em>new</em></small>

@@ -20,6 +20,14 @@
 	.flexmls-locations-selector {
 		width: 100%;
 	}
+
+	.flexmls-search-widget-propertysubtypes {
+		display: none;
+
+		&.open {
+			display: block;
+		}
+	}
 }
 .flexmls-search-form-group-min-max {
 	@include clearfix;

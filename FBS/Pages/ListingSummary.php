@@ -474,23 +474,10 @@ class ListingSummary extends Page {
 			if( isset( $_GET[ 'flexmls_general_search' ] ) ){
 				// This is a general search result
 				$this->idx_link_details[ 'Name' ] = 'Property Search Results';
-
-				if( isset( $_GET[ 'flexmls_general_search' ] ) && 1 == $_GET[ 'flexmls_general_search' ] ){
-					$SparkAPI = new \SparkAPI\Core();
-					$this->search_filter = $SparkAPI->parse_search_into_filter();
-				}
 			}
+			$SparkAPI = new \SparkAPI\Core();
+			$this->search_filter = $SparkAPI->modify_search_filter_with_query_string( $this->search_filter );
 		}
-		/*
-		$addl_filters = implode( ' And ', $addl_filters );
-		if( $addl_filters ){
-			if( !empty( $this->search_filter ) ){
-				$this->search_filter = $this->search_filter . ' And ' . $addl_filters;
-			} else {
-				$this->search_filter = $addl_filters;
-			}
-		}
-		*/
 
 		if( !empty( $this->search_filter ) ){
 			$this->query->results = $this->query->get_listings( $this->search_filter, $wp_query->query_vars[ 'idxsearch_page' ] );
@@ -507,8 +494,10 @@ class ListingSummary extends Page {
 			}
 		}
 		if( 'custom_404' == $flexmls_settings[ 'general' ][ 'listing_not_available' ] ){
-			wp_redirect( get_permalink( $flexmls_settings[ 'general' ][ 'listing_not_available_page' ] ) );
-			exit();
+			if( is_page( $flexmls_settings[ 'general' ][ 'listing_not_available' ] ) ){
+				wp_redirect( get_permalink( $flexmls_settings[ 'general' ][ 'listing_not_available_page' ] ) );
+				exit();
+			}
 		}
 		$wp_query->set_404();
 		status_header( 404 );

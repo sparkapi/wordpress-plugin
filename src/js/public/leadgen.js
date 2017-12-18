@@ -31,6 +31,7 @@
 				if( 1 === response.success ){
 					noticeClass = 'success';
 				}
+        $( form ).find( 'input[type="text"], input[type="email"], textarea' ).val( '' );
 				$( form ).prepend( '<div class="flexmls-form-notice flexmls-form-notice-' + noticeClass + '">' + response.message + '</div>' );
 				$( btn ).html( btnHtml ).removeAttr( 'disabled' );
 			}, 'json' );

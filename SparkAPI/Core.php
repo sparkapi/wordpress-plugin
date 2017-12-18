@@ -289,6 +289,155 @@ class Core {
 		return json_encode( array( 'D' => $data ) );
 	}
 
+	function modify_search_filter_with_query_string( $filter ){
+		// $filter is the original filter string
+		$StandardFields = new \SparkAPI\StandardFields();
+		$sf = $StandardFields->get_standard_fields()[ 0 ];
+
+		$qs = $_SERVER[ 'QUERY_STRING' ];
+		parse_str( $qs, $search );
+		$params = array_filter( $search );
+
+		if( 0 == count( $params ) ){
+			return $filter;
+		}
+
+		$minmax_fields_search = array(
+			'Baths' => 'BathsTotal',
+			'Beds' => 'BedsTotal',
+			'SqFt' => 'BuildingAreaTotal',
+			'Price' => 'ListPrice',
+			'Year' => 'YearBuilt'
+		);
+
+		$minmax_fields_match = array(
+			'MinBaths' => 'BathsTotal',
+			'MaxBaths' => 'BathsTotal',
+			'MinBeds' => 'BedsTotal',
+			'MaxBeds' => 'BedsTotal',
+			'MinSqFt' => 'BuildingAreaTotal',
+			'MaxSqFt' => 'BuildingAreaTotal',
+			'MinPrice' => 'ListPrice',
+			'MaxPrice' => 'ListPrice',
+			'MinYear' => 'YearBuilt',
+			'MaxYear' => 'YearBuilt'
+		);
+
+		$new_params = array();
+
+		foreach( $minmax_fields_search as $minmax_field_key => $minmax_field_sf ){
+			$field_min = 'Min' . $minmax_field_key;
+			$field_max = 'Max' . $minmax_field_key;
+			switch( true ){
+				case array_key_exists( $field_min, $params ) && array_key_exists( $field_max, $params ):
+					$min = \FBS\Admin\Utilities::get_clean_number( $params[ $field_min ] );
+					$max = \FBS\Admin\Utilities::get_clean_number( $params[ $field_max ] );
+					$new_params[ $minmax_field_sf ] = array(
+						$minmax_field_sf,
+						'Bt',
+						$min . ',' . $max
+					);
+					unset( $params[ $field_min ] );
+					unset( $params[ $field_max ] );
+					break;
+				case array_key_exists( $field_min, $params ):
+					$min = \FBS\Admin\Utilities::get_clean_number( $params[ $field_min ] );
+					$new_params[ $minmax_field_sf ] = array(
+						$minmax_field_sf,
+						'Ge',
+						$min
+					);
+					unset( $params[ $field_min ] );
+					break;
+				case array_key_exists( $field_max, $params ):
+					$max = \FBS\Admin\Utilities::get_clean_number( $params[ $field_max ] );
+					$new_params[ $minmax_field_sf ] = array(
+						$minmax_field_sf,
+						'Le',
+						$max
+					);
+					unset( $params[ $field_max ] );
+					break;
+			}
+		}
+
+		if( array_key_exists( 'location_selector', $params ) ){
+			list( $area, $type ) = explode( '***', $search[ 'location_selector' ] );
+			$params[ $type ] = $area;
+			unset( $params[ 'location_selector' ] );
+		}
+		if( array_key_exists( 'SavedSearch', $params ) ){
+			$new_filter[] = 'SavedSearch Eq ' . $search[ 'SavedSearch' ];
+			$new_params = array(
+				'SavedSearch',
+				'Eq',
+				$params[ 'SavedSearch' ]
+			);
+			unset( $params[ 'SavedSearch' ] );
+		}
+
+		foreach( $params as $key => $val ){
+			if( array_key_exists( $key, $sf ) ){
+				$type = $sf[ $key ][ 'Type' ];
+				switch( $type ){
+					case 'Decimal':
+					case 'Integer':
+						$number = \FBS\Admin\Utilities::get_clean_number( $val );
+						$new_params[ $key ] = array(
+							$key,
+							'Eq',
+							$number
+						);
+						break;
+					default:
+						if( is_array( $val ) ){
+							$val = implode( '\',\'', $val );
+						}
+						$new_params[ $key ] = $key . ' Eq \'' . $val . '\'';
+						$new_params[ $key ] = array(
+							$key,
+							'Eq',
+							'\'' . $val . '\''
+						);
+						break;
+				}
+			}
+		}
+
+		$new_filter = $this->parse_filter_into_array( $filter );
+		foreach( $new_filter as $index => $filter_item ){
+			if( array_key_exists( $filter_item[ 0 ], $new_params ) ){
+				$new_filter[ $index ] = $new_params[ $filter_item[ 0 ] ];
+				unset( $new_params[ $filter_item[ 0 ] ] );
+			}
+		}
+		$final_filter = array_merge( $new_filter, $new_params );
+
+		$filter_strings = array();
+		if( count( $final_filter ) ){
+			foreach( $final_filter as $filter_item ){
+				$filter_strings[] = implode( ' ', $filter_item );
+			}
+		}
+		$filter = implode( ' And ', $filter_strings );
+		return $filter;
+	}
+
+	function parse_filter_into_array( $qs = null ){
+		$filter_as_array = array();
+		if( null == $qs ){
+			return $filter_as_array;
+		}
+		$search_terms = preg_split( "/\s(And|Or|Not)\s/", $qs );
+		if( $search_terms ){
+			foreach( $search_terms as $search_term ){
+				$search_parameter = preg_split( "/\s(Eq|Ne|Bt|Gt|Ge|Lt|Le)\s/", $search_term, -1, PREG_SPLIT_DELIM_CAPTURE );
+				$filter_as_array[] = $search_parameter;
+			}
+		}
+		return $filter_as_array;
+	}
+
 	function parse_search_into_filter( $qs = null ){
 		if( null == $qs ){
 			$qs = $_SERVER[ 'QUERY_STRING' ];

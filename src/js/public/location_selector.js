@@ -1,10 +1,11 @@
 (function($){
 
 	var queryObject = {
+    c: 'Y',
 		command_line_mode: 'true',
 		cmd: 'srv+api/search/getLocations.json',
-		i: 'City,StateOrProvince,SteetAddress,PostalCode,CountyOrParish,SubdivisionName,MLSAreaMajor,ListingId,SchoolDistrict',
-		l: 8,
+		i: 'City,StateOrProvince,SteetAddress,PostalCode,CountyOrParish,SubdivisionName,MLSAreaMajor,MLSAreaMinor,StreetAddress,MapOverlay,ListingId,SchoolDistrict',
+		l: 18,
 		ma: 'x\'' + flexmls.ma_tech_id + '\'',
 		p: '',
 		std: 'Y',

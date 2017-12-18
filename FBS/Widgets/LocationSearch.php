@@ -107,11 +107,20 @@ class LocationSearch extends \WP_Widget {
 
 			echo '<ul>';
 
+			$property_type = $instance[ 'property_type' ];
+
 			foreach( $locations_field as $location_field){
 				$location_field_pieces = explode( '***', $location_field );
-				$this_url = $link_url . '?' . build_query( array(
+
+				$query = array(
 					urlencode( $location_field_pieces[ 1 ] ) => urlencode( $location_field_pieces[ 0 ] )
-				) );
+				);
+
+				if( !empty( $property_type ) ){
+					$query[ 'PropertyType' ] = $property_type;
+				}
+
+				$this_url = $link_url . '?' . build_query( $query );
 				echo '<li><a href="' . $this_url . '" title="' . $location_field_pieces[ 0 ] . '">' . $location_field_pieces[ 0 ] . '</a></li>';
 			}
 			echo '</ul>';

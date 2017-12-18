@@ -195,7 +195,7 @@ class Flexmls {
 			$flexmls_settings[ 'general' ][ 'search_results_page' ] = $post_id;
 			update_option( 'flexmls_settings', $flexmls_settings, true );
 			update_option( 'flexmls_version', FLEXMLS_PLUGIN_VERSION, false );
-			add_action( 'shutdown', '\flush_rewrite_rules' );
+			flush_rewrite_rules();
 			return;
 		}
 
