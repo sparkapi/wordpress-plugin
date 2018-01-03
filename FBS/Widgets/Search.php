@@ -18,6 +18,17 @@ class Search extends \WP_Widget {
 			'SqFt' => 'Square Footage',
 			'Price' => 'Price'
 		);
+
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
+		add_action( 'admin_footer', array( $this, 'admin_footer' ) );
+	}
+
+	function admin_enqueue_scripts(){
+		wp_enqueue_script( 'iris' );
+		// wp_enqueue_style( 'wp-color-picker');
+	}
+
+	function admin_footer(){
 	}
 
 	public function form( $instance ){
@@ -34,6 +45,12 @@ class Search extends \WP_Widget {
 		$submit_button_text = !isset( $instance[ 'submit_button_text' ] ) ? 'Search For Homes' : $instance[ 'submit_button_text' ];
 		$more_search_options_link = !isset( $instance[ 'more_search_options_link' ] ) ? '' : $instance[ 'more_search_options_link' ];
 		$more_search_options_text = !isset( $instance[ 'more_search_options_text' ] ) ? '' : $instance[ 'more_search_options_text' ];
+
+		$theme_style = !isset( $instance[ 'theme_style' ] ) ? '' : $instance[ 'theme_style' ];
+		$corner_style = !isset( $instance[ 'corner_style' ] ) ? 'square' : $instance[ 'corner_style' ];
+		$button_background = !isset( $instance[ 'button_background' ] ) ? '' : $instance[ 'button_background' ];
+		$button_foreground = !isset( $instance[ 'button_foreground' ] ) ? '' : $instance[ 'button_foreground' ];
+
 		?>
 		<p>
 			<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>">Title</label>
@@ -101,6 +118,33 @@ class Search extends \WP_Widget {
 			<input placeholder="eg, More Search Options" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'more_search_options_text' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'more_search_options_text' ) ); ?>" type="text" value="<?php echo esc_attr( $more_search_options_text ); ?>">
 			<br /><small>Custom text for the above link on the bottom of the search widget</small>
 		</p>
+		<p>
+			<label for="<?php echo esc_attr( $this->get_field_id( 'theme_style' ) ); ?>">Search Box Theme</label>
+			<select class="widefat flexmls-search-widget-theme-select" id="<?php echo $this->get_field_id( 'theme_style' ); ?>" name="<?php echo $this->get_field_name( 'theme_style' ); ?>">
+				<option value="" <?php selected( $theme_style, '' ); ?>>None - Controlled By Theme</option>
+				<option value="light" <?php selected( $theme_style, 'light' ); ?>>Light</option>
+				<option value="dark" <?php selected( $theme_style, 'dark' ); ?>>Dark</option>
+			</select>
+		</p>
+		<div class="flexmls-search-widget-theme-options">
+			<p>
+				<label for="<?php echo esc_attr( $this->get_field_id( 'corner_style' ) ); ?>">Box Corners</label>
+				<select class="widefat" id="<?php echo $this->get_field_id( 'corner_style' ); ?>" name="<?php echo $this->get_field_name( 'corner_style' ); ?>">
+					<option value="square" <?php selected( $corner_style, 'square' ); ?>>Square (Default)</option>
+					<option value="rounded" <?php selected( $corner_style, 'rounded' ); ?>>Rounded</option>
+				</select>
+			</p>
+			<p>
+				<label for="<?php echo esc_attr( $this->get_field_id( 'button_background' ) ); ?>">Button Background Color</label><br />
+				<small>Leave blank to use the default blue</small>
+				<input placeholder="eg, #4b6ed0" class="widefat iris-color-picker" id="<?php echo esc_attr( $this->get_field_id( 'button_background' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'button_background' ) ); ?>" type="text" value="<?php echo esc_attr( $button_background ); ?>">
+			</p>
+			<p>
+				<label for="<?php echo esc_attr( $this->get_field_id( 'button_foreground' ) ); ?>">Button Text Color</label><br />
+				<small>Leave blank to use the default white</small>
+				<input placeholder="eg, #ffffff" class="widefat iris-color-picker" id="<?php echo esc_attr( $this->get_field_id( 'button_foreground' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'button_foreground' ) ); ?>" type="text" value="<?php echo esc_attr( $button_foreground ); ?>">
+			</p>
+		</div>
 		<?php
 	}
 
@@ -126,6 +170,18 @@ class Search extends \WP_Widget {
 
 		$instance[ 'more_search_options_link' ] = esc_url( $new_instance[ 'more_search_options_link' ] );
 		$instance[ 'more_search_options_text' ] = !empty( $new_instance[ 'more_search_options_text' ] ) ? sanitize_text_field( $new_instance[ 'more_search_options_text' ] ) : '';
+		$instance[ 'theme_style' ] = sanitize_text_field( $new_instance[ 'theme_style' ] );
+		if( !empty( $instance[ 'theme_style' ] ) ){
+			$instance[ 'corner_style' ] = sanitize_text_field( $new_instance[ 'corner_style' ] );
+			$button_background = sanitize_hex_color( $new_instance[ 'button_background' ] );
+			if( !empty( $button_background ) ){
+				$instance[ 'button_background' ] = $button_background;
+			}
+			$button_foreground = sanitize_hex_color( $new_instance[ 'button_foreground' ] );
+			if( !empty( $button_foreground ) ){
+				$instance[ 'button_foreground' ] = $button_foreground;
+			}
+		}
 
 		return $instance;
 	}
@@ -164,8 +220,16 @@ class Search extends \WP_Widget {
 		if( !empty( $instance[ 'title' ] ) ){
 			echo $args[ 'before_title' ] . apply_filters( 'widget_title', $instance[ 'title' ] ) . $args[ 'after_title' ];
 		}
+		$widget_theme_class = '';
+		if( !empty( $instance[ 'theme_style' ] ) ){
+			$widget_theme_class = ' flexmls-search-form-' . $instance[ 'theme_style' ];
+
+			if( !empty( $instance[ 'corner_style' ] ) ){
+				$widget_theme_class .= ' flexmls-search-form-' . $instance[ 'corner_style' ];
+			}
+		}
 		?>
-		<div class="flexmls-search-form">
+		<div class="flexmls-search-form<?php echo $widget_theme_class; ?>" id="flexmls-search-form-<?php echo $args[ 'widget_id' ]; ?>">
 			<form action="<?php echo $base_url; ?>" method="get" autocomplete="off">
 				<?php if( 'yes' == $user_property_types && 1 < count( $instance[ 'property_types_to_search' ] ) ) : ?>
 					<div class="flexmls-search-form-group">
@@ -284,5 +348,20 @@ class Search extends \WP_Widget {
 		</div>
 		<?php
 		echo $args[ 'after_widget' ];
+		if( isset( $instance[ 'button_background' ] ) || isset( $instance[ 'button_foreground' ] ) ){
+			$styles = array();
+			if( isset( $instance[ 'button_background' ] ) ){
+				$styles[] = 'background:' . $instance[ 'button_background' ] . ' !important;';
+				$styles[] = 'border-color:' . $instance[ 'button_background' ] . ' !important;';
+			}
+			if( isset( $instance[ 'button_foreground' ] ) ){
+				$styles[] = 'color:' . $instance[ 'button_foreground' ] . ' !important;';
+			}
+			if( count( $styles ) ){
+				echo '<style type="text/css">';
+				echo '#flexmls-search-form-' . $args[ 'widget_id' ] . ' .flexmls-button-primary {' . implode( '', $styles ) . '}';
+				echo '</style>';
+			}
+		}
 	}
 }

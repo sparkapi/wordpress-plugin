@@ -216,6 +216,9 @@ class ListingSummary extends Page {
 									if( 1 < $this->query->current_page ){
 										$list_url .= '/page/' . $this->query->current_page . $qs;
 										$map_url .= '/page/' . $this->query->current_page . $qs;
+									} else {
+										$list_url .= $qs;
+										$map_url .= $qs;
 									}
 									$content .= '<ul class="flexmls-listings-view-tabs">';
 									$content .= '<li class="flexmls-listings-view-tab-list' . ( 'list' == $wp_query->query_vars[ 'idxpage_view' ] ? ' tab-active' : '' ) . '"><a href="' . $list_url . '" title="List View">List View</a></li>';
@@ -257,7 +260,7 @@ class ListingSummary extends Page {
 			if( !empty( $address[ 1 ] ) ){
 				$address_text .= '<span class="listing-address-line-2">' . $address[ 1 ] . '</span>';
 			}
-			$this_permalink = $this->base_url . '/' . sanitize_title_with_dashes( $address[ 0 ] . ' ' . $address[ 1 ] ) . '_' . $listing[ 'Id' ];
+			$this_permalink = $this->base_url . '/' . sanitize_title_with_dashes( $address[ 0 ] . ' ' . $address[ 1 ] ) . '_' . $listing[ 'Id' ] . $qs;
 			$content .= '		<div class="listings-listing">
 									<header class="listing-header">
 										<address><a href="' . $this_permalink . '" title="View ' . $address[ 0 ] . '">' . $address_text . '</a></address>
@@ -452,6 +455,13 @@ class ListingSummary extends Page {
 						$this->search_filter = $saved_search_details[ 'Filter' ];
 					}
 				}
+			} else {
+				$SavedSearches = new \SparkAPI\SavedSearches();
+				$saved_search_details = $SavedSearches->get_saved_search_details( $this->idx_link_details[ 'SearchId' ] );
+				if( array_key_exists( 'Filter', $saved_search_details ) ){
+					$this->search_filter = $saved_search_details[ 'Filter' ];
+					$this->idx_link_details[ 'Name' ] = $saved_search_details[ 'Name' ];
+				}
 			}
 		} elseif( 'cart' == $wp_query->query_vars[ 'idxsearch_type' ] ){
 			$Oauth = new \SparkAPI\Oauth();
@@ -462,7 +472,7 @@ class ListingSummary extends Page {
 			}
 		}
 
-		//$addl_filters = array();
+
 		if( $_GET ){
 			$get_params = $_GET;
 			if( isset( $get_params[ 'listings_order_by' ] ) ){

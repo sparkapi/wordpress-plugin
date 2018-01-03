@@ -173,6 +173,14 @@ class ListingDetail extends Page {
 		if( empty( $this->search_filter ) ){
 			return;
 		}
+
+		$current_url = \FBS\Admin\Utilities::get_current_url();
+		$qs = '';
+		if( strpos( $current_url, '?' ) ){
+			list( $first_part, $qs ) = explode( '?', $current_url );
+			$qs = '?' . $qs;
+		}
+
 		$done_with_prev_next = false;
 		$do_previous_link = true;
 		$do_next_link = false;
@@ -193,11 +201,11 @@ class ListingDetail extends Page {
 				if( $this_id != $this_listing_id ){
 					if( $do_previous_link ){
 						$address = \FBS\Admin\Utilities::format_listing_street_address( $listing_ids[ $i ] );
-						$this->previous_listing_url = $this->base_url . '/' . sanitize_title_with_dashes( $address[ 0 ] . ' ' . $address[ 1 ] ) . '_' . $this_id;
+						$this->previous_listing_url = $this->base_url . '/' . sanitize_title_with_dashes( $address[ 0 ] . ' ' . $address[ 1 ] ) . '_' . $this_id . $qs;
 					}
 					if( $do_next_link ){
 						$address = \FBS\Admin\Utilities::format_listing_street_address( $listing_ids[ $i ] );
-						$this->next_listing_url = $this->base_url . '/' . sanitize_title_with_dashes( $address[ 0 ] . ' ' . $address[ 1 ] ) . '_' . $this_id;
+						$this->next_listing_url = $this->base_url . '/' . sanitize_title_with_dashes( $address[ 0 ] . ' ' . $address[ 1 ] ) . '_' . $this_id . $qs;
 						$do_next_link = false;
 						$done_with_prev_next = true;
 						break 2;

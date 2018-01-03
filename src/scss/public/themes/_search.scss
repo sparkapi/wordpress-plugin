@@ -1,3 +1,35 @@
+.flexmls-search-form-light,
+.flexmls-search-form-dark {
+	border: 1px solid $brand-grey-lt;
+	padding: 15px;
+}
+
+.flexmls-search-form-light {
+	background: #fff;
+}
+
+.flexmls-search-form-dark {
+	background: $brand-grey-dk;
+
+	h4,
+	label {
+		color: #fff;
+	}
+
+	p {
+		a {
+			color: #fff;
+
+			&:hover {
+				color: $brand-grey-xlt;
+			}
+		}
+	}
+}
+
+.flexmls-search-form-rounded {
+	border-radius: 8px;
+}
 .flexmls-search-form-group {
 	padding-bottom: 15px;
 

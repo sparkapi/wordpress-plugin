@@ -6505,10 +6505,10 @@ window.optimizedScroll = (function(){
     c: 'Y',
 		command_line_mode: 'true',
 		cmd: 'srv+api/search/getLocations.json',
-		i: 'City,StateOrProvince,SteetAddress,PostalCode,CountyOrParish,SubdivisionName,MLSAreaMajor,MLSAreaMinor,StreetAddress,MapOverlay,ListingId,SchoolDistrict',
+		i: 'City,StateOrProvince,StreetAddress,PostalCode,CountyOrParish,SubdivisionName,MLSAreaMajor,MLSAreaMinor,MapOverlay,ListingId,SchoolDistrict',
 		l: 18,
 		ma: 'x\'' + flexmls.ma_tech_id + '\'',
-		p: '',
+		p: 'A',
 		std: 'Y',
 		tech_id: 'x\'' + flexmls.tech_id + '\''
 	};
@@ -6541,10 +6541,18 @@ window.optimizedScroll = (function(){
 							$.each(data.results, function( idx, item ){
 								r.push({
 									id: item.display_val + '***' + item.name,
-									text: item.display_val + ' (' + item.name + ')'
+									text: item.display_val + ' (' + item.name.split(/(?=[A-Z])/).join(" ") + ')'
 								});
 							});
 						}
+            if( true === !!data.overlays.length ){
+              $.each(data.overlays, function( idx, item ){
+                r.push({
+                  id: item.display_val + '***' + item.name,
+                  text: item.display_val + ' (' + item.name.split(/(?=[A-Z])/).join(" ") + ')'
+                });
+              });
+            }
 						return {
 							results: r
 						};
@@ -6564,6 +6572,48 @@ window.optimizedScroll = (function(){
 		locationSelector();
 	});
 
+})(jQuery);
+(function($){
+
+  var doColorPicker = function(){
+    $( '.iris-color-picker' ).iris({
+      hide: false,
+      palettes: ['#4b6ed0', '#666370', '#84B03D', '#ff9933', '#59CFEB', '#ffffff']
+    });
+  };
+
+  var doThemeOptions = function(){
+    if( $( '.flexmls-search-widget-theme-select' ).length ){
+      var select = $( '.flexmls-search-widget-theme-select' );
+      $( select ).each(function(){
+        var widget = $( this ).closest( '.widget' );
+        var optionsSection = $( widget ).find( '.flexmls-search-widget-theme-options' );
+        if ( $( this ).val().length > 0) {
+          $( optionsSection ).fadeIn();
+        } else {
+          $( optionsSection ).fadeOut();
+        }
+
+        $( this ).on( 'change', function( ev ){
+          console.log(this.value);
+          if (this.value.length > 0) {
+            $( optionsSection ).fadeIn();
+          } else {
+            $( optionsSection ).fadeOut();
+          }
+        });
+      });
+    }
+  };
+
+  $(document).ready(function(){
+    doColorPicker();
+    doThemeOptions();
+  });
+  $(document).ajaxSuccess(function( e, xhr, settings ){
+    doColorPicker();
+    doThemeOptions();
+  });
 })(jQuery);
 (function($){
 

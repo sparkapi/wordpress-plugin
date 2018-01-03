@@ -142,6 +142,9 @@ class Slideshow extends \WP_Widget {
 	}
 
 	public static function get_background_slides(){
+		if( !array_key_exists( 'params', $_POST ) ){
+			exit( json_encode( array() ) );
+		}
 		$listings = new \SparkAPI\Listings();
 		$slides = array();
 		$search_filter = sanitize_text_field( stripslashes( $_POST[ 'params' ][ 'search_filter' ] ) );
@@ -269,11 +272,32 @@ class Slideshow extends \WP_Widget {
 			}
 		}
 
-		$search_filter = implode( ' And ', $addl_filters );
-
 		$addl_params = array(
 			'_limit' => 25
 		);
+
+		$temp_date = date_default_timezone_get();
+		date_default_timezone_set('America/Chicago');
+		$time_format_back = date( 'Y-m-d\TH:i:s.u', strtotime( '-' . $instance[ 'days_back' ] . ' days' ) );
+		date_default_timezone_set( $temp_date );
+		$days_in_hours = $instance[ 'days_back' ] * 24;
+
+		switch( $instance[ 'display' ] ){
+			case 'new':
+				$addl_filters[] = 'OnMarketDate Ge ' . $time_format_back;
+				break;
+			case 'open_houses':
+				$addl_params[ 'OpenHouses' ] = $instance[ 'days_back' ];
+				break;
+			case 'price_changes':
+				$addl_filters[] = 'PriceChangeTimestamp Gt ' . $time_format_back;
+				break;
+			case 'recent_sales':
+				$addl_filters[] = 'StatusChangeTimestamp Gt ' . $time_format_back;
+				break;
+		}
+
+		$search_filter = implode( ' And ', $addl_filters );
 
 		if( 'all' != $instance[ 'source' ] ){
 			$addl_params[ 'endpoint' ] = $instance[ 'source' ];

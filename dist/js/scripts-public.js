@@ -11524,10 +11524,10 @@ window.optimizedScroll = (function(){
     c: 'Y',
 		command_line_mode: 'true',
 		cmd: 'srv+api/search/getLocations.json',
-		i: 'City,StateOrProvince,SteetAddress,PostalCode,CountyOrParish,SubdivisionName,MLSAreaMajor,MLSAreaMinor,StreetAddress,MapOverlay,ListingId,SchoolDistrict',
+		i: 'City,StateOrProvince,StreetAddress,PostalCode,CountyOrParish,SubdivisionName,MLSAreaMajor,MLSAreaMinor,MapOverlay,ListingId,SchoolDistrict',
 		l: 18,
 		ma: 'x\'' + flexmls.ma_tech_id + '\'',
-		p: '',
+		p: 'A',
 		std: 'Y',
 		tech_id: 'x\'' + flexmls.tech_id + '\''
 	};
@@ -11553,7 +11553,7 @@ window.optimizedScroll = (function(){
 							$.each(data.results, function( idx, item ){
 								r.push({
 									id: item.display_val + '***' + item.name,
-									text: item.display_val + ' (' + item.name + ')'
+									text: item.display_val + ' (' + item.name.split(/(?=[A-Z])/).join(" ") + ')'
 								});
 							});
 						}

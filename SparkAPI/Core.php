@@ -26,15 +26,15 @@ class Core {
 			'X-SparkApi-User-Agent' => 'Flexmls-WordPress-Plugin/' . $this->plugin_version
 		);
 
-		global $Flexmls;
-		$stored_tokens = ( isset( $Flexmls->oauth_tokens ) && is_array( $Flexmls->oauth_tokens ) ) ? $Flexmls->oauth_tokens : array();
-		if( empty( $stored_tokens ) && isset( $_COOKIE[ 'flexmls_oauth_tokens' ] ) ){
-			$stored_tokens = json_decode( stripslashes( $_COOKIE[ 'flexmls_oauth_tokens' ] ), true );
-			$Flexmls->oauth_tokens = $stored_tokens;
-		}
-		if( array_key_exists( 'access_token', $stored_tokens ) ){
-			$this->api_headers[ 'Authorization' ] = 'OAuth ' . $stored_tokens[ 'access_token' ];
-		}
+		// global $Flexmls;
+		// $stored_tokens = ( isset( $Flexmls->oauth_tokens ) && is_array( $Flexmls->oauth_tokens ) ) ? $Flexmls->oauth_tokens : array();
+		// if( empty( $stored_tokens ) && isset( $_COOKIE[ 'flexmls_oauth_tokens' ] ) ){
+		// 	$stored_tokens = json_decode( stripslashes( $_COOKIE[ 'flexmls_oauth_tokens' ] ), true );
+		// 	$Flexmls->oauth_tokens = $stored_tokens;
+		// }
+		// if( array_key_exists( 'access_token', $stored_tokens ) ){
+		// 	$this->api_headers[ 'Authorization' ] = 'OAuth ' . $stored_tokens[ 'access_token' ];
+		// }
 	}
 
 	function admin_notices_api_connection_error(){
