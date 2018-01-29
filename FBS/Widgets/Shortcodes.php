@@ -10,8 +10,10 @@ class Shortcodes {
 
 		$atts = shortcode_atts( array(
 			'title' => 'Saved Searches',
-			'idx_link' => array()
+			'idx_link' => ''
 		), $atts, 'flexmls_idxlinks' );
+
+		$atts[ 'idx_link' ] = explode( ',', $atts[ 'idx_link' ] );
 
 		$widget_name = '\FBS\Widgets\IDXLinks';
 

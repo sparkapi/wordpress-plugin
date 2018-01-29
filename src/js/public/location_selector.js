@@ -30,6 +30,7 @@
 					processResults: function( data, params ){
 						var r = [];
 						if( true === !!data.results.length ){
+              console.log(data.results)
 							$.each(data.results, function( idx, item ){
 								r.push({
 									id: item.display_val + '***' + item.name,

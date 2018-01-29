@@ -57,6 +57,18 @@ class Oauth extends Core {
 				$stored_tokens = json_decode( stripslashes( $_COOKIE[ 'flexmls_oauth_tokens' ] ), true );
 				$Flexmls->oauth_tokens = $stored_tokens;
 			}
+			if( empty( $stored_tokens ) ){
+				$this->oauth_token_failures++;
+				$this->logout();
+				$auth_token = $this->generate_oauth_token( false );
+				return $auth_token;
+			}
+			if( $stored_tokens[ 'refresh_token' ] < time() ){
+				$this->oauth_token_failures++;
+				$this->logout();
+				$auth_token = $this->generate_oauth_token( false );
+				return $auth_token;
+			}
 			$body[ 'grant_type' ] = 'refresh_token';
 			$body[ 'refresh_token' ] = $stored_tokens[ 'refresh_token' ];
 			if( array_key_exists( 'access_token', $stored_tokens ) ){
@@ -86,6 +98,7 @@ class Oauth extends Core {
 					'token_expiration' => time() + intval( $json[ 'expires_in' ] )
 				);
 				$Flexmls->oauth_tokens = $auth_token;
+				$this->oauth_token_failures = 0;
 				setcookie( 'flexmls_oauth_tokens', json_encode( $auth_token ), time() + MONTH_IN_SECONDS, COOKIEPATH );
 			} else {
 				$this->oauth_token_failures++;
@@ -140,16 +153,17 @@ class Oauth extends Core {
 	}
 
 	function is_user_logged_in(){
-		global $Flexmls;
-		$stored_tokens = is_array( $Flexmls->oauth_tokens ) ? $Flexmls->oauth_tokens : array();
-		if( empty( $stored_tokens ) && isset( $_COOKIE[ 'flexmls_oauth_tokens' ] ) ){
-			$stored_tokens = json_decode( stripslashes( $_COOKIE[ 'flexmls_oauth_tokens' ] ), true );
-			$Flexmls->oauth_tokens = $stored_tokens;
-		}
-		if( array_key_exists( 'access_token', $stored_tokens ) ){
-			return true;
-		}
-		return false;
+		return $this->generate_oauth_token( false ) ? true : false;
+		// global $Flexmls;
+		// $stored_tokens = is_array( $Flexmls->oauth_tokens ) ? $Flexmls->oauth_tokens : array();
+		// if( empty( $stored_tokens ) && isset( $_COOKIE[ 'flexmls_oauth_tokens' ] ) ){
+		// 	$stored_tokens = json_decode( stripslashes( $_COOKIE[ 'flexmls_oauth_tokens' ] ), true );
+		// 	$Flexmls->oauth_tokens = $stored_tokens;
+		// }
+		// if( array_key_exists( 'access_token', $stored_tokens ) ){
+		// 	return true;
+		// }
+		// return false;
 	}
 
 	function login(){
@@ -186,6 +200,7 @@ class Oauth extends Core {
 		global $Flexmls;
 		$Flexmls->oauth_tokens = array();
 		foreach( $_COOKIE as $key => $value ){
+			unset( $_COOKIE[ $key ] );
 			setcookie( $key, '', time() - DAY_IN_SECONDS, COOKIEPATH );
 		}
 		// Portal url may have been redirected. This could have been another WordPress

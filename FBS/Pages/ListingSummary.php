@@ -193,6 +193,20 @@ class ListingSummary extends Page {
 		global $Flexmls, $wp_query;
 		$flexmls_settings = get_option( 'flexmls_settings' );
 
+		$current_url = \FBS\Admin\Utilities::get_current_url();
+		$qs = '';
+		if( strpos( $current_url, '?' ) ){
+			list( $first_part, $qs ) = explode( '?', $current_url );
+			$qs_pieces = explode( '&', $qs );
+			for( $i = 0; $i < count( $qs_pieces ); $i++ ){
+				if( false !== strpos( $qs_pieces[ $i ], 'listings_per_page' ) || false !== strpos( $qs_pieces[ $i ], 'listings_order_by' ) ){
+					$qs_pieces[ $i ] = '';
+				}
+			}
+			$qs = implode( '&', array_filter( $qs_pieces ) );
+			$qs = '?' . $qs;
+		}
+
 		$content  = '	<div class="flexmls-content">
 							<aside class="flexmls-listings-meta">';
 		$content .= '			<div class="flexmls-listings-count">';
@@ -202,13 +216,6 @@ class ListingSummary extends Page {
 										$this->query->last_count
 									), number_format( $this->query->last_count ) );
 								if( $this->can_do_maps() ){
-
-									$current_url = \FBS\Admin\Utilities::get_current_url();
-									$qs = '';
-									if( strpos( $current_url, '?' ) ){
-										list( $first_part, $qs ) = explode( '?', $current_url );
-										$qs = '?' . $qs;
-									}
 
 									$list_url = $this->base_url;
 									$map_url = $list_url . '/map';
@@ -228,7 +235,7 @@ class ListingSummary extends Page {
 		$content .= '			</div>
 								<div class="flexmls-listings-sort">
 									<div class="flexmls-listings-sort-numberperpage">
-										<select name="listings_per_page" data-baseurl="' . $this->base_url . ( 'map' == $wp_query->query_vars[ 'idxpage_view' ] ? '/map' : '' ) . '">
+										<select name="listings_per_page" data-baseurl="' . ( 'map' == $wp_query->query_vars[ 'idxpage_view' ] ? $map_url : $list_url ) . '">
 											<option value="5" ' . selected( $Flexmls->listings_per_page, 5, false ) . '>5 Per Page</option>
 											<option value="10" ' . selected( $Flexmls->listings_per_page, 10, false ) . '>10 Per Page</option>
 											<option value="15" ' . selected( $Flexmls->listings_per_page, 15, false ) . '>15 Per Page</option>
@@ -237,7 +244,7 @@ class ListingSummary extends Page {
 										</select>
 									</div>
 									<div class="flexmls-listings-sort-orderby">
-										<select name="listings_order_by" data-baseurl="' . $this->base_url . ( 'map' == $wp_query->query_vars[ 'idxpage_view' ] ? '/map' : '' ) . '">
+										<select name="listings_order_by" data-baseurl="' . ( 'map' == $wp_query->query_vars[ 'idxpage_view' ] ? $map_url : $list_url ) . '">
 											<option value="-ListPrice" ' . selected( $Flexmls->listings_order_by, '-ListPrice', false ) . '>List price (High to Low)</option>
 											<option value="ListPrice" ' . selected( $Flexmls->listings_order_by, 'ListPrice', false ) . '>List price (Low to High)</option>
 											<option value="-BedsTotal" ' . selected( $Flexmls->listings_order_by, '-BedsTotal', false ) . '># Bedrooms</option>

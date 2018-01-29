@@ -31,11 +31,20 @@
 	var changeFilterParams = function(){
 		$( 'select[name="listings_per_page"]' ).change( function(){
 			var baseurl = $( this ).data( 'baseurl' );
-			window.location = baseurl + '?listings_per_page=' + $( this ).val();
+      if (baseurl.indexOf('?') > 0) {
+  			window.location = baseurl + '&listings_per_page=' + $( this ).val();
+      } else {
+        window.location = baseurl + '?listings_per_page=' + $( this ).val();
+      }
 		} );
 		$( 'select[name="listings_order_by"]' ).change( function(){
 			var baseurl = $( this ).data( 'baseurl' );
-			window.location = baseurl + '?listings_order_by=' + $( this ).val();
+      if (baseurl.indexOf('?') > 0) {
+        window.location = baseurl + '&listings_order_by=' + $( this ).val();
+      } else {
+        window.location = baseurl + '?listings_order_by=' + $( this ).val();
+      }
+
 		} );
 	};
 

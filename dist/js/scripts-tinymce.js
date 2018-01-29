@@ -21,10 +21,10 @@
     }
   };
 
-  var flexmls_idxlinkss = function( editor ){
+  var flexmls_idxlinks = function( editor ){
     // Widget Defaults
     var title = 'Saved Searches';
-    var idx_link = '';
+    var idx_link = [];
 
     // If existing shortcode is selected and matches this type
     var selection = tinyMCE.activeEditor.selection.getContent({format : 'text'});
@@ -37,7 +37,7 @@
             title = atts.title;
           }
           if( atts.hasOwnProperty( 'idx_link' ) ){
-            idx_link = atts.idx_link;
+            idx_link = atts.idx_link.split(',');
           }
         } catch( e ){
           console.log( 'Error' );
@@ -58,35 +58,93 @@
         },
         {
           type: 'container',
-          name: 'idxlinks2',
+          name: 'idx_link',
           label: 'IDX Link(s)',
-          onpostrender: function( el ){
-            var container = this;
-            var ed = editor;
-            var str = {'type' : 'checkbox', 'name' : 'idxlinks', 'label' : 'IDX Link(s)', 'text' : 'Link Name', 'value': 1};
-            container.append( str );
-            container.reflow();
-            console.log( 'Getting IDX Links' );
-            console.log( ed.get_idx_links() );
+          onPostRender: function(){
+            var element = this.getEl(),
+                input = element.firstChild,
+                $input = $( input ),
+                inputInstance = this;
             $.post( ajaxurl, {action: 'tinymce_get_idx_links'}, function( response ){
-
-              response.forEach(function( item ) {
-                var str = {'type' : 'checkbox', 'name' : 'idxlinks', 'label' : 'IDX Link(s)', 'text' : 'Link Name', 'value': 1};
-
-                container.append( item );
-              });
-              container.renderHTML();
-              container.reflow();
-
+              if (response.length) {
+                for (var i = 0; i < inputInstance.items().length; i++) {
+                  inputInstance.items()[i].hide();
+                }
+                for (var i = 0; i < response.length; i++) {
+                  var lb = {
+                    checked: -1 !== idx_link.indexOf(response[i].value),
+                    type: 'checkbox',
+                    text: response[i].text,
+                    name: response[i].value
+                  };
+                  inputInstance.append(lb);
+                }
+                element.style.overflowY='scroll';
+                inputInstance.reflow();
+              }
             }, 'json' );
           },
-          style: 'max-height: 50vh; overflow-y: scroll',
           items: [
-]
+            {
+              disabled: true,
+              type: 'checkbox',
+              text: 'Loading',
+              value: 0
+            },
+            {
+              disabled: true,
+              type: 'checkbox',
+              text: 'Loading',
+              value: 0
+            },
+            {
+              disabled: true,
+              type: 'checkbox',
+              text: 'Loading',
+              value: 0
+            },
+            {
+              disabled: true,
+              type: 'checkbox',
+              text: 'Loading',
+              value: 0
+            },
+            {
+              disabled: true,
+              type: 'checkbox',
+              text: 'Loading',
+              value: 0
+            },
+            {
+              disabled: true,
+              type: 'checkbox',
+              text: 'Loading',
+              value: 0
+            },
+          ]
         }
       ],
       onsubmit: function( e ) {
-        editor.insertContent( '[container style="' + e.data.style + '"]<br /><br />[/container]');
+        var attrs = {};
+        var links = [];
+        for (key in e.data) {
+          switch (true) {
+            case 'title' === key:
+              attrs.title = e.data[key];
+              break;
+            default:
+              if (true === e.data[key]) {
+                links.push(key);
+              }
+          }
+        }
+        attrs.idx_link = links.join(',');
+        var shortcode = wp.shortcode.string({
+          tag: 'flexmls_idxlinks',
+          attrs: attrs,
+          type: 'single'
+        });
+        editor.insertContent( shortcode );
       }
     }
   };
@@ -102,6 +160,7 @@
     var selection = tinyMCE.activeEditor.selection.getContent({format : 'text'});
     if( true === !!selection ){
       var shortcode = wp.shortcode.next( 'flexmls_leadgen', selection, 0 );
+      console.log(shortcode)
       if( true === !!shortcode ){
         try {
           var atts = shortcode.shortcode.attrs.named;
@@ -260,66 +319,6 @@
   tinymce.PluginManager.add( 'flexmlsidx', function( editor, url ){
     var self = this;
 
-    function flexmls_idxlinks(){
-      var title = 'Saved Searches';
-      var idx_link = '';
-
-      // If existing shortcode is selected and matches this type
-      var selection = tinyMCE.activeEditor.selection.getContent({format : 'text'});
-      if( true === !!selection ){
-        var shortcode = wp.shortcode.next( 'flexmls_idxlinks', selection, 0 );
-        if( true === !!shortcode ){
-          try {
-            var atts = shortcode.shortcode.attrs.named;
-            if( atts.hasOwnProperty( 'title' ) ){
-              title = atts.title;
-            }
-            if( atts.hasOwnProperty( 'idx_link' ) ){
-              idx_link = atts.idx_link;
-            }
-          } catch( e ){
-            console.log( 'Error' );
-            console.log( e );
-          }
-        }
-      }
-
-      editor.windowManager.open( {
-        title: 'IDX Links',
-        body: [
-          {
-            type: 'textbox',
-            name: 'title',
-            label: 'Title',
-            size: 42,
-            value: title
-          },
-          {
-            type: 'container',
-            name: 'idxlinks',
-            label: 'IDX Link(s)',
-            ondata: function(){
-              var pas = this.parentsAndSelf();
-              pas.reflow();
-            },
-            onpostrender: function( el ){
-              var container = this;
-              $.post( ajaxurl, {action: 'tinymce_get_idx_links'}, function( response ){
-                var items = container.create( response );
-                container.append( items ).reflow().repaint();
-                container.fire( 'data' );
-              }, 'json' );
-            },
-            //style: 'max-height: 50vh; overflow-y: scroll',
-            items: []
-          }
-        ],
-        onsubmit: function( e ) {
-          editor.insertContent( '[container style="' + e.data.style + '"]<br /><br />[/container]');
-        }
-      } );
-    }
-
     editor.addButton( 'flexmlsidx_shortcodes', {
         type: 'menubutton',
         tooltip: 'Add a Flexmls widget',
@@ -332,7 +331,10 @@
           {text: 'General Search', onclick: function(){
             editor.windowManager.open( flexmls_general_search( editor ) );
           } },
-          {text: 'IDX Links', onclick: flexmls_idxlinks },
+          // {text: 'IDX Links', onclick: flexmls_idxlinks },
+          {text: 'IDX Links', onclick: function(){
+            editor.windowManager.open( flexmls_idxlinks( editor ) );
+          } },
           {text: 'IDX Slideshow', onclick: function(){
             editor.windowManager.open( flexmls_slideshow( editor ) );
           } },
