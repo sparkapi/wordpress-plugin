@@ -160,7 +160,6 @@
     var selection = tinyMCE.activeEditor.selection.getContent({format : 'text'});
     if( true === !!selection ){
       var shortcode = wp.shortcode.next( 'flexmls_leadgen', selection, 0 );
-      console.log(shortcode)
       if( true === !!shortcode ){
         try {
           var atts = shortcode.shortcode.attrs.named;
@@ -275,22 +274,73 @@
   };
 
   var flexmls_portal = function( editor ){
+    var saved_searches, listing_carts;
+    // If existing shortcode is selected and matches this type
+    var selection = tinyMCE.activeEditor.selection.getContent({format : 'text'});
+    if( true === !!selection ){
+      var shortcode = wp.shortcode.next( 'flexmls_portal', selection, 0 );
+      if( true === !!shortcode ){
+        try {
+          var atts = shortcode.shortcode.attrs.named;
+          if( atts.hasOwnProperty( 'saved_searches' ) ){
+            saved_searches = parseInt(atts.saved_searches);
+          }
+          if( atts.hasOwnProperty( 'listing_carts' ) ){
+            listing_carts = parseInt(atts.listing_carts);
+          }
+        } catch( e ){
+          console.log( 'Error' );
+          console.log( e );
+        }
+      }
+    }
+
     return {
       title: 'Portal Widget',
-      body: [{
-          type: 'listbox',
-          name: 'style',
-          label: 'Style',
-          'values': [
-              {text: 'Clear', value: 'clear'},
-              {text: 'White', value: 'white'},
-              {text: 'Colour 1', value: 'colour1'},
-              {text: 'Colour 2', value: 'colour2'},
-              {text: 'Colour 3', value: 'colour3'},
-          ]
-      }],
+      body: [
+        {
+          border: '0 0 0 0',
+          margin: '0 0 0 0',
+          multiline: true,
+          padding: '0 0 0 0',
+          type: 'infobox',
+          text: 'Do you want to display your visitor\'s Saved Searches on this widget?'
+        },
+        {
+          checked: (1 === saved_searches ? true : false),
+          name: 'saved_searches',
+          type: 'checkbox',
+          text: 'Yes, include Saved Searches'
+        },
+        {
+          border: '0 0 0 0',
+          margin: '0 0 0 0',
+          multiline: true,
+          padding: '0 0 0 0',
+          type: 'infobox',
+          text: 'Do you want to display your visitor\'s Listing Carts on this widget?'
+        },
+        {
+          checked: (1 === listing_carts ? true : false),
+          name: 'listing_carts',
+          type: 'checkbox',
+          text: 'Yes, include Listing Carts'
+        }
+      ],
       onsubmit: function( e ) {
-        editor.insertContent( '[container style="' + e.data.style + '"]<br /><br />[/container]');
+        var attrs = {};
+        if (true === e.data[ 'saved_searches' ]) {
+          attrs.saved_searches = 1
+        }
+        if (true === e.data[ 'listing_carts' ]) {
+          attrs.listing_carts = 1
+        }
+        var shortcode = wp.shortcode.string({
+          tag: 'flexmls_portal',
+          attrs: attrs,
+          type: 'single'
+        });
+        editor.insertContent( shortcode );
       }
     }
   };

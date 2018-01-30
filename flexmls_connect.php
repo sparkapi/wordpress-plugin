@@ -170,6 +170,7 @@ class Flexmls {
 
 		add_shortcode( 'flexmls_idxlinks',array( 'FBS\Widgets\Shortcodes', 'flexmls_idxlinks' ) );
 		add_shortcode( 'flexmls_leadgen',array( 'FBS\Widgets\Shortcodes', 'flexmls_leadgen' ) );
+		add_shortcode( 'flexmls_portal',array( 'FBS\Widgets\Shortcodes', 'flexmls_portal' ) );
 
 	}
 

@@ -49,4 +49,23 @@ class Shortcodes {
 		return $output;
 	}
 
+	public static function flexmls_portal( $atts ){
+		global $wp_widget_factory;
+
+		$atts = shortcode_atts( array(
+			'listing_carts' => 0,
+			'saved_searches' => 0
+		), $atts, 'flexmls_leadgen' );
+
+		$widget_name = '\FBS\Widgets\Portal';
+
+		$widget = $wp_widget_factory->widgets[ $widget_name ];
+
+		ob_start();
+		the_widget( $widget_name, $atts );
+		$output = ob_get_contents();
+		ob_end_clean();
+		return $output;
+	}
+
 }
