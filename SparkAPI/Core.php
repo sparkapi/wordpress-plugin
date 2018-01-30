@@ -172,8 +172,6 @@ class Core {
 	}
 
 	function get_from_api( $method, $service, $seconds_to_cache = 15 * MINUTE_IN_SECONDS, $params = array(), $post_data = null, $a_retry = false ){
-		// write_log( debug_backtrace() );
-
 		if( !$this->generate_auth_token() ){
 			// No need to try anything else. We're not connected to the API so we
 			// bail with a failed response.
@@ -220,17 +218,23 @@ class Core {
 			if( !is_array( $json ) ){
 				// The response wasn't JSON as expected so bail out with the original, unparsed body
 				$return[ 'body' ] = $json;
+
 				return $return;
 			}
+
 			$json = $this->remove_blank_and_restricted_fields( $json );
 			if( array_key_exists( 'D', $json ) ){
 				if( array_key_exists( 'Success', $json[ 'D' ] ) && true == $json[ 'D' ][ 'Success' ] && 'GET' == $method ){
 					set_transient( $transient_name, $json, $seconds_to_cache );
+				} elseif( isset( $json[ 'D' ][ 'Code' ] ) && 1000 == $json[ 'D' ][ 'Code' ] ){
+					if( array_key_exists( 'Authorization', $this->api_headers ) && $this->generate_oauth_token() ){
+						$json = $this->get_from_api( $method, $service, $seconds_to_cache, $params, $post_data, $a_retry );
+					}
 				} elseif( isset( $json[ 'D' ][ 'Code' ] ) && 1020 == $json[ 'D' ][ 'Code' ] ){
 					delete_transient( 'flexmls_auth_token' );
-					if( array_key_exists( 'Authorization', $this->api_headers ) ){
-						$this->generate_oauth_token();
-					}
+					// if( array_key_exists( 'Authorization', $this->api_headers ) && $this->generate_oauth_token() ){
+					// 	$json = $this->get_from_api( $method, $service, $seconds_to_cache, $params, $post_data, $a_retry );
+					// }
 					if( $this->generate_auth_token() ){
 						$json = $this->get_from_api( $method, $service, $seconds_to_cache, $params, $post_data, $a_retry );
 					}
@@ -375,7 +379,6 @@ class Core {
 			);
 			unset( $params[ 'SavedSearch' ] );
 		}
-
 		foreach( $params as $key => $val ){
 			if( array_key_exists( $key, $sf ) ){
 				$type = $sf[ $key ][ 'Type' ];
@@ -393,11 +396,27 @@ class Core {
 						if( is_array( $val ) ){
 							$val = implode( '\',\'', $val );
 						}
-						$new_params[ $key ] = $key . ' Eq \'' . $val . '\'';
 						$new_params[ $key ] = array(
 							$key,
 							'Eq',
 							'\'' . $val . '\''
+						);
+						break;
+				}
+			} else {
+				switch( $key ){
+					case 'MapOverlay':
+						$new_params[ $key ] = array(
+							$key,
+							'Eq',
+							'\'' . addslashes( $val ) . '\''
+						);
+						break;
+					case 'StreetAddress':
+						$new_params[ $key ] = array(
+							$key,
+							'Eq',
+							'\'' . addslashes( $val ) . '\''
 						);
 						break;
 				}

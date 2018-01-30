@@ -153,6 +153,7 @@ class Flexmls {
 		add_action( 'wp_ajax_flexmls_listing_schedule_showing', array( 'FBS\Pages\Page', 'schedule_showing' ) );
 		add_action( 'wp_ajax_nopriv_flexmls_listing_schedule_showing', array( 'FBS\Pages\Page', 'schedule_showing' ) );
 		add_action( 'wp_ajax_tinymce_get_idx_links', array( 'FBS\Admin\TinyMCE', 'tinymce_get_idx_links' ) );
+		add_action( 'wp_ajax_tinymce_get_idx_links_list', array( 'FBS\Admin\TinyMCE', 'tinymce_get_idx_links_list' ) );
 		add_action( 'wp_ajax_tinymce_popup_shortcode', array( 'FBS\Admin\TinyMCE', 'tinymce_popup_shortcode' ) );
 		add_action( 'wp_ajax_toggle_cart_status', array( 'SparkAPI\Oauth', 'toggle_cart_status' ) );
 		add_action( 'wp_ajax_nopriv_toggle_cart_status', array( 'SparkAPI\Oauth', 'toggle_cart_status' ) );

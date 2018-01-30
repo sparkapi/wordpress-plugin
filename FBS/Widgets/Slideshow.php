@@ -174,7 +174,7 @@ class Slideshow extends \WP_Widget {
 					} else {
 						$primary_photo = FLEXMLS_PLUGIN_DIR_URL . '/dist/assets/photo_not_available.png';
 					}
-					$photos = $listing[ 'StandardFields' ][ 'Photos' ];
+					$photos = array_key_exists( 'Photos', $listing[ 'StandardFields' ] ) ? $listing[ 'StandardFields' ][ 'Photos' ] : [];
 
 					$listing_quickfacts = array();
 					$listing_quickfacts_list = '';
@@ -278,25 +278,36 @@ class Slideshow extends \WP_Widget {
 
 		$temp_date = date_default_timezone_get();
 		date_default_timezone_set('America/Chicago');
-		$time_format_back = date( 'Y-m-d\TH:i:s.u', strtotime( '-' . $instance[ 'days_back' ] . ' days' ) );
+		// $time_format_back = date( 'Y-m-d\TH:i:s.u', strtotime( '-' . $instance[ 'days_back' ] . ' days' ) );
+		$time_format_back = date( 'c', time() - $instance[ 'days_back' ] * DAY_IN_SECONDS );
 		date_default_timezone_set( $temp_date );
-		$days_in_hours = $instance[ 'days_back' ] * 24;
+		// $days_in_hours = $instance[ 'days_back' ] * 24;
 
 		switch( $instance[ 'display' ] ){
 			case 'new':
 				$addl_filters[] = 'OnMarketDate Ge ' . $time_format_back;
 				break;
 			case 'open_houses':
-				$addl_params[ 'OpenHouses' ] = $instance[ 'days_back' ];
+				$addl_filters[] = 'OpenHouses Ge ' . $time_format_back;
 				break;
 			case 'price_changes':
-				$addl_filters[] = 'PriceChangeTimestamp Gt ' . $time_format_back;
+				$addl_filters[] = 'PriceChangeTimestamp Ge ' . $time_format_back;
 				break;
 			case 'recent_sales':
-				$addl_filters[] = 'StatusChangeTimestamp Gt ' . $time_format_back;
+				if( count( $addl_filters ) ){
+					for( $i = 0; $i < count( $addl_filters ); $i++ ){
+						$search_filter_pieces = explode( ' And ', $addl_filters[ $i ] );
+						for( $k = 0; $k < count( $search_filter_pieces ); $k++ ){
+							if( false !== strpos( $search_filter_pieces[ $k ], 'MlsStatus' ) ){
+								$search_filter_pieces[ $k ] = 'MlsStatus Eq \'Closed\'';
+							}
+						}
+						$addl_filters[ $i ] = implode( ' And ', $search_filter_pieces );
+					}
+				}
+				$addl_filters[] = 'StatusChangeTimestamp Ge ' . $time_format_back;
 				break;
 		}
-
 		$search_filter = implode( ' And ', $addl_filters );
 
 		if( 'all' != $instance[ 'source' ] ){

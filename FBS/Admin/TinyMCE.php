@@ -73,6 +73,22 @@ class TinyMCE {
 		exit( json_encode( $links ) );
 	}
 
+	public static function tinymce_get_idx_links_list(){
+		$IDXLinks = new \SparkAPI\IDXLinks();
+		$all_idx_links = $IDXLinks->get_all_idx_links( true );
+		$links = array();
+		if( $all_idx_links ){
+			foreach( $all_idx_links as $all_idx_link ){
+				$arr = array(
+					'text' => $all_idx_link[ 'Name' ],
+					'value' => $all_idx_link[ 'Id' ]
+				);
+				$links[] = $arr;
+			}
+		}
+		exit( json_encode( $links ) );
+	}
+
 	public static function tinymce_popup(){
 
 		?>

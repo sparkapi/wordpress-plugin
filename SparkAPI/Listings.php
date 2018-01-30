@@ -72,6 +72,7 @@ class Listings extends Core {
 			'Latitude',
 			'ListPrice',
 			'Longitude',
+			'MapOverlay',
 			'MlsStatus',
 			'PhotosCount',
 			'PostalCode',

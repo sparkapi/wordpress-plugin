@@ -11511,11 +11511,20 @@ window.optimizedScroll = (function(){
 	var changeFilterParams = function(){
 		$( 'select[name="listings_per_page"]' ).change( function(){
 			var baseurl = $( this ).data( 'baseurl' );
-			window.location = baseurl + '?listings_per_page=' + $( this ).val();
+      if (baseurl.indexOf('?') > 0) {
+  			window.location = baseurl + '&listings_per_page=' + $( this ).val();
+      } else {
+        window.location = baseurl + '?listings_per_page=' + $( this ).val();
+      }
 		} );
 		$( 'select[name="listings_order_by"]' ).change( function(){
 			var baseurl = $( this ).data( 'baseurl' );
-			window.location = baseurl + '?listings_order_by=' + $( this ).val();
+      if (baseurl.indexOf('?') > 0) {
+        window.location = baseurl + '&listings_order_by=' + $( this ).val();
+      } else {
+        window.location = baseurl + '?listings_order_by=' + $( this ).val();
+      }
+
 		} );
 	};
 
@@ -11590,6 +11599,7 @@ window.optimizedScroll = (function(){
 					processResults: function( data, params ){
 						var r = [];
 						if( true === !!data.results.length ){
+              console.log(data.results)
 							$.each(data.results, function( idx, item ){
 								r.push({
 									id: item.display_val + '***' + item.name,
