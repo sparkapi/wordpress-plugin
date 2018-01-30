@@ -43,6 +43,7 @@ class Support {
 		$license_info[] = '<strong>API Key:</strong> ' . ( !empty( $flexmls_settings[ 'credentials' ][ 'api_key' ] ) ? '<code>' . $flexmls_settings[ 'credentials' ][ 'api_key' ] . '</code>' : 'Not Set' );
 		$license_info[] = '<strong>OAuth Key:</strong> ' . ( !empty( $flexmls_settings[ 'credentials' ][ 'oauth_key' ] ) ? '<code>' . $flexmls_settings[ 'credentials' ][ 'oauth_key' ] . '</code>' : 'Not Set' );
 
+		$current_user = wp_get_current_user();
 		?>
 		<div class="wrap">
 			<h1><?php echo get_admin_page_title(); ?></h1>
@@ -53,15 +54,15 @@ class Support {
 					<tbody>
 						<tr>
 							<th scope="row"><label for="firstName">First Name</label></th>
-							<td><input type="text" id="firstName" name="firstName" class="regular-text" required></td>
+							<td><input type="text" id="firstName" name="firstName" class="regular-text" required value="<?php echo $current_user->user_firstname; ?>"></td>
 						</tr>
 						<tr>
 							<th scope="row"><label for="lastName">Last Name</label></th>
-							<td><input type="text" id="lastName" name="lastName" class="regular-text" required></td>
+							<td><input type="text" id="lastName" name="lastName" class="regular-text" required value="<?php echo $current_user->user_lastname; ?>"></td>
 						</tr>
 						<tr>
 							<th scope="row"><label for="emailAddress">Email Address</label></th>
-							<td><input type="email" id="emailAddress" name="emailAddress" class="regular-text" required></td>
+							<td><input type="email" id="emailAddress" name="emailAddress" class="regular-text" required value="<?php echo $current_user->user_email; ?>"></td>
 						</tr>
 						<tr>
 							<th scope="row"><label for="phoneNumber">Phone <small>(optional)</small></label></th>

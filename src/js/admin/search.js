@@ -2,6 +2,11 @@
 
   var doColorPicker = function(){
     $( '.iris-color-picker' ).iris({
+      change: function(event, ui) {
+        console.log(ui)
+        console.log(event)
+        $( event.target ).val(ui.color.toString()).trigger('change');
+      },
       hide: false,
       palettes: ['#4b6ed0', '#666370', '#84B03D', '#ff9933', '#59CFEB', '#ffffff']
     });
