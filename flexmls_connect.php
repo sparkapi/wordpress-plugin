@@ -193,6 +193,7 @@ class Flexmls {
 				'post_type' => 'page'
 			) );
 			$flexmls_settings[ 'general' ][ 'search_results_page' ] = $post_id;
+			update_option( 'flexmls_do_flush_permalinks', 1 );
 			update_option( 'flexmls_settings', $flexmls_settings, true );
 			update_option( 'flexmls_version', FLEXMLS_PLUGIN_VERSION, false );
 			flush_rewrite_rules();
