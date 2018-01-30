@@ -3,8 +3,6 @@
   var doColorPicker = function(){
     $( '.iris-color-picker' ).iris({
       change: function(event, ui) {
-        console.log(ui)
-        console.log(event)
         $( event.target ).val(ui.color.toString()).trigger('change');
       },
       hide: false,
