@@ -38,7 +38,11 @@
     doColorPicker();
     doThemeOptions();
   });
-  $(document).ajaxSuccess(function( e, xhr, settings ){
+  $(document).on('widget-added', function(event, widget){
+    doColorPicker();
+    doThemeOptions();
+  });
+  $(document).on('widget-updated', function(event, widget){
     doColorPicker();
     doThemeOptions();
   });

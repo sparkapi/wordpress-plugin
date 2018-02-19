@@ -71,7 +71,7 @@ class Upgrade {
 
 			// Transfer SEO (permabase) setting
 			$flexmls_settings[ 'portal' ][ 'permalink_base' ] = $fmc_settings[ 'permabase' ];
-			add_action( 'shutdown', '\flush_rewrite_rules' );
+			update_option( 'flexmls_do_flush_permalinks', 1 );
 
 			// Clean up old options no longer used or moved to the 'flexmls_settings' option
 			delete_option( 'fmc_cache_version' );

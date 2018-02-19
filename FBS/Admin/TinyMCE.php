@@ -89,6 +89,18 @@ class TinyMCE {
 		exit( json_encode( $links ) );
 	}
 
+	public static function tinymce_get_property_types(){
+		$flexmls_settings = get_option( 'flexmls_settings' );
+		$json = array();
+		foreach( $flexmls_settings[ 'general' ][ 'property_types' ] as $ptype_key => $ptype_values ){
+			$json[] = array(
+				'text' => $ptype_values[ 'value' ],
+				'value' => $ptype_key
+			);
+		}
+		exit( json_encode( $json ) );
+	}
+
 	public static function tinymce_popup(){
 
 		?>

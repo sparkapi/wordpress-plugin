@@ -6549,8 +6549,6 @@ window.optimizedScroll = (function(){
 					delay: 250,
 					data: function( params ){
 						queryObject.q = params.term;
-            console.log(queryObject);
-            console.log(params);
 						return queryObject;
 					},
 					error: function( x, err, p ){
@@ -6588,10 +6586,12 @@ window.optimizedScroll = (function(){
 	$(document).ready(function(){
 		locationSelector();
 	});
-	$(document).ajaxSuccess(function( e, xhr, settings ){
-		// Reinitialize location selector on widget save
-		locationSelector();
-	});
+  $(document).on('widget-added', function(event, widget){
+    locationSelector();
+  });
+  $(document).on('widget-updated', function(event, widget){
+    locationSelector();
+  });
 
 })(jQuery);
 (function($){
@@ -6634,7 +6634,11 @@ window.optimizedScroll = (function(){
     doColorPicker();
     doThemeOptions();
   });
-  $(document).ajaxSuccess(function( e, xhr, settings ){
+  $(document).on('widget-added', function(event, widget){
+    doColorPicker();
+    doThemeOptions();
+  });
+  $(document).on('widget-updated', function(event, widget){
     doColorPicker();
     doThemeOptions();
   });
@@ -6770,5 +6774,13 @@ window.optimizedScroll = (function(){
 		dependentSelect();
 		populateMarketStatOptions();
 	});
+  $(document).on('widget-added', function(event, widget){
+    dependentSelect();
+    populateMarketStatOptions();
+  });
+  $(document).on('widget-updated', function(event, widget){
+    dependentSelect();
+    populateMarketStatOptions();
+  });
 
 })(jQuery);

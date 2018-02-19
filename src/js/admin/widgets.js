@@ -32,5 +32,13 @@
 		dependentSelect();
 		populateMarketStatOptions();
 	});
+  $(document).on('widget-added', function(event, widget){
+    dependentSelect();
+    populateMarketStatOptions();
+  });
+  $(document).on('widget-updated', function(event, widget){
+    dependentSelect();
+    populateMarketStatOptions();
+  });
 
 })(jQuery);

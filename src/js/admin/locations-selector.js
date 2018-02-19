@@ -27,8 +27,6 @@
 					delay: 250,
 					data: function( params ){
 						queryObject.q = params.term;
-            console.log(queryObject);
-            console.log(params);
 						return queryObject;
 					},
 					error: function( x, err, p ){
@@ -66,9 +64,11 @@
 	$(document).ready(function(){
 		locationSelector();
 	});
-	$(document).ajaxSuccess(function( e, xhr, settings ){
-		// Reinitialize location selector on widget save
-		locationSelector();
-	});
+  $(document).on('widget-added', function(event, widget){
+    locationSelector();
+  });
+  $(document).on('widget-updated', function(event, widget){
+    locationSelector();
+  });
 
 })(jQuery);

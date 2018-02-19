@@ -11,6 +11,7 @@ class Widgets {
 		if( !empty( $flexmls_settings[ 'credentials' ][ 'oauth_key' ] ) && !empty( $flexmls_settings[ 'credentials' ][ 'oauth_secret' ] ) ){
 			register_widget( '\FBS\Widgets\Portal' );
 		}
+		// register_widget( '\FBS\Widgets\Agents' );
 		register_widget( '\FBS\Widgets\IDXLinks' );
 		register_widget( '\FBS\Widgets\LeadGeneration' );
 		register_widget( '\FBS\Widgets\LocationSearch' );

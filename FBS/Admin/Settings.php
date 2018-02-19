@@ -76,6 +76,14 @@ class Settings {
 						admin_url( 'admin.php?page=flexmls_support' )
 					);
 				} else {
+					if( empty( $flexmls_settings[ 'general' ][ 'search_results_default' ] ) ){
+						printf(
+							'<div class="notice notice-error is-dismissible">
+								<p>Real estate listings will not appear on your site until you set a default Saved Search for your search results page. <a href="%1$s">Click here</a> to set a default Saved Search.</p>
+							</div>',
+							admin_url( 'admin.php?page=flexmls_settings' )
+						);
+					}
 					if( empty( $flexmls_settings[ 'gmaps' ][ 'api_key' ] ) ){
 						printf(
 							'<div class="notice notice-warning is-dismissible">

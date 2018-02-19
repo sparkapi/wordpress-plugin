@@ -153,17 +153,18 @@ class Oauth extends Core {
 	}
 
 	function is_user_logged_in(){
-		return $this->generate_oauth_token( false ) ? true : false;
-		// global $Flexmls;
-		// $stored_tokens = is_array( $Flexmls->oauth_tokens ) ? $Flexmls->oauth_tokens : array();
-		// if( empty( $stored_tokens ) && isset( $_COOKIE[ 'flexmls_oauth_tokens' ] ) ){
-		// 	$stored_tokens = json_decode( stripslashes( $_COOKIE[ 'flexmls_oauth_tokens' ] ), true );
-		// 	$Flexmls->oauth_tokens = $stored_tokens;
-		// }
-		// if( array_key_exists( 'access_token', $stored_tokens ) ){
-		// 	return true;
-		// }
-		// return false;
+		// return $this->generate_oauth_token( false ) ? true : false;
+		// Need to check if token is expired.
+		global $Flexmls;
+		$stored_tokens = is_array( $Flexmls->oauth_tokens ) ? $Flexmls->oauth_tokens : array();
+		if( empty( $stored_tokens ) && isset( $_COOKIE[ 'flexmls_oauth_tokens' ] ) ){
+			$stored_tokens = json_decode( stripslashes( $_COOKIE[ 'flexmls_oauth_tokens' ] ), true );
+			$Flexmls->oauth_tokens = $stored_tokens;
+		}
+		if( array_key_exists( 'access_token', $stored_tokens ) ){
+			return true;
+		}
+		return false;
 	}
 
 	function login(){
@@ -199,10 +200,11 @@ class Oauth extends Core {
 	function logout(){
 		global $Flexmls;
 		$Flexmls->oauth_tokens = array();
-		foreach( $_COOKIE as $key => $value ){
-			unset( $_COOKIE[ $key ] );
-			setcookie( $key, '', time() - DAY_IN_SECONDS, COOKIEPATH );
-		}
+		// write_log( $_COOKIE );
+		// foreach( $_COOKIE as $key => $value ){
+		// 	unset( $_COOKIE[ $key ] );
+		// 	setcookie( $key, '', time() - DAY_IN_SECONDS, COOKIEPATH );
+		// }
 		// Portal url may have been redirected. This could have been another WordPress
 		// or plugin rule interferring, or if the portal expects https but the
 		// site is http (or vice versa). In any event, to be safe we'll to pull the

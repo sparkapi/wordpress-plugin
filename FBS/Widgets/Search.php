@@ -51,6 +51,13 @@ class Search extends \WP_Widget {
 		$button_background = !isset( $instance[ 'button_background' ] ) ? '' : $instance[ 'button_background' ];
 		$button_foreground = !isset( $instance[ 'button_foreground' ] ) ? '' : $instance[ 'button_foreground' ];
 
+		$system = new \SparkAPI\System();
+		$api_system_info = $system->get_system_info();
+
+		$does_allow_sold_search = array(
+			'OCA', 'NEF', 'LBR', 'TBR', 'TAR', 'RIC', 'NCR', 'SVV', 'FLK', 'SEM', 'MM', 'KEY', 'SPC', 'CCI', 'YAK', 'NCW', 'RMLS', 'SCC', 'PBB', 'ALX', 'KNX', 'PAZ', 'GVS', 'BC', 'AK', 'LINCOLN', 'LOU', 'ARMLS', 'NEW', 'COA', 'AGS', 'GCO', 'ECN', 'CRMLS', 'EUP', 'BRK', 'SBR', 'PF', 'VC', 'CHS', 'NSBC', 'GANT'
+		);
+
 		?>
 		<p>
 			<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>">Title</label>
@@ -100,10 +107,12 @@ class Search extends \WP_Widget {
 				}
 			?>
 		</p>
-		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'allow_sold_searches' ) ); ?>">Allow Sold Searches?</label><br />
-			<label><input type="checkbox" id="<?php echo esc_attr( $this->get_field_id( 'allow_sold_searches' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'allow_sold_searches' ) ); ?>" value="1" <?php checked( $allow_sold_searches, 1 ); ?>> Yes, allow searches of sold listings</label>
-		</p>
+		<?php if( in_array( $api_system_info[ 'Mls' ], $does_allow_sold_search ) ) : ?>
+			<p>
+				<label for="<?php echo esc_attr( $this->get_field_id( 'allow_sold_searches' ) ); ?>">Allow Sold Searches?</label><br />
+				<label><input type="checkbox" id="<?php echo esc_attr( $this->get_field_id( 'allow_sold_searches' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'allow_sold_searches' ) ); ?>" value="1" <?php checked( $allow_sold_searches, 1 ); ?>> Yes, allow searches of sold listings</label>
+			</p>
+		<?php endif; ?>
 		<p>
 			<label for="<?php echo esc_attr( $this->get_field_id( 'submit_button_text' ) ); ?>">Submit Button Text</label>
 			<input placeholder="eg, Search for Homes" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'submit_button_text' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'submit_button_text' ) ); ?>" type="text" value="<?php echo esc_attr( $submit_button_text ); ?>">

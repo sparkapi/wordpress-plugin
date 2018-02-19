@@ -232,21 +232,155 @@
   };
 
   var flexmls_location_search = function( editor ){
+    var title = '1-Click Searches';
+
     return {
       title: '1-Click Location Search',
-      body: [{
-          type: 'listbox',
-          name: 'style',
-          label: 'Style',
-          'values': [
-              {text: 'Clear', value: 'clear'},
-              {text: 'White', value: 'white'},
-              {text: 'Colour 1', value: 'colour1'},
-              {text: 'Colour 2', value: 'colour2'},
-              {text: 'Colour 3', value: 'colour3'},
-          ]
-      }],
+      body: [
+        {
+          type: 'textbox',
+          name: 'title',
+          label: 'Title',
+          size: 42,
+          value: title
+        },
+        {
+          items: [
+            {
+              disabled: true,
+              name: 'idxlinksplaceholder',
+              type: 'listbox',
+              values: [{
+                text: 'Loading Saved Searches',
+                value: ''
+              }],
+            }
+          ],
+          label: 'Saved Search',
+          minWidth: 42,
+          name: 'idx_link',
+          onPostRender: function(){
+            var element = this.getEl(),
+                input = element.firstChild,
+                $input = $( input ),
+                inputInstance = this;
+            $.post( ajaxurl, {action: 'tinymce_get_idx_links'}, function( response ){
+              if (response.length) {
+                // for (var i = 0; i < inputInstance.items().length; i++) {
+                //   inputInstance.items()[i].hide();
+                // }
+                var newValues = [];
+                for (var i = 0; i < response.length; i++) {
+                  var newValue = {
+                    text: response[i].text,
+                    value: response[i].value
+                  };
+                  newValues.push(newValue);
+                }
+                var newListBox = {
+                  name: 'idxlinks',
+                  type: 'listbox',
+                  values: newValues
+                }
+                inputInstance.append(newListBox);
+                inputInstance.items()[0].remove();
+                inputInstance.reflow();
+              }
+            }, 'json' );
+          },
+          type: 'container'
+        },
+        {
+          items: [
+            {
+              disabled: true,
+              name: 'propertytypesplaceholder',
+              type: 'listbox',
+              values: [{
+                text: 'Loading Property Types',
+                value: ''
+              }],
+            }
+          ],
+          label: 'Property Type',
+          minWidth: 42,
+          name: 'property_type',
+          onPostRender: function(){
+            var element = this.getEl(),
+                input = element.firstChild,
+                $input = $( input ),
+                inputInstance = this;
+            $.post( ajaxurl, {action: 'tinymce_get_property_types'}, function( response ){
+              if (response.length) {
+                var newValues = [];
+                for (var i = 0; i < response.length; i++) {
+                  var newValue = {
+                    text: response[i].text,
+                    value: response[i].value
+                  };
+                  newValues.push(newValue);
+                }
+                var newListBox = {
+                  name: 'propertytypes',
+                  type: 'listbox',
+                  values: newValues
+                }
+                inputInstance.append(newListBox);
+                inputInstance.items()[0].remove();
+                inputInstance.reflow();
+              }
+            }, 'json' );
+          },
+          type: 'container'
+        },
+        {
+          onKeyUp: function(ev) {
+            var inputInstance = this;
+            console.log(this)
+            console.log(ev.target.value)
+          },
+          label: 'Select Location(s)',
+          name: 'idx_area',
+          size: 42,
+          text: 'Search',
+          type: 'textbox'
+        },
+        {
+          hidden: false,
+          label: ' ',
+          name: 'idx_area_results',
+          type: 'selectbox'
+        },
+        {
+          items: [
+
+
+          ],
+          label: 'Select Location(s)',
+          type: 'container'
+        }
+      ],
       onsubmit: function( e ) {
+        // var attrs = {};
+        // var links = [];
+        // for (key in e.data) {
+        //   switch (true) {
+        //     case 'title' === key:
+        //       attrs.title = e.data[key];
+        //       break;
+        //     default:
+        //       if (true === e.data[key]) {
+        //         links.push(key);
+        //       }
+        //   }
+        // }
+        // attrs.idx_link = links.join(',');
+        // var shortcode = wp.shortcode.string({
+        //   tag: 'flexmls_idxlinks',
+        //   attrs: attrs,
+        //   type: 'single'
+        // });
+        // editor.insertContent( shortcode );
         editor.insertContent( '[container style="' + e.data.style + '"]<br /><br />[/container]');
       }
     }

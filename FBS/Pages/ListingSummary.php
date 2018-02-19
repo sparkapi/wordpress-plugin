@@ -206,6 +206,7 @@ class ListingSummary extends Page {
 			$qs = implode( '&', array_filter( $qs_pieces ) );
 			$qs = '?' . $qs;
 		}
+		$list_url = '';
 
 		$content  = '	<div class="flexmls-content">
 							<aside class="flexmls-listings-meta">';

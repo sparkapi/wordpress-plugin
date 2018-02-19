@@ -226,19 +226,30 @@ class Core {
 			if( array_key_exists( 'D', $json ) ){
 				if( array_key_exists( 'Success', $json[ 'D' ] ) && true == $json[ 'D' ][ 'Success' ] && 'GET' == $method ){
 					set_transient( $transient_name, $json, $seconds_to_cache );
-				} elseif( isset( $json[ 'D' ][ 'Code' ] ) && 1000 == $json[ 'D' ][ 'Code' ] ){
-					if( array_key_exists( 'Authorization', $this->api_headers ) && $this->generate_oauth_token() ){
-						$json = $this->get_from_api( $method, $service, $seconds_to_cache, $params, $post_data, $a_retry );
-					}
 				} elseif( isset( $json[ 'D' ][ 'Code' ] ) && 1020 == $json[ 'D' ][ 'Code' ] ){
 					delete_transient( 'flexmls_auth_token' );
-					// if( array_key_exists( 'Authorization', $this->api_headers ) && $this->generate_oauth_token() ){
-					// 	$json = $this->get_from_api( $method, $service, $seconds_to_cache, $params, $post_data, $a_retry );
-					// }
+					if( array_key_exists( 'Authorization', $this->api_headers ) ){
+						$this->generate_oauth_token();
+					}
 					if( $this->generate_auth_token() ){
 						$json = $this->get_from_api( $method, $service, $seconds_to_cache, $params, $post_data, $a_retry );
 					}
 				}
+				// if( array_key_exists( 'Success', $json[ 'D' ] ) && true == $json[ 'D' ][ 'Success' ] && 'GET' == $method ){
+				// 	set_transient( $transient_name, $json, $seconds_to_cache );
+				// // } elseif( isset( $json[ 'D' ][ 'Code' ] ) && 1000 == $json[ 'D' ][ 'Code' ] ){
+				// // 	if( array_key_exists( 'Authorization', $this->api_headers ) && $this->generate_oauth_token() ){
+				// // 		$json = $this->get_from_api( $method, $service, $seconds_to_cache, $params, $post_data, $a_retry );
+				// // 	}
+				// } elseif( isset( $json[ 'D' ][ 'Code' ] ) && 1020 == $json[ 'D' ][ 'Code' ] ){
+				// 	delete_transient( 'flexmls_auth_token' );
+				// 	if( array_key_exists( 'Authorization', $this->api_headers ) && $this->generate_oauth_token() ){
+				// 		$json = $this->get_from_api( $method, $service, $seconds_to_cache, $params, $post_data, $a_retry );
+				// 	}
+				// 	if( $this->generate_auth_token() ){
+				// 		$json = $this->get_from_api( $method, $service, $seconds_to_cache, $params, $post_data, $a_retry );
+				// 	}
+				// }
 			}
 		}
 		if( array_key_exists( 'D', $json ) ){
