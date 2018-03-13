@@ -40,6 +40,15 @@ class Portal extends \WP_Widget {
 			return;
 		}
 		$flexmls_settings = get_option( 'flexmls_settings' );
+
+		if (!fmc_array_get($flexmls_settings, 'credentials.oauth_key') or !fmc_array_get($flexmls_settings, 'credentials.oauth_secret')) {
+		    // this widget isn't any good if there aren't OAuth credentials on the account
+            if (is_user_logged_in()) {
+	            echo "<span style='color: red;'>Admin: Portal widget is unavailable until OAuth credentials are provided within the Flexmls IDX plugin settings screen.</span>";
+            }
+		    return;
+        }
+
 		$Oauth = new \SparkAPI\Oauth();
 
 		echo $args[ 'before_widget' ];
