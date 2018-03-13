@@ -82,7 +82,8 @@ class Listings extends Core {
 			'VideosCount',
 			'VirtualTours',
 		);
-		foreach( $this->possible_compliance_fields() as $key => $val ){
+        $pcf = $this->possible_compliance_fields();
+        foreach($pcf as $key => $val ){
 			if( !in_array( $val, $formatted_search_results_fields ) ){
 				$formatted_search_results_fields[] = $key;
 			}

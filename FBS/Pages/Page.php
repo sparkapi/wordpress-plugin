@@ -235,7 +235,7 @@ class Page {
 
 	public static function neighborhood_template_page_notice( $post ){
 		$flexmls_settings = get_option( 'flexmls_settings' );
-		if( $post->ID == $flexmls_settings[ 'general' ][ 'neighborhood_template' ] ){
+		if( $post->ID == fmc_array_get($flexmls_settings, 'general.neighborhood_template')) {
 			echo '<div class="notice notice-warning inline"><p>You are currently editing the page for your Flexmls&reg; IDX neighborhood templates. Content on this page will be automatically transferred to any of your neighborhood pages. You should not publish this page &ndash; it&#8217;s just a template.</p></div>';
 		}
 	}

@@ -53,6 +53,24 @@ if( !function_exists( 'write_log' ) ){
 	}
 }
 
+function fmc_array_get($array, $key, $default = null)
+{
+    if (is_null($key)) return $array;
+
+    if (isset($array[$key])) return $array[$key];
+
+    foreach (explode('.', $key) as $segment)
+    {
+        if ( ! is_array($array) || ! array_key_exists($segment, $array))
+        {
+            return $default;
+        }
+
+        $array = $array[$segment];
+    }
+
+    return $array;
+}
 
 // Autoload all of the supporting classes
 include_once( FLEXMLS_PLUGIN_DIR_PATH . '/autoloader.php' );
@@ -125,53 +143,53 @@ class Flexmls {
 	function __construct(){
 		//add_action( 'admin_head-nav-menus.php', array( 'FBS\Admin\NavMenus', 'add_saved_searches_meta_boxes' ) );
 		add_action( 'admin_init', array( $this, 'init_and_maybe_flush_permalinks' ), 0 );
-		add_action( 'admin_menu', array( 'FBS\Admin\Settings', 'admin_menu' ) );
-		add_action( 'admin_notices', array( 'FBS\Admin\Settings', 'notice_test_environment' ), 9 );
-		add_action( 'admin_enqueue_scripts', array( 'FBS\Admin\Enqueue', 'admin_enqueue_scripts' ) );
+		add_action( 'admin_menu', array( FBS\Admin\Settings::class, 'admin_menu' ) );
+		add_action( 'admin_notices', array( FBS\Admin\Settings::class, 'notice_test_environment' ), 9 );
+		add_action( 'admin_enqueue_scripts', array( FBS\Admin\Enqueue::class, 'admin_enqueue_scripts' ) );
 		add_action( 'before_delete_post', array( $this, 'prevent_delete_flexmls_search_page' ), 10, 1 );
-		add_action( 'edit_form_after_title', array( 'FBS\Pages\Page', 'neighborhood_template_page_notice' ), 9 );
-		add_action( 'edit_form_after_title', array( 'FBS\Pages\Page', 'search_results_page_notice' ), 9 );
-		add_action( 'init', array( 'FBS\Admin\Settings', 'update_settings' ), 9 );
-		add_action( 'init', array( 'FBS\Pages\Page', 'custom_rewrite_rules' ), 10, 0 );
-		add_action( 'init', array( 'FBS\Pages\Page', 'set_global_listing_vars' ) );
-		add_action( 'init', array( 'SparkAPI\Oauth', 'custom_rewrite_rules' ), 10, 0 );
-		add_action( 'parse_request', array( 'SparkAPI\Oauth', 'test_if_oauth_action' ) );
-		add_action( 'preload_related_search_results', array( 'FBS\Pages\Page', 'preload_related_search_results' ) );
-		add_action( 'post_updated', array( 'FBS\Pages\Page', 'maybe_update_permalink' ), 10, 3 );
+		add_action( 'edit_form_after_title', array( FBS\Pages\Page::class, 'neighborhood_template_page_notice' ), 9 );
+		add_action( 'edit_form_after_title', array( FBS\Pages\Page::class, 'search_results_page_notice' ), 9 );
+		add_action( 'init', array( FBS\Admin\Settings::class, 'update_settings' ), 9 );
+		add_action( 'init', array( FBS\Pages\Page::class, 'custom_rewrite_rules' ), 10, 0 );
+		add_action( 'init', array( FBS\Pages\Page::class, 'set_global_listing_vars' ) );
+		add_action( 'init', array( SparkAPI\Oauth::class, 'custom_rewrite_rules' ), 10, 0 );
+		add_action( 'parse_request', array( SparkAPI\Oauth::class, 'test_if_oauth_action' ) );
+		add_action( 'preload_related_search_results', array( FBS\Pages\Page::class, 'preload_related_search_results' ) );
+		add_action( 'post_updated', array( FBS\Pages\Page::class, 'maybe_update_permalink' ), 10, 3 );
 		add_action( 'publish_page', array( $this, 'prevent_publish_flexmls_neighborhood_page' ), 10, 2 );
-		add_action( 'widgets_init', array( 'FBS\Widgets\Widgets', 'widgets_init' ) );
-		add_action( 'wp', array( 'FBS\Pages\Page', 'test_if_idx_page' ), 9 );
+		add_action( 'widgets_init', array( FBS\Widgets\Widgets::class, 'widgets_init' ) );
+		add_action( 'wp', array( FBS\Pages\Page::class, 'test_if_idx_page' ), 9 );
 		add_action( 'wp_ajax_clear_spark_api_cache', array( $this, 'ajax_clear_cache' ) );
-		add_action( 'wp_ajax_flexmls_leadgen', array( 'FBS\Widgets\LeadGeneration', 'flexmls_leadgen' ) );
-		add_action( 'wp_ajax_nopriv_flexmls_leadgen', array( 'FBS\Widgets\LeadGeneration', 'flexmls_leadgen' ) );
-		add_action( 'wp_ajax_flexmls_listing_ask_question', array( 'FBS\Pages\Page', 'ask_question' ) );
-		add_action( 'wp_ajax_nopriv_flexmls_listing_ask_question', array( 'FBS\Pages\Page', 'ask_question' ) );
-		add_action( 'wp_ajax_flexmls_get_background_slides', array( 'FBS\Widgets\Slideshow', 'get_background_slides' ) );
-		add_action( 'wp_ajax_nopriv_flexmls_get_background_slides', array( 'FBS\Widgets\Slideshow', 'get_background_slides' ) );
-		add_action( 'wp_ajax_get_listing_media', array( 'FBS\Pages\Page', 'listing_media' ) );
-		add_action( 'wp_ajax_nopriv_get_listing_media', array( 'FBS\Pages\Page', 'listing_media' ) );
-		add_action( 'wp_ajax_flexmls_listing_schedule_showing', array( 'FBS\Pages\Page', 'schedule_showing' ) );
-		add_action( 'wp_ajax_nopriv_flexmls_listing_schedule_showing', array( 'FBS\Pages\Page', 'schedule_showing' ) );
-		add_action( 'wp_ajax_tinymce_get_idx_links', array( 'FBS\Admin\TinyMCE', 'tinymce_get_idx_links' ) );
-		add_action( 'wp_ajax_tinymce_get_idx_links_list', array( 'FBS\Admin\TinyMCE', 'tinymce_get_idx_links_list' ) );
-		add_action( 'wp_ajax_tinymce_get_property_types', array( 'FBS\Admin\TinyMCE', 'tinymce_get_property_types' ) );
-		add_action( 'wp_ajax_tinymce_popup_shortcode', array( 'FBS\Admin\TinyMCE', 'tinymce_popup_shortcode' ) );
-		add_action( 'wp_ajax_toggle_cart_status', array( 'SparkAPI\Oauth', 'toggle_cart_status' ) );
-		add_action( 'wp_ajax_nopriv_toggle_cart_status', array( 'SparkAPI\Oauth', 'toggle_cart_status' ) );
+		add_action( 'wp_ajax_flexmls_leadgen', array( FBS\Widgets\LeadGeneration::class, 'flexmls_leadgen' ) );
+		add_action( 'wp_ajax_nopriv_flexmls_leadgen', array( FBS\Widgets\LeadGeneration::class, 'flexmls_leadgen' ) );
+		add_action( 'wp_ajax_flexmls_listing_ask_question', array( FBS\Pages\Page::class, 'ask_question' ) );
+		add_action( 'wp_ajax_nopriv_flexmls_listing_ask_question', array( FBS\Pages\Page::class, 'ask_question' ) );
+		add_action( 'wp_ajax_flexmls_get_background_slides', array( FBS\Widgets\Slideshow::class, 'get_background_slides' ) );
+		add_action( 'wp_ajax_nopriv_flexmls_get_background_slides', array( FBS\Widgets\Slideshow::class, 'get_background_slides' ) );
+		add_action( 'wp_ajax_get_listing_media', array( FBS\Pages\Page::class, 'listing_media' ) );
+		add_action( 'wp_ajax_nopriv_get_listing_media', array( FBS\Pages\Page::class, 'listing_media' ) );
+		add_action( 'wp_ajax_flexmls_listing_schedule_showing', array( FBS\Pages\Page::class, 'schedule_showing' ) );
+		add_action( 'wp_ajax_nopriv_flexmls_listing_schedule_showing', array( FBS\Pages\Page::class, 'schedule_showing' ) );
+		add_action( 'wp_ajax_tinymce_get_idx_links', array( FBS\Admin\TinyMCE::class, 'tinymce_get_idx_links' ) );
+		add_action( 'wp_ajax_tinymce_get_idx_links_list', array( FBS\Admin\TinyMCE::class, 'tinymce_get_idx_links_list' ) );
+		add_action( 'wp_ajax_tinymce_get_property_types', array( FBS\Admin\TinyMCE::class, 'tinymce_get_property_types' ) );
+		add_action( 'wp_ajax_tinymce_popup_shortcode', array( FBS\Admin\TinyMCE::class, 'tinymce_popup_shortcode' ) );
+		add_action( 'wp_ajax_toggle_cart_status', array( SparkAPI\Oauth::class, 'toggle_cart_status' ) );
+		add_action( 'wp_ajax_nopriv_toggle_cart_status', array( SparkAPI\Oauth::class, 'toggle_cart_status' ) );
 
-		add_action( 'wp_enqueue_scripts', array( 'FBS\Admin\Enqueue', 'wp_enqueue_scripts' ) );
+		add_action( 'wp_enqueue_scripts', array( FBS\Admin\Enqueue::class, 'wp_enqueue_scripts' ) );
 		add_action( 'wp_trash_post', array( $this, 'prevent_delete_flexmls_search_page' ), 10, 1 );
 
 		add_filter( 'body_class', array( $this, 'body_class' ) );
-		add_filter( 'nav_menu_css_class' , array( 'FBS\Pages\Page', 'nav_menu_css_class' ), 10, 2 );
-		add_filter( 'mce_buttons', array( 'FBS\Admin\TinyMCE', 'mce_buttons' ) );
-		add_filter( 'mce_external_plugins', array( 'FBS\Admin\TinyMCE', 'mce_external_plugins' ) );
+		add_filter( 'nav_menu_css_class' , array( FBS\Pages\Page::class, 'nav_menu_css_class' ), 10, 2 );
+		add_filter( 'mce_buttons', array( FBS\Admin\TinyMCE::class, 'mce_buttons' ) );
+		add_filter( 'mce_external_plugins', array( FBS\Admin\TinyMCE::class, 'mce_external_plugins' ) );
 		//add_filter( 'nav_menu_meta_box_object', array( 'FBS\Admin\NavMenus', 'nav_menu_meta_box_object' ) );
-		add_filter( 'script_loader_tag', array( 'FBS\Admin\Enqueue', 'script_loader_tag' ), 10, 2 );
+		add_filter( 'script_loader_tag', array( FBS\Admin\Enqueue::class, 'script_loader_tag' ), 10, 2 );
 
-		add_shortcode( 'flexmls_idxlinks',array( 'FBS\Widgets\Shortcodes', 'flexmls_idxlinks' ) );
-		add_shortcode( 'flexmls_leadgen',array( 'FBS\Widgets\Shortcodes', 'flexmls_leadgen' ) );
-		add_shortcode( 'flexmls_portal',array( 'FBS\Widgets\Shortcodes', 'flexmls_portal' ) );
+		add_shortcode( 'flexmls_idxlinks', array( FBS\Widgets\Shortcodes::class, 'flexmls_idxlinks' ) );
+		add_shortcode( 'flexmls_leadgen', array( FBS\Widgets\Shortcodes::class, 'flexmls_leadgen' ) );
+		add_shortcode( 'flexmls_portal', array( FBS\Widgets\Shortcodes::class, 'flexmls_portal' ) );
 
 	}
 

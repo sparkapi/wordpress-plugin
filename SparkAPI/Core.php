@@ -539,7 +539,7 @@ class Core {
 		$compliance_list = array_key_exists( 'View', $system_info[ 'DisplayCompliance' ] ) ? $system_info[ 'DisplayCompliance' ][ $mls_id ][ 'View' ][ $listing_type ][ 'DisplayCompliance' ] : array();
 
 		$logo = '';
-		if( $system_info[ 'Configuration' ][ 0 ][ 'IdxLogoSmall' ] ){
+		if( fmc_array_get($system_info, 'Configuration.0.IdxLogoSmall') ){
 			$logo = $system_info[ 'Configuration' ][ 0 ][ 'IdxLogoSmall' ];
 		} elseif( $system_info[ 'Configuration' ][ 0 ][ 'IdxLogo' ] ){
 			$logo = $system_info[ 'Configuration' ][ 0 ][ 'IdxLogo' ];
