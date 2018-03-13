@@ -285,7 +285,7 @@ class Slideshow extends \WP_Widget {
 
 		switch( $instance[ 'display' ] ){
 			case 'new':
-				$addl_filters[] = 'OnMarketDate Ge ' . $time_format_back;
+				$addl_filters[] = 'OriginalOnMarketTimestamp Ge ' . $time_format_back;
 				break;
 			case 'open_houses':
 				$addl_filters[] = 'OpenHouses Ge ' . $time_format_back;
@@ -305,7 +305,7 @@ class Slideshow extends \WP_Widget {
 						$addl_filters[ $i ] = implode( ' And ', $search_filter_pieces );
 					}
 				}
-				$addl_filters[] = 'StatusChangeTimestamp Ge ' . $time_format_back;
+				$addl_filters[] = 'ClosedTimestamp Ge ' . $time_format_back;
 				break;
 		}
 		$search_filter = implode( ' And ', $addl_filters );
