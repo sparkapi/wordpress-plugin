@@ -134,7 +134,11 @@ gulp.task( 'scripts-admin', [ 'lint' ], function(){
 
 gulp.task( 'scripts-tinymce', [ 'lint' ], function(){
 	return gulp.src( [
-			'src/js/tinymce/*.js'
+			'src/js/admin/locations-selector.js',
+			'src/js/tinymce/shortcode_generator.js',
+			'src/js/tinymce/location_search.js',
+			'src/js/tinymce/market_stats.js',
+			'src/js/tinymce/tinymce.js'
 		] )
 		.pipe( concat( 'dist/js/scripts-tinymce.js' ).on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
 		.pipe( gulp.dest( '' ) )

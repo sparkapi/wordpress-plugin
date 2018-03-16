@@ -57,6 +57,10 @@ class MarketStats extends \WP_Widget {
 		)
 	);
 
+	public static function tinymce_get_stat_options() {
+		exit( json_encode( self::$stat_options ) );
+	}
+
 	public function __construct(){
 		parent::__construct( 'flexmls_market_stats', 'Flexmls&reg;: Market Statistics', array(
 			'classname' => 'flexmls_market_stats',
@@ -209,7 +213,8 @@ class MarketStats extends \WP_Widget {
 				echo $args[ 'before_title' ] . apply_filters( 'widget_title', $instance[ 'title' ] ) . $args[ 'after_title' ];
 			}
 
-			$id = sprintf( '%u', crc32( $args[ 'widget_id' ] ) );
+			$raw_id = array_key_exists('widget_id', $args) ? $args[ 'widget_id' ] : 'market_stats';
+			$id = sprintf( '%u', crc32( $raw_id ) );
 			?>
 			<canvas id="flexmls_market_stats_<?php echo $id; ?>" width="400" height="400"></canvas>
 			<script>
