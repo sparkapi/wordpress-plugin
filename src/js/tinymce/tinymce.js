@@ -1,3 +1,6 @@
+import { MarketStats } from './market_stats';
+import { LocationSearch } from './location_search';
+
 (function($){
 
   var flexmls_general_search = function( editor ){
@@ -334,7 +337,7 @@
         image: flexmls.pluginurl + '/dist/assets/tinymce_flexmls_pin.png',
         menu: [
           {text: '1-Click Location Search', onclick: function(){
-            var locationSearch = new flexmls.LocationSearch(editor);
+            var locationSearch = new LocationSearch(editor);
             editor.windowManager.open( locationSearch.editorOptions() );
           } },
           {text: 'General Search', onclick: function(){
@@ -351,7 +354,7 @@
             editor.windowManager.open( flexmls_leadgen( editor ) );
           } },
           {text: 'Market Statistics', onclick: function(){
-            var marketStats = new flexmls.MarketStats(editor);
+            var marketStats = new MarketStats(editor);
             editor.windowManager.open( marketStats.editorOptions() );
           } },
           {text: 'Portal Widget', onclick: function(){
