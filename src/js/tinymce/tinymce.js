@@ -21,7 +21,7 @@ import { LocationSearch } from './location_search';
       onsubmit: function( e ) {
         editor.insertContent( '[container style="' + e.data.style + '"]<br /><br />[/container]');
       }
-    }
+    };
   };
 
   var flexmls_idxlinks = function( editor ){
@@ -149,7 +149,7 @@ import { LocationSearch } from './location_search';
         });
         editor.insertContent( shortcode );
       }
-    }
+    };
   };
 
   var flexmls_leadgen = function( editor ){
@@ -231,7 +231,7 @@ import { LocationSearch } from './location_search';
         });
         editor.insertContent( shortcode );
       }
-    }
+    };
   };
 
   var flexmls_portal = function( editor ){
@@ -290,11 +290,11 @@ import { LocationSearch } from './location_search';
       ],
       onsubmit: function( e ) {
         var attrs = {};
-        if (true === e.data[ 'saved_searches' ]) {
-          attrs.saved_searches = 1
+        if (true === e.data.saved_searches) {
+          attrs.saved_searches = 1;
         }
-        if (true === e.data[ 'listing_carts' ]) {
-          attrs.listing_carts = 1
+        if (true === e.data.listing_carts) {
+          attrs.listing_carts = 1;
         }
         var shortcode = wp.shortcode.string({
           tag: 'flexmls_portal',
@@ -303,7 +303,7 @@ import { LocationSearch } from './location_search';
         });
         editor.insertContent( shortcode );
       }
-    }
+    };
   };
 
   var flexmls_slideshow = function( editor ){
@@ -324,7 +324,7 @@ import { LocationSearch } from './location_search';
       onsubmit: function( e ) {
         editor.insertContent( '[container style="' + e.data.style + '"]<br /><br />[/container]');
       }
-    }
+    };
   };
 
   tinymce.PluginManager.add( 'flexmlsidx', function( editor, url ){

@@ -2,98 +2,65 @@ import { ShortcodeGenerator } from './shortcode_generator';
 
 var $ = window.jQuery;
 
-function LocationSearch(editor) {
+class LocationSearch extends ShortcodeGenerator {
 
-  ShortcodeGenerator.call(this, editor);
+  constructor(editor){
+    super(editor);
 
-};
+    this.shortCodeId = 'flexmls_location_search';
+    this.modalTitle = '1-Click Location Search';
 
-
-LocationSearch.prototype = Object.create($.extend({}, ShortcodeGenerator.prototype, {
-  constructor: LocationSearch,
-
-
-  editorOptions: function(){
-    var title = '1-Click Searches';
-
-    return {
+    this.defaultValues = {
       title: '1-Click Location Search',
-      body: [
-        {
-          type: 'textbox',
-          name: 'title',
-          label: 'Title',
-          size: 42,
-          value: title
-        },
-        {
-          items: [
-            {
-              disabled: true,
-              name: 'idxlinksplaceholder',
-              type: 'listbox',
-              values: [{
-                text: 'Loading Saved Searches',
-                value: ''
-              }],
-            }
-          ],
-          label: 'Saved Search',
-          minWidth: 42,
-          name: 'idx_link',
-          onPostRender: this.idxLinksOnPostRender,
-          type: 'container'
-        },
-        {
-          items: [
-            {
-              disabled: true,
-              name: 'propertytypesplaceholder',
-              type: 'listbox',
-              values: [{
-                text: 'Loading Property Types',
-                value: ''
-              }],
-            }
-          ],
-          label: 'Property Type',
-          minWidth: 42,
-          name: 'property_type',
-          onPostRender: this.addPropertyTypeValues,
-          type: 'container'
-        },
-        {
-          onKeyUp: function(ev) {
-            var inputInstance = this;
-            console.log(this)
-            console.log(ev.target.value)
-          },
-          label: 'Select Location(s)',
-          name: 'idx_area',
-          size: 42,
-          text: 'Search',
-          type: 'textbox'
-        },
-        {
-          hidden: false,
-          label: ' ',
-          name: 'idx_area_results',
-          type: 'selectbox'
-        },
-        {
-          items: [
+      stat_type: 'absorption',
+      chart_type: 'line',
+      property_type: 'A',
+      time_period: 12,
+    };
+  }
 
+  body(){
+    var values = this.getInitialValues();
 
-          ],
-          label: 'Select Location(s)',
-          type: 'container'
-        }
-      ],
-      onsubmit: this.onsubmit.bind(this)
-    }
-  },
+    this.locationInput = this.buildLocationInput(values.location_field);
+    this.propertyTypeInput = this.buildPropertyTypeInput();
 
-  idxLinksOnPostRender: function(){
+    return [
+      {
+        type: 'textbox',
+        name: 'title',
+        label: 'Title',
+        size: 42,
+        value: values.title
+      },
+      {
+        label: 'Saved Search',
+        minWidth: 42,
+        name: 'idx_link',
+        onPostRender: this.idxLinksOnPostRender,
+        type: 'container',
+        items: [
+          {
+            disabled: true,
+            name: 'idxlinksplaceholder',
+            type: 'listbox',
+            values: [{
+              text: 'Loading Saved Searches',
+              value: ''
+            }],
+          }
+        ],
+      },
+      this.propertyTypeInput,
+      {
+        type: 'container',
+        label: 'Select Location',
+        items: [this.locationInput]
+      }
+    ];
+  }
+
+  idxLinksOnPostRender() {
     var element = this.getEl(),
         input = element.firstChild,
         $input = $( input ),
@@ -116,14 +83,14 @@ LocationSearch.prototype = Object.create($.extend({}, ShortcodeGenerator.prototy
           name: 'idxlinks',
           type: 'listbox',
           values: newValues
-        }
+        };
         inputInstance.append(newListBox);
         inputInstance.items()[0].remove();
         inputInstance.reflow();
       }
     }, 'json' );
-  },
+  }
 
-}));
+}
 
 export { LocationSearch };
