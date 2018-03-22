@@ -16,59 +16,50 @@ var flexmls = (typeof flexmls === 'undefined') ? {} : flexmls;
       tech_id: 'x\'' + flexmls.tech_id + '\''
     };
 
-  	if( $( elementSelector ).length ){
+    if( $( elementSelector ).length ){
       $( elementSelector ).each(function(){
         if( true === !!$( this ).data( 'select2' ) ){
           $( this ).select2( 'destroy' );
         }
       });
-  		$( elementSelector ).select2({
+      $( elementSelector ).select2({
         width: '100%',
-  			ajax: {
-  				cache: false,
-  				crossDomain: true,
-  				dataType: 'jsonp',
-  				delay: 250,
-  				data: function( params ){
-  					queryObject.q = params.term;
-  					return queryObject;
-  				},
-  				error: function( x, err, p ){
-  					console.log( x, err, p );
-  				},
-  				processResults: function( data, params ){
-  					var r = [];
-  					if( true === !!data.results.length ){
-  						$.each(data.results, function( idx, item ){
-  							r.push({
-  								id: item.display_val + '***' + item.name,
-  								text: item.display_val + ' (' + item.name.split(/(?=[A-Z])/).join(" ") + ')'
-  							});
-  						});
-  					}
-            if( true === !!data.overlays.length ){
-              $.each(data.overlays, function( idx, item ){
-                r.push({
-                  id: item.display_val + '***' + item.name,
-                  text: item.display_val + ' (' + item.name.split(/(?=[A-Z])/).join(" ") + ')'
-                });
+        ajax: {
+          cache: false,
+          crossDomain: true,
+          dataType: 'jsonp',
+          delay: 250,
+          data: function( params ){
+            queryObject.q = params.term;
+            return queryObject;
+          },
+          error: function( x, err, p ){
+            console.log( x, err, p );
+          },
+          processResults: function( data, params ){
+            var r = [];
+            var results = data.results.concat(data.overlays);
+
+            $.each(results, function( idx, item ){
+              r.push({
+                id: item.value + '***' + item.name + '***'+ item.display_val,
+                text: item.display_val + ' (' + item.name.split(/(?=[A-Z])/).join(" ") + ')'
               });
-            }
-  					return {
-  						results: r
-  					};
-  				},
-  				url: 'https://www.flexmls.com/cgi-bin/mainmenu.cgi'
-  			},
-  			minimumInputLength: 3
-  		});
-  	}
+            });
+
+            return { results: r };
+          },
+          url: 'https://www.flexmls.com/cgi-bin/mainmenu.cgi'
+        },
+        minimumInputLength: 3
+      });
+    }
   };
 
 
-	$(document).ready(function(){
-		flexmls.locationSelector('.flexmls-locations-selector');
-	});
+  $(document).ready(function(){
+    flexmls.locationSelector('.flexmls-locations-selector');
+  });
   $(document).on('widget-added', function(event, widget){
     flexmls.locationSelector('.flexmls-locations-selector');
   });

@@ -54,7 +54,12 @@ class LocationSearch extends \WP_Widget {
 					<?php
 						foreach( $locations_field as $location_field ){
 							$location_field_pieces = explode( '***', $location_field );
-							echo '<option selected="selected" value="' . $location_field . '">' . $location_field_pieces[ 0 ] . ' (' . $location_field_pieces[ 1 ] . ')</option>';
+
+							// The first item in $location_field_pieces is the id, but we don't need it here.
+							$field_name = $location_field_pieces[1];
+							$display_name = $location_field_pieces[2];
+
+							echo '<option selected="selected" value="' . $location_field . '">' . $display_name . ' (' . $$field_name . ')</option>';
 						}
 					?>
 				</select>
@@ -111,9 +116,13 @@ class LocationSearch extends \WP_Widget {
 
 			foreach( $locations_field as $location_field){
 				$location_field_pieces = explode( '***', $location_field );
+				
+				$id = $location_field_pieces[0];
+				$field_name = $location_field_pieces[1];
+				$display_name = $location_field_pieces[2];
 
 				$query = array(
-					urlencode( $location_field_pieces[ 1 ] ) => urlencode( $location_field_pieces[ 0 ] )
+					urlencode( $field_name ) => urlencode( $id )
 				);
 
 				if( !empty( $property_type ) ){
@@ -121,7 +130,7 @@ class LocationSearch extends \WP_Widget {
 				}
 
 				$this_url = $link_url . '?' . build_query( $query );
-				echo '<li><a href="' . $this_url . '" title="' . $location_field_pieces[ 0 ] . '">' . $location_field_pieces[ 0 ] . '</a></li>';
+				echo '<li><a href="' . $this_url . '" title="' . $display_name . '">' . $display_name . '</a></li>';
 			}
 			echo '</ul>';
 			echo $args[ 'after_widget' ];
