@@ -12,6 +12,15 @@ var uglify       = require( 'gulp-uglify' );
 var watch        = require( 'gulp-watch' );
 var zip          = require( 'gulp-zip' );
 
+var browserify 	 = require('browserify');
+var babelify		 = require('babelify');
+var source 			 = require('vinyl-source-stream');
+var buffer 			 = require('vinyl-buffer');
+var gutil 			 = require('gulp-util');
+
+
+var environment = !!gutil.env.production ? 'production' : 'development';
+
 function logError( error ){
 	console.log( error.toString() );
 	this.emit( 'end' );
@@ -133,19 +142,21 @@ gulp.task( 'scripts-admin', [ 'lint' ], function(){
 } );
 
 gulp.task( 'scripts-tinymce', [ 'lint' ], function(){
-	return gulp.src( [
+		return browserify({
+			entries: [
 			'src/js/admin/locations-selector.js',
-			'src/js/tinymce/shortcode_generator.js',
-			'src/js/tinymce/location_search.js',
-			'src/js/tinymce/market_stats.js',
 			'src/js/tinymce/tinymce.js'
-		] )
-		.pipe( concat( 'dist/js/scripts-tinymce.js' ).on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
-		.pipe( gulp.dest( '' ) )
-		.pipe( uglify().on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
-		.pipe( concat( 'dist/js/scripts-tinymce.min.js' ).on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
-		.pipe( gulp.dest( '' ) )
-		.pipe( livereload() );
+		],
+			debug: true
+		})
+		.transform(babelify)
+		.on('error',gutil.log)
+		.bundle()
+		.on('error',gutil.log)
+		.pipe(source('scripts-tinymce.js'))
+		.pipe(buffer())
+		.pipe( environment == 'production' ? uglify().on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) : gutil.noop() )
+		.pipe(gulp.dest('./dist/js/'));
 } );
 
 gulp.task( 'watch', function(){

@@ -49,7 +49,7 @@ class TinyMCE {
 	public static function mce_external_plugins( $plugin_array ){
 		$flexmls_settings = get_option( 'flexmls_settings' );
 		if( !empty( $flexmls_settings[ 'credentials' ][ 'api_key' ] ) ){
-			$plugin_array[ 'flexmlsidx' ] = \FLEXMLS_PLUGIN_DIR_URL . '/dist/js/scripts-tinymce.min.js';
+			$plugin_array[ 'flexmlsidx' ] = \FLEXMLS_PLUGIN_DIR_URL . '/dist/js/scripts-tinymce.js';
 		}
 		return $plugin_array;
 	}
