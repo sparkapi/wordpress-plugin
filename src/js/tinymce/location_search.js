@@ -1,4 +1,5 @@
 import { ShortcodeGenerator } from './shortcode_generator';
+import { ShortcodeData } from './shortcode_data';
 
 var $ = window.jQuery;
 
@@ -25,6 +26,21 @@ class LocationSearch extends ShortcodeGenerator {
     this.locationInput = this.buildLocationInput(values.location_field);
     this.propertyTypeInput = this.buildPropertyTypeInput();
 
+    this.idxLinkInput = tinymce.ui.Factory.create({
+      label: 'Saved Search',
+      minWidth: 42,
+      name: 'idx_link',
+      onPostRender: this.getIdxLinksValues.bind(this),
+      type: 'container',
+      items: [
+        {
+          type: 'listbox',
+          values: [{text: 'Loading Saved Searches', value: ''}],
+          disabled: true,
+        }
+      ],
+    });
+
     return [
       {
         type: 'textbox',
@@ -33,24 +49,7 @@ class LocationSearch extends ShortcodeGenerator {
         size: 42,
         value: values.title
       },
-      {
-        label: 'Saved Search',
-        minWidth: 42,
-        name: 'idx_link',
-        onPostRender: this.idxLinksOnPostRender,
-        type: 'container',
-        items: [
-          {
-            disabled: true,
-            name: 'idxlinksplaceholder',
-            type: 'listbox',
-            values: [{
-              text: 'Loading Saved Searches',
-              value: ''
-            }],
-          }
-        ],
-      },
+      this.idxLinkInput,
       this.propertyTypeInput,
       {
         type: 'container',
@@ -60,35 +59,37 @@ class LocationSearch extends ShortcodeGenerator {
     ];
   }
 
-  idxLinksOnPostRender() {
-    var element = this.getEl(),
-        input = element.firstChild,
-        $input = $( input ),
-        inputInstance = this;
-
+  getIdxLinksValues() {
+    var self = this;
     $.post( ajaxurl, {action: 'tinymce_get_idx_links'}, function( response ){
       if (response.length) {
-        // for (var i = 0; i < inputInstance.items().length; i++) {
-        //   inputInstance.items()[i].hide();
-        // }
-        var newValues = [];
-        for (var i = 0; i < response.length; i++) {
-          var newValue = {
-            text: response[i].text,
-            value: response[i].value
-          };
-          newValues.push(newValue);
-        }
+        
+        var newValues = response.map((r) => {
+          return {
+            text: r.text,
+            value: r.value
+          }
+        });
+
         var newListBox = {
-          name: 'idxlinks',
           type: 'listbox',
-          values: newValues
+          name: 'idx_link',
+          values: newValues,
+          value: self.getInitialValues().idx_link,
         };
-        inputInstance.append(newListBox);
-        inputInstance.items()[0].remove();
-        inputInstance.reflow();
+        self.idxLinkInput.append(newListBox);
+        self.idxLinkInput.items()[0].remove();
       }
     }, 'json' );
+  }
+
+  onsubmit( e ) {
+    var data = new ShortcodeData(e.data);
+
+    data.processLocation($(this.locationInput.getEl()).val());
+
+    e.data = data.toAttrs();
+    super.onsubmit(e);
   }
 
 }

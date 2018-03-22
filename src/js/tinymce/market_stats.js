@@ -1,4 +1,5 @@
 import { ShortcodeGenerator } from './shortcode_generator';
+import { ShortcodeData } from './shortcode_data';
 
 var $ = window.jQuery;
 
@@ -53,7 +54,7 @@ class MarketStats extends ShortcodeGenerator {
 
     this.locationInput = this.buildLocationInput(values.location_field);
 
-    this.propertyTypeInput = this.buildPropertytypeInput();
+    this.propertyTypeInput = this.buildPropertyTypeInput();
 
     return [{
       type: 'textbox',
@@ -144,44 +145,14 @@ class MarketStats extends ShortcodeGenerator {
   }
 
   onsubmit( e ) {
-    var data = e.data;
-    var chartDataValues = [];
-    var validChartDataValues = Object.keys(this.statOptions[data.stat_type]);
+    var data = new ShortcodeData(e.data);
 
-    // All selected checkboxes for all chart data types will be include in the data
-    // as {ChartData: true} or {ChartData: false}. They need to be added to the
-    // shortcode as 'chart_data="ChartData,OtherChartData"'. This moves the stat
-    // types and filters out those that don't apply to the selected stat_type.
-    Object.keys(data).forEach(function(key) {
-      if(key.indexOf('chart_data_') === 0){
-        var id = key.replace('chart_data_', '');
-        var value = data[key];
-        
-        if(value === true && validChartDataValues.indexOf(id) >= 0){
-          chartDataValues.push(id);
-        }
-        delete data[key];
-      }
-    });
+    data.processChartData(Object.keys(this.statOptions[e.data.stat_type]));
+    
+    data.processLocation($(this.locationInput.getEl()).val());
 
-    if(chartDataValues.length > 0) {
-      data.chart_data = chartDataValues.join(',');
-    }
-
-    // get the data from the select2 location box
-    var locationValue = $(this.locationInput.getEl()).val();
-    if (locationValue !== null) {
-      data.location_field = locationValue;
-    } else {
-      delete data.location_field;
-    }
-
-    var shortcode = wp.shortcode.string({
-      tag: this.shortCodeId,
-      attrs: data,
-      type: 'single'
-    });
-    this.editor.insertContent( shortcode );
+    e.data = data.toAttrs();
+    super.onsubmit(e);
   }
 
 }

@@ -42,7 +42,6 @@ class ShortcodeGenerator{
   }
 
   onsubmit( e ) {
-    console.log( this.shortCodeId );
     var shortcode = wp.shortcode.string({
       tag: this.shortCodeId,
       attrs: e.data,
@@ -51,9 +50,23 @@ class ShortcodeGenerator{
     this.editor.insertContent( shortcode );
   }
 
+  buildPropertyTypeInput() {
+    return tinymce.ui.Factory.create({
+      type: 'container',
+      label: 'Property Type',
+      minWidth: 42,
+      name: 'property_type',
+      onPostRender: this.addPropertyTypeValues.bind(this),
+      items: [{
+        type: 'listbox',
+        values: [{text: 'Loading Property Types'}],
+        disabled: true,
+      }]
+    });
+  }
+
   addPropertyTypeValues(){
     var self = this;
-    console.log( self );
     
     $.post( ajaxurl, {action: 'tinymce_get_property_types'}, function( response ){
       if (response.length) {
@@ -76,7 +89,6 @@ class ShortcodeGenerator{
 
         self.propertyTypeInput.append(newListBox);
         self.propertyTypeInput.items()[0].remove();
-        self.propertyTypeInput.reflow();
       }
     }, 'json' );
   }
@@ -101,26 +113,6 @@ class ShortcodeGenerator{
 
       }
     })
-  }
-
-  buildPropertyTypeInput() {
-    return tinymce.ui.Factory.create({
-      items: [
-      {
-          disabled: true,
-          type: 'listbox',
-          values: [{
-            text: 'Loading Property Types',
-            value: ''
-          }],
-        }
-      ],
-      label: 'Property Type',
-      minWidth: 42,
-      name: 'property_type',
-      onPostRender: this.addPropertyTypeValues.bind(this),
-      type: 'container'
-    });
   }
 
 }
