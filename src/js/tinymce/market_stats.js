@@ -1,38 +1,26 @@
 import { ShortcodeGenerator } from './shortcode_generator';
+import { ShortcodeData } from './shortcode_data';
 
 var $ = window.jQuery;
 
-function MarketStats(editor) {
+class MarketStats extends ShortcodeGenerator {
 
-  ShortcodeGenerator.call(this, editor);
+  constructor(editor) {
+    super(editor);
 
-  this.shortCodeId = 'flexmls_market_stats';
-  this.modalTitle = 'Market Statistics';
+    this.shortCodeId = 'flexmls_market_stats';
+    this.modalTitle = 'Market Statistics';
 
-  this.defaultValues = {
-    title: 'Market Statistics',
-    stat_type: 'absorption',
-    chart_type: 'line',
-    property_type: 'A',
-    time_period: 12,
-  };
-
-  this.statOptions;
-};
-
-MarketStats.prototype = Object.create($.extend({}, ShortcodeGenerator.prototype, {
-  constructor: MarketStats,
-
-  editorOptions: function(){
-    return {
-      title: this.modalTitle,
-      body: this.body(),
-      onsubmit: this.onsubmit.bind(this),
+    this.defaultValues = {
+      title: 'Market Statistics',
+      stat_type: 'absorption',
+      chart_type: 'line',
+      property_type: 'A',
+      time_period: 12,
     };
+  }
 
-  },
-
-  body: function() {
+  body() {
 
     var values = this.getInitialValues();
     var self = this;
@@ -62,46 +50,11 @@ MarketStats.prototype = Object.create($.extend({}, ShortcodeGenerator.prototype,
       onselect: function(e) {
         self.updateChartDataValues();
       },
-    })
-
-    this.locationInput = tinymce.ui.Factory.create({
-      type: 'selectbox',
-      name: 'location_field',
-      value: values.location_field,
-      classes: 'flexmls-locations-selector',
-      onPostRender: function() {
-        flexmls.locationSelector('.mce-flexmls-locations-selector');
-
-        // add pre-existing values to the dropdown
-        if(typeof values.location_field !== 'undefined') {
-          var locationParts = values.location_field.split('***');
-          var id = values.location_field
-          var text = locationParts[0] + ' (' + locationParts[1] + ')';
-
-          var newOption = new Option(text, id, true, true)
-          $('.mce-flexmls-locations-selector').append(newOption);
-        }
-
-      }
     });
 
-    this.propertyTypeInput = tinymce.ui.Factory.create({
-      items: [
-      {
-          disabled: true,
-          type: 'listbox',
-          values: [{
-            text: 'Loading Property Types',
-            value: ''
-          }],
-        }
-      ],
-      label: 'Property Type',
-      minWidth: 42,
-      name: 'property_type',
-      onPostRender: this.addPropertyTypeValues.bind(this),
-      type: 'container'
-    });
+    this.locationInput = this.buildLocationInput(values.location_field);
+
+    this.propertyTypeInput = this.buildPropertyTypeInput();
 
     return [{
       type: 'textbox',
@@ -147,9 +100,9 @@ MarketStats.prototype = Object.create($.extend({}, ShortcodeGenerator.prototype,
       label: 'Select Location',
       items: [this.locationInput]
     }];
-  },
+  }
 
-  getChartDataValues: function(e){
+  getChartDataValues(e){
     var self = this;
     
     if(typeof this.statOptions === 'undefined') {
@@ -160,9 +113,9 @@ MarketStats.prototype = Object.create($.extend({}, ShortcodeGenerator.prototype,
     } else {
       self.updateChartDataValues();
     }
-  },
+  }
 
-  updateChartDataValues: function() {
+  updateChartDataValues() {
     var chartType = this.statTypeInput.value();
     var options = this.statOptions[chartType];
     var checkboxes = [];
@@ -189,49 +142,19 @@ MarketStats.prototype = Object.create($.extend({}, ShortcodeGenerator.prototype,
     $(this.chartDataInput.getEl()).find('.mce-container-body').html('');
 
     this.chartDataInput.append( checkboxes ).reflow();
-  },
-
-  onsubmit: function( e ) {
-    var data = e.data;
-    var chartDataValues = [];
-    var validChartDataValues = Object.keys(this.statOptions[data.stat_type]);
-
-    // All selected checkboxes for all chart data types will be include in the data
-    // as {ChartData: true} or {ChartData: false}. They need to be added to the
-    // shortcode as 'chart_data="ChartData,OtherChartData"'. This moves the stat
-    // types and filters out those that don't apply to the selected stat_type.
-    Object.keys(data).forEach(function(key) {
-      if(key.indexOf('chart_data_') === 0){
-        var id = key.replace('chart_data_', '');
-        var value = data[key];
-        
-        if(value === true && validChartDataValues.indexOf(id) >= 0){
-          chartDataValues.push(id);
-        }
-        delete data[key];
-      }
-    });
-
-    if(chartDataValues.length > 0) {
-      data.chart_data = chartDataValues.join(',');
-    }
-
-    // get the data from the select2 location box
-    var locationValue = $(this.locationInput.getEl()).val();
-    if (locationValue !== null) {
-      data.location_field = locationValue;
-    } else {
-      delete data.location_field;
-    }
-
-    var shortcode = wp.shortcode.string({
-      tag: this.shortCodeId,
-      attrs: data,
-      type: 'single'
-    });
-    this.editor.insertContent( shortcode );
   }
 
-}));
+  onsubmit( e ) {
+    var data = new ShortcodeData(e.data);
+
+    data.processChartData(Object.keys(this.statOptions[e.data.stat_type]));
+    
+    data.processLocation($(this.locationInput.getEl()).val());
+
+    e.data = data.toAttrs();
+    super.onsubmit(e);
+  }
+
+}
 
 export { MarketStats };

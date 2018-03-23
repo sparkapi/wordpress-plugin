@@ -89,31 +89,169 @@ class Page {
 			return;
 		}
 
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/map/page/([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=' . $search_results_default . '&idxpage_view=map&idxsearch_page=$matches[1]', 'top' );
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/page/([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=' . $search_results_default . '&idxpage_view=list&idxsearch_page=$matches[1]', 'top' );
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/map/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=' . $search_results_default . '&idxpage_view=map&idxsearch_page=1', 'top' );
+		// capture 0 or more of any character except "/"
+		$capture_segment = '([^/]*)';
 
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/cart/([^/]*)/map/page/([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=cart&idxsearch_id=$matches[1]&idxpage_view=map&idxsearch_page=$matches[2]', 'top' );
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/cart/([^/]*)/page/([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=cart&idxsearch_id=$matches[1]&idxpage_view=list&idxsearch_page=$matches[2]', 'top' );
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/cart/([^/]*)/map/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=cart&idxsearch_id=$matches[1]&idxpage_view=map&idxsearch_page=1', 'top' );
+		// capture 1 or more digits
+		$capture_digits = '([0-9]+)';
 
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/map/page/([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=$matches[1]&idxpage_view=map&idxsearch_page=$matches[2]', 'top' );
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/page/([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=$matches[1]&idxpage_view=list&idxsearch_page=$matches[2]', 'top' );
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/map/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=$matches[1]&idxpage_view=map&idxsearch_page=1', 'top' );
+		// 0 or more of any character except "/"
+		$anything = '[^/]*';
 
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/cart/([^/]*)/[^/]*_([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=cart&idxsearch_id=$matches[1]&idxpage_view=list&idxlisting_id=$matches[2]', 'top' );
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/[^/]*_([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=$matches[1]&idxpage_view=list&idxlisting_id=$matches[2]', 'top' );
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/[^/]*_([0-9]+)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=' . $search_results_default . '&idxpage_view=list&idxlisting_id=$matches[1]', 'top' );
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/cart/([^/]*)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=cart&idxsearch_id=$matches[1]&idxpage_view=list&idxsearch_page=1', 'top' );
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/([^/]*)/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=$matches[1]&idxpage_view=list&idxsearch_page=1', 'top' );
+		// All path patterns are prefixed by $search_results_page->post_name 
+		// which seems to be "/idx".
+		$rewrite_rules = array(
+			array(
+				'path' => "/map/page/$capture_digits/?$",
+				'params' => array(
+					'idxsearch_type' => 'standard',
+					'idxsearch_id' => $search_results_default,
+					'idxpage_view' => 'map',
+					'idxsearch_page' => '$matches[1]'
+				)
+			),
+			array(
+				'path' => "/page/$capture_digits/?$",
+				'params' => array(
+					'idxsearch_type' => 'standard',
+					'idxsearch_id' => $search_results_default,
+					'idxpage_view' => 'list',
+					'idxsearch_page' => '$matches[1]'
+				)
+			),
+			array(
+				'path' => '/map/?$',
+				'params' => array(
+					'idxsearch_type' => 'standard',
+					'idxsearch_id' => $search_results_default,
+					'idxpage_view' => 'map',
+					'idxsearch_page' => '1'
+				)
+			),
+			array(
+				'path' => "/cart/$capture_segment/map/page/$capture_digits/?$",
+				'params' => array(
+					'idxsearch_type' => 'cart',
+					'idxsearch_id' => '$matches[1]',
+					'idxpage_view' => 'map',
+					'idxsearch_page' => '$matches[2]'
+				)
+			),
+			array(
+				'path' => "/cart/$capture_segment/page/$capture_digits/?$",
+				'params' => array(
+					'idxsearch_type' => 'cart',
+					'idxsearch_id' => '$matches[1]',
+					'idxpage_view' => 'list',
+					'idxsearch_page' => '$matches[2]'
+				)
+			),
+			array(
+				'path' => "/cart/$capture_segment/map/?$",
+				'params' => array(
+					'idxsearch_type' => 'cart',
+					'idxsearch_id' => '$matches[1]',
+					'idxpage_view' => 'map',
+					'idxsearch_page' => '1'
+				)
+			),
+			array(
+				'path' => "/$capture_segment/map/page/$capture_digits/?$",
+				'params' => array(
+					'idxsearch_type' => 'standard',
+					'idxsearch_id' => '$matches[1]',
+					'idxpage_view' => 'map',
+					'idxsearch_page' => '$matches[2]'
+				)
+			),
+			array(
+				'path' => "/$capture_segment/page/$capture_digits/?$",
+				'params' => array(
+					'idxsearch_type' => 'standard',
+					'idxsearch_id' => '$matches[1]',
+					'idxpage_view' => 'list',
+					'idxsearch_page' => '$matches[2]'
+				)
+			),
+			array(
+				'path' => "/$capture_segment/map/?$",
+				'params' => array(
+					'idxsearch_type' => 'standard',
+					'idxsearch_id' => '$matches[1]',
+					'idxpage_view' => 'map',
+					'idxsearch_page=1'
+				)
+			),
+			array(
+				'path' => "/cart/$capture_segment/{$anything}_$capture_digits/?$",
+				'params' => array(
+					'idxsearch_type' => 'cart',
+					'idxsearch_id' => '$matches[1]',
+					'idxpage_view' => 'list',
+					'idxlisting_id' => '$matches[2]'
+				)
+			),
+			array(
+				'path' => "/$capture_segment/{$anything}_$capture_digits/?$",
+				'params' => array(
+					'idxsearch_type' => 'standard',
+					'idxsearch_id' => '$matches[1]',
+					'idxpage_view' => 'list',
+					'idxlisting_id' => '$matches[2]'
+				)
+			),
+			array(
+				'path' => "/{$anything}_$capture_digits/?$",
+				'params' => array(
+					'idxsearch_type' => 'standard',
+					'idxsearch_id' => $search_results_default,
+					'idxpage_view' => 'list',
+					'idxlisting_id' => '$matches[1]'
+				)
+			),
+			array(
+				'path' => "/cart/$capture_segment/?$",
+				'params' => array(
+					'idxsearch_type' => 'cart',
+					'idxsearch_id' => '$matches[1]',
+					'idxpage_view' => 'list',
+					'idxsearch_page' => '1'
+				)
+			),
+			array(
+				'path' => "/$capture_segment/?$",
+				'params' => array(
+					'idxsearch_type' => 'standard',
+					'idxsearch_id' => '$matches[1]',
+					'idxpage_view' => 'list',
+					'idxsearch_page' => '1'
+				)
+			),
+			array(
+				'path' => '/?$',
+				'params' => array(
+					'idxsearch_type' => 'standard',
+					'idxsearch_id' => $search_results_default,
+					'idxpage_view' => 'list',
+					'idxsearch_page' => '1'
+				)
+			),
+		);
 
-		add_rewrite_rule( '^' . $search_results_page->post_name . '/?$', 'index.php?page_id=' . $search_results_page->ID . '&idxsearch_type=standard&idxsearch_id=' . $search_results_default . '&idxpage_view=list&idxsearch_page=1', 'top' );
+		foreach ($rewrite_rules as $rule) {
+			$pattern = '^' . $search_results_page->post_name . $rule['path'];
+			$dest = 'index.php?page_id=' . $search_results_page->ID . '&' . build_query($rule['params']);
+			
+			add_rewrite_rule( $pattern, $dest, 'top' );
+		}
 
-		add_rewrite_tag( '%idxsearch_id%', '([^&]+)' );
-		add_rewrite_tag( '%idxsearch_type%', '([^&]+)' );
-		add_rewrite_tag( '%idxlisting_id%', '([^&]+)' );
-		add_rewrite_tag( '%idxsearch_page%', '(d+)' );
-		add_rewrite_tag( '%idxpage_view%', '([^&]+)' );
+		// Captures query params and makes them available as $wp_query->query_vars['my_param']. 
+		// The regex validates the value of the param.
+		add_rewrite_tag( '%idxsearch_id%', 		'([^&]+)' );  # capture one or more of any char except "&"
+		add_rewrite_tag( '%idxsearch_type%', 	'([^&]+)' );
+		add_rewrite_tag( '%idxlisting_id%', 	'([^&]+)' );
+		add_rewrite_tag( '%idxsearch_page%', 	'(\d+)' 	);  # capture one or more of any digit
+		add_rewrite_tag( '%idxpage_view%', 		'([^&]+)' );
 	}
 
 	function display_carts_buttons( $listing_id = null ){

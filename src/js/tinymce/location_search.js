@@ -1,129 +1,94 @@
 import { ShortcodeGenerator } from './shortcode_generator';
+import { ShortcodeData } from './shortcode_data';
 
 var $ = window.jQuery;
 
-function LocationSearch(editor) {
+class LocationSearch extends ShortcodeGenerator {
 
-  ShortcodeGenerator.call(this, editor);
+  constructor(editor){
+    super(editor);
 
-};
+    this.shortCodeId = 'flexmls_location_search';
+    this.modalTitle = '1-Click Location Search';
 
-
-LocationSearch.prototype = Object.create($.extend({}, ShortcodeGenerator.prototype, {
-  constructor: LocationSearch,
-
-
-  editorOptions: function(){
-    var title = '1-Click Searches';
-
-    return {
+    this.defaultValues = {
       title: '1-Click Location Search',
-      body: [
-        {
-          type: 'textbox',
-          name: 'title',
-          label: 'Title',
-          size: 42,
-          value: title
-        },
-        {
-          items: [
-            {
-              disabled: true,
-              name: 'idxlinksplaceholder',
-              type: 'listbox',
-              values: [{
-                text: 'Loading Saved Searches',
-                value: ''
-              }],
-            }
-          ],
-          label: 'Saved Search',
-          minWidth: 42,
-          name: 'idx_link',
-          onPostRender: this.idxLinksOnPostRender,
-          type: 'container'
-        },
-        {
-          items: [
-            {
-              disabled: true,
-              name: 'propertytypesplaceholder',
-              type: 'listbox',
-              values: [{
-                text: 'Loading Property Types',
-                value: ''
-              }],
-            }
-          ],
-          label: 'Property Type',
-          minWidth: 42,
-          name: 'property_type',
-          onPostRender: this.addPropertyTypeValues,
-          type: 'container'
-        },
-        {
-          onKeyUp: function(ev) {
-            var inputInstance = this;
-            console.log(this)
-            console.log(ev.target.value)
-          },
-          label: 'Select Location(s)',
-          name: 'idx_area',
-          size: 42,
-          text: 'Search',
-          type: 'textbox'
-        },
-        {
-          hidden: false,
-          label: ' ',
-          name: 'idx_area_results',
-          type: 'selectbox'
-        },
-        {
-          items: [
+      property_type: 'A',
+    };
+  }
 
+  body(){
+    var values = this.getInitialValues();
 
-          ],
-          label: 'Select Location(s)',
-          type: 'container'
+    this.locationInput = this.buildLocationInput(values.location_field);
+    this.propertyTypeInput = this.buildPropertyTypeInput();
+
+    this.idxLinkInput = tinymce.ui.Factory.create({
+      label: 'Saved Search',
+      minWidth: 42,
+      name: 'idx_link',
+      onPostRender: this.getIdxLinksValues.bind(this),
+      type: 'container',
+      items: [
+        {
+          type: 'listbox',
+          values: [{text: 'Loading Saved Searches', value: ''}],
+          disabled: true,
         }
       ],
-      onsubmit: this.onsubmit.bind(this)
-    }
-  },
+    });
 
-  idxLinksOnPostRender: function(){
-    var element = this.getEl(),
-        input = element.firstChild,
-        $input = $( input ),
-        inputInstance = this;
+    return [
+      {
+        type: 'textbox',
+        name: 'title',
+        label: 'Title',
+        size: 42,
+        value: values.title
+      },
+      this.idxLinkInput,
+      this.propertyTypeInput,
+      {
+        type: 'container',
+        label: 'Select Location',
+        items: [this.locationInput]
+      }
+    ];
+  }
 
+  getIdxLinksValues() {
+    var self = this;
     $.post( ajaxurl, {action: 'tinymce_get_idx_links'}, function( response ){
       if (response.length) {
-        // for (var i = 0; i < inputInstance.items().length; i++) {
-        //   inputInstance.items()[i].hide();
-        // }
-        var newValues = [];
-        for (var i = 0; i < response.length; i++) {
-          var newValue = {
-            text: response[i].text,
-            value: response[i].value
-          };
-          newValues.push(newValue);
-        }
+        
+        var newValues = response.map((r) => {
+          return {
+            text: r.text,
+            value: r.value
+          }
+        });
+
         var newListBox = {
-          name: 'idxlinks',
           type: 'listbox',
-          values: newValues
-        }
-        inputInstance.append(newListBox);
-        inputInstance.items()[0].remove();
-        inputInstance.reflow();
+          name: 'idx_link',
+          values: newValues,
+          value: self.getInitialValues().idx_link,
+        };
+        self.idxLinkInput.append(newListBox);
+        self.idxLinkInput.items()[0].remove();
       }
     }, 'json' );
-  },
+  }
 
-}));
+  onsubmit( e ) {
+    var data = new ShortcodeData(e.data);
+
+    data.processLocation($(this.locationInput.getEl()).val());
+
+    e.data = data.toAttrs();
+    super.onsubmit(e);
+  }
+
+}
 
 export { LocationSearch };

@@ -192,6 +192,7 @@ class Flexmls {
 		add_shortcode( 'flexmls_leadgen', array( FBS\Widgets\Shortcodes::class, 'flexmls_leadgen' ) );
 		add_shortcode( 'flexmls_portal', array( FBS\Widgets\Shortcodes::class, 'flexmls_portal' ) );
 		add_shortcode( 'flexmls_market_stats', array( FBS\Widgets\Shortcodes::class, 'flexmls_market_stats' ) );
+		add_shortcode( 'flexmls_location_search', array( FBS\Widgets\Shortcodes::class, 'flexmls_location_search' ) );
 
 	}
 

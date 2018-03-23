@@ -68,7 +68,8 @@ gulp.task( 'lint', function(){
 			'src/js/*.js'
 		] )
 		.pipe( jshint( {
-			multistr: true
+			multistr: true,
+			esversion: 6
 		} ) )
 		.pipe( notify( function( file ){
 			if( file.jshint.success ){

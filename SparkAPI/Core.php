@@ -587,6 +587,9 @@ class Core {
 	function remove_blank_and_restricted_fields( $item ){
 		if( is_array( $item ) ){
 			foreach( $item as $key => $val ){
+				if($key == 'Results' && empty($val)) {
+					continue;
+				}
 				$new_val = $this->remove_blank_and_restricted_fields( $item[ $key ] );
 				if( $new_val ){
 					$item[ $key ] = $new_val;
