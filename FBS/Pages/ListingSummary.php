@@ -499,17 +499,16 @@ class ListingSummary extends Page {
 
 		if( !empty( $this->search_filter ) ){
 			$this->query->results = $this->query->get_listings( $this->search_filter, $wp_query->query_vars[ 'idxsearch_page' ] );
-			if( !empty( $this->query->results ) ){
-				$flexmls_settings = get_option( 'flexmls_settings' );
-				$this->base_url = untrailingslashit( get_permalink() );
-				if( 'cart' == $wp_query->query_vars[ 'idxsearch_type' ] ){
-					$this->base_url .= '/cart';
-				}
-				if( $wp_query->query_vars[ 'idxsearch_id' ] != $flexmls_settings[ 'general' ][ 'search_results_default' ] ){
-					$this->base_url .= '/' . $wp_query->query_vars[ 'idxsearch_id' ];
-				}
-				return;
+			
+			$flexmls_settings = get_option( 'flexmls_settings' );
+			$this->base_url = untrailingslashit( get_permalink() );
+			if( 'cart' == $wp_query->query_vars[ 'idxsearch_type' ] ){
+				$this->base_url .= '/cart';
 			}
+			if( $wp_query->query_vars[ 'idxsearch_id' ] != $flexmls_settings[ 'general' ][ 'search_results_default' ] ){
+				$this->base_url .= '/' . $wp_query->query_vars[ 'idxsearch_id' ];
+			}
+			return;
 		}
 		if( 'custom_404' == $flexmls_settings[ 'general' ][ 'listing_not_available' ] ){
 			if( is_page( $flexmls_settings[ 'general' ][ 'listing_not_available' ] ) ){
