@@ -68,29 +68,24 @@ class ShortcodeGenerator{
   addPropertyTypeValues(){
     var self = this;
     
-    $.post( ajaxurl, {action: 'tinymce_get_property_types'}, function( response ){
+    this.getPropertytypes(function( response ){
       if (response.length) {
-        var newValues = [];
-        
-        for (var i = 0; i < response.length; i++) {
-          var newValue = {
-            text: response[i].text,
-            value: response[i].value
-          };
-          newValues.push(newValue);
-        }
 
         var newListBox = {
           name: 'property_type',
           type: 'listbox',
-          values: newValues,
+          values: response,
           value: self.getInitialValues().property_type,
         };
 
         self.propertyTypeInput.append(newListBox);
         self.propertyTypeInput.items()[0].remove();
       }
-    }, 'json' );
+    });
+  }
+
+  getPropertytypes(callback) {
+    $.post( ajaxurl, {action: 'tinymce_get_property_types'}, callback, 'json');
   }
 
   buildLocationInput(value){
