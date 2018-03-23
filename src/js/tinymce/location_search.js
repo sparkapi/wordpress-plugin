@@ -13,10 +13,7 @@ class LocationSearch extends ShortcodeGenerator {
 
     this.defaultValues = {
       title: '1-Click Location Search',
-      stat_type: 'absorption',
-      chart_type: 'line',
       property_type: 'A',
-      time_period: 12,
     };
   }
 

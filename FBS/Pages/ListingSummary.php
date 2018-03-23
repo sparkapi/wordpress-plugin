@@ -292,7 +292,7 @@ class ListingSummary extends Page {
 										}
 										if( array_key_exists( 'BuildingAreaTotal', $listing[ 'StandardFields' ] ) ){
 											if( false === strpos( $listing[ 'StandardFields' ][ 'BuildingAreaTotal' ], '.' ) ){
-												$listing_quickfacts[] = number_format( $listing[ 'StandardFields' ][ 'BuildingAreaTotal' ], 0 ) . ' sq ft';
+												$listing_quickfacts[] = number_format( (float)$listing[ 'StandardFields' ][ 'BuildingAreaTotal' ], 0 ) . ' sq ft';
 											} else {
 												$listing_quickfacts[] = number_format( $listing[ 'StandardFields' ][ 'BuildingAreaTotal' ], 1 ) . ' sq ft';
 											}
@@ -354,7 +354,7 @@ class ListingSummary extends Page {
 												$label = $flexmls_settings[ 'general' ][ 'search_results_fields' ][ $key ];
 												switch( $key ){
 													case 'BuildingAreaTotal':
-														$val = number_format( $val, 0 ) . ' sq ft';
+														$val = number_format( (float)$val, 0 ) . ' sq ft';
 														break;
 													case 'TaxAmount':
 														$val = '$' . \FBS\Admin\Utilities::gentle_price_rounding( $val );

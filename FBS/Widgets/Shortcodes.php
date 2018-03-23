@@ -6,7 +6,6 @@ defined( 'ABSPATH' ) or die( 'This plugin requires WordPress' );
 class Shortcodes {
 
 	public static function flexmls_idxlinks( $atts ){
-		global $wp_widget_factory;
 
 		$atts = shortcode_atts( array(
 			'title' => 'Saved Searches',
@@ -17,20 +16,10 @@ class Shortcodes {
 			$atts[ 'idx_link' ] = explode( ',', $atts[ 'idx_link' ] );
 		}
 
-		$widget_name = '\FBS\Widgets\IDXLinks';
-
-		$widget = $wp_widget_factory->widgets[ $widget_name ];
-
-		ob_start();
-		the_widget( $widget_name, $atts );
-		$output = ob_get_contents();
-		ob_end_clean();
-    	return $output;
+		return self::render('IDXLinks', $atts);
 	}
 
 	public static function flexmls_leadgen( $atts ){
-		global $wp_widget_factory;
-
 		$atts = shortcode_atts( array(
 			'title' => '',
 			'blurb' => false,
@@ -38,38 +27,20 @@ class Shortcodes {
 			'buttontext' => 'Submit'
 		), $atts, 'flexmls_leadgen' );
 
-		$widget_name = '\FBS\Widgets\LeadGeneration';
-
-		$widget = $wp_widget_factory->widgets[ $widget_name ];
-
-		ob_start();
-		the_widget( $widget_name, $atts );
-		$output = ob_get_contents();
-		ob_end_clean();
-		return $output;
+		return self::render('LeadGeneration', $atts);
 	}
 
 	public static function flexmls_portal( $atts ){
-		global $wp_widget_factory;
 
 		$atts = shortcode_atts( array(
 			'listing_carts' => 0,
 			'saved_searches' => 0
 		), $atts, 'flexmls_portal' );
 
-		$widget_name = '\FBS\Widgets\Portal';
-
-		$widget = $wp_widget_factory->widgets[ $widget_name ];
-
-		ob_start();
-		the_widget( $widget_name, $atts );
-		$output = ob_get_contents();
-		ob_end_clean();
-		return $output;
+		return self::render('Portal', $atts);
 	}
 
 	public static function flexmls_market_stats( $atts ){
-		global $wp_widget_factory;
 
 		if ( ! is_array($atts['chart_data'])) {
 			$atts['chart_data'] = explode(',', $atts['chart_data']);
@@ -88,12 +59,32 @@ class Shortcodes {
 		
 		$atts = shortcode_atts( $defaults, $atts, 'flexmls_market_stats' );
 
-		$widget_name = '\FBS\Widgets\MarketStats';
+		return self::render('MarketStats', $atts);
+	}
 
-		$widget = $wp_widget_factory->widgets[ $widget_name ];
+	public static function flexmls_location_search( $atts ){
 
+		$defaults = array(
+      'title' => null,
+      'idx_link' => null,
+      'property_type' => null,
+      'locations_field' => null,
+      'widget_id' => 'flexmls_location_search',
+		);
+		
+		// The shortcode generator location selector only supports a single location
+		// right now because the modal isn't resizable. The data needs to be copied
+		// into locations_field because the widget support multiple locations.
+		$atts['locations_field'] = [$atts['location_field']];
+
+		$atts = shortcode_atts( $defaults, $atts, 'flexmls_location_search' );
+
+		return self::render('LocationSearch', $atts);
+	}
+
+	private static function render($widget_name, $atts) {
 		ob_start();
-		the_widget( $widget_name, $atts );
+		the_widget("\FBS\Widgets\\{$widget_name}", $atts );
 		$output = ob_get_contents();
 		ob_end_clean();
 		return $output;
