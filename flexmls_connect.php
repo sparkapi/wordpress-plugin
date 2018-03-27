@@ -177,6 +177,11 @@ class Flexmls {
 		add_action( 'wp_ajax_tinymce_popup_shortcode', array( FBS\Admin\TinyMCE::class, 'tinymce_popup_shortcode' ) );
 		add_action( 'wp_ajax_toggle_cart_status', array( SparkAPI\Oauth::class, 'toggle_cart_status' ) );
 		add_action( 'wp_ajax_nopriv_toggle_cart_status', array( SparkAPI\Oauth::class, 'toggle_cart_status' ) );
+		
+
+		add_action( 'wp_ajax_slideshow_form', array( FBS\Widgets\Slideshow::class, 'ajax_form' ) );
+
+
 
 		add_action( 'wp_enqueue_scripts', array( FBS\Admin\Enqueue::class, 'wp_enqueue_scripts' ) );
 		add_action( 'wp_trash_post', array( $this, 'prevent_delete_flexmls_search_page' ), 10, 1 );

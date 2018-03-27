@@ -12,6 +12,11 @@ class Slideshow extends \WP_Widget {
 		) );
 	}
 
+	public static function ajax_form() {
+		$i = new self();
+		return $i->form(array());
+	}
+
 	public function form( $instance ){
 		$flexmls_settings = get_option( 'flexmls_settings' );
 		$search_results_default = !empty( $flexmls_settings[ 'general' ][ 'search_results_default' ] ) ? $flexmls_settings[ 'general' ][ 'search_results_default' ] : '';
