@@ -65,3 +65,55 @@
 .select2-container {
 	z-index: 1000000;
 }
+
+
+.flexmls-shortcode-form {
+	min-width: 500px;
+	.flexmls-field {
+		&+.flexmls-field {
+			margin-top: 20px;
+		}
+	}
+	label {
+		width: 30%;
+		display: inline-block;
+		line-height: 28px;
+	}
+	.flexmls-field-inputs {
+		display: inline-block;
+		width: 65%;
+	}
+	select {
+		width: 100%;
+		border: 1px solid #BBB;
+		box-shadow: none;
+	}
+	small {
+		display: block;
+		font-size: smaller;
+		margin-top: 4px
+	}
+	input[type="text"],
+	input[type="number"] {
+		height: 26px;
+		vertical-align: baseline;
+		border: 1px solid #BBB;
+		border-radius: 4px;
+		padding: 1px 6px;
+	}
+
+	.select2-selection--multiple {
+		padding-bottom: 5px;
+	}
+
+}
+
+.widget-content {
+	.flexmls-field {
+		margin: 1em 0;
+	}
+}
+
+
+
+
