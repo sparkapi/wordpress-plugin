@@ -3,28 +3,13 @@ namespace FBS\Widgets;
 
 defined( 'ABSPATH' ) or die( 'This plugin requires WordPress' );
 
-class Slideshow extends \WP_Widget {
+class Slideshow extends BaseWidget {
 
 	public function __construct(){
 		parent::__construct( 'flexmls_slideshow', 'Flexmls&reg;: IDX Slideshow', array(
 			'classname' => 'flexmls_slideshow',
 			'description' => 'Photo slideshow of select listings',
 		) );
-	}
-
-	public static function ajax_form() {
-		$i = new self();
-		$i->form( $_GET['instance'] );
-		wp_die();
-	}
-
-  private function render($path, $data) {
-	  extract($data);
-	  ob_start();
-	    require(FLEXMLS_PLUGIN_DIR_PATH . '/FBS/Widgets/templates/' . $path);
-	    $html = ob_get_contents();
-	  ob_end_clean();
-	  return $html;
 	}
 
 	public function form( $instance ){

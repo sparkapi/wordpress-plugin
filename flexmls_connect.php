@@ -180,6 +180,7 @@ class Flexmls {
 		
 
 		add_action( 'wp_ajax_slideshow_form', array( FBS\Widgets\Slideshow::class, 'ajax_form' ) );
+		add_action( 'wp_ajax_general_search_form', array( FBS\Widgets\Search::class, 'ajax_form' ) );
 
 
 

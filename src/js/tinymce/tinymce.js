@@ -323,26 +323,14 @@ import { Slideshow } from './slideshow';
           } },
           {text: 'General Search', onclick: function(){
             var generalSearch = new GeneralSearch(editor);
-
-            editor.setProgressState(1);
-            generalSearch.editorOptions().then((options) => {
-              editor.setProgressState(0);
-              editor.windowManager.open( options );
-            });
-
+            generalSearch.open();
           } },
           {text: 'IDX Links', onclick: function(){
             editor.windowManager.open( flexmls_idxlinks( editor ) );
           } },
           {text: 'IDX Slideshow', onclick: function(){
             var slideshow = new Slideshow(editor);
-
-            editor.setProgressState(1);
-            slideshow.editorOptions().then((options) => {
-              editor.setProgressState(0);
-              editor.windowManager.open( options );
-            });
-
+            slideshow.open();
           } },
           {text: 'Lead Generation', onclick: function(){
             editor.windowManager.open( flexmls_leadgen( editor ) );
