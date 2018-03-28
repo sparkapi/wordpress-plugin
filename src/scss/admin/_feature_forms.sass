@@ -1,0 +1,68 @@
+
+
+.widget-content,
+.flexmls-shortcode-form
+  small
+    display: block
+
+// Widget forms under Apperance > Widgets
+.widget-content
+  .flexmls-field
+    margin: 1em 0
+
+
+
+// Shortcode Generator form, tinymce plugin on page/post editor
+
+.flexmls-shortcode-form
+  min-width: 500px
+  
+  .mce-container &
+    padding-bottom: 20px
+
+  .select2-container
+    z-index: 1000000
+
+  .flexmls-field
+    & + .flexmls-field
+      margin-top: 20px
+
+    & > label
+      width: 30%
+      display: inline-block
+      line-height: 1.3em
+      white-space: normal
+
+  .flexmls-field-inputs
+    display: inline-block
+    width: 65%
+    line-height: 1.8em
+    *
+      white-space: normal
+
+  select
+    width: 100%
+    border: 1px solid #BBB
+    box-shadow: none
+
+  small
+    font-size: smaller
+    margin: 4px 0
+
+  input[type="text"],
+  input[type="number"]
+    height: 26px
+    vertical-align: baseline
+    border: 1px solid #BBB
+    border-radius: 4px
+    padding: 1px 6px
+
+  input[type="checkbox"]
+    vertical-align: baseline
+
+  .select2-selection--multiple
+    padding-bottom: 5px
+
+  .flexmls-search-widget-theme-options
+    margin-top: 20px
+

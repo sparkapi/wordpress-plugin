@@ -21,7 +21,7 @@
 <div class="flexmls-field">
   <label for="<?php echo $this->get_field_id( 'grid_horizontal' ); ?>">Slideshow Layout</label>
   <div class="flexmls-field-inputs">
-    <input type="number" class="small-text" id="<?php echo $this->get_field_id( 'grid_horizontal' ); ?>" name="<?php echo $this->get_field_name( 'grid_horizontal' ); ?>" value="<?php echo $grid_horizontal; ?>"> x <input type="number" class="small-text" id="<?php echo $this->get_field_id( 'grid_vertical' ); ?>" name="<?php echo $this->get_field_name( 'grid_vertical' ); ?>" value="<?php echo $grid_vertical; ?>"><br />
+    <input type="number" class="small-text" id="<?php echo $this->get_field_id( 'grid_horizontal' ); ?>" name="<?php echo $this->get_field_name( 'grid_horizontal' ); ?>" value="<?php echo $grid_horizontal; ?>"> x <input type="number" class="small-text" id="<?php echo $this->get_field_id( 'grid_vertical' ); ?>" name="<?php echo $this->get_field_name( 'grid_vertical' ); ?>" value="<?php echo $grid_vertical; ?>">
     <small>You can display up to 25 images at once</small>
   </div>
 </div>
@@ -29,7 +29,7 @@
 <div class="flexmls-field">
   <label for="<?php echo $this->get_field_id( 'autoplay' ); ?>">Autoplay Speed</label>
   <div class="flexmls-field-inputs">
-    <input type="number" class="small-text" id="<?php echo $this->get_field_id( 'autoplay' ); ?>" name="<?php echo $this->get_field_name( 'autoplay' ); ?>" value="<?php echo $autoplay; ?>"> seconds<br />
+    <input type="number" class="small-text" id="<?php echo $this->get_field_id( 'autoplay' ); ?>" name="<?php echo $this->get_field_name( 'autoplay' ); ?>" value="<?php echo $autoplay; ?>"> seconds
     <small>Set this to 0 to disable autoplay</small>
   </div>
 </div>

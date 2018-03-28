@@ -59,7 +59,7 @@
     <small>Which attributes do you want to allow users to search by?</small>
     <?php
       foreach( $this->attributes as $label => $name ){
-        echo '<br /><label><input type="checkbox" name="' . esc_attr( $this->get_field_name( 'attributes_to_search' ) ) . '[]" value="' . esc_attr( $label ) . '" ' . checked( in_array( $label, $attributes_to_search ), true, false ) . '> ' . $name . '</label>';
+        echo '<label><input type="checkbox" name="' . esc_attr( $this->get_field_name( 'attributes_to_search' ) ) . '[]" value="' . esc_attr( $label ) . '" ' . checked( in_array( $label, $attributes_to_search ), true, false ) . '> ' . $name . '</label><br>';
       }
     ?>
   </div>

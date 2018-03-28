@@ -1,3 +1,5 @@
+import { locationSelector } from '../admin/feature_forms.js';
+
 var $ = window.jQuery;
 
 class ShortcodeGenerator{
@@ -19,6 +21,14 @@ class ShortcodeGenerator{
     });
   }
 
+  modal() {
+    return $( '#' + this.editor.windowManager.windows[0]._id );
+  }
+
+  modalBody() {
+    return $(this.container.$el[0]).parent();
+  }
+
   getEditorOptions(){
     var self = this;
     var p = new Promise(function(resolve, reject) {  
@@ -26,14 +36,14 @@ class ShortcodeGenerator{
       self.gatherData().then((form) => { 
 
         self.container = tinymce.ui.Factory.create({
-            type: 'container',
-            html: '<form id="' + self.formId + '" class="flexmls-shortcode-form">' + form + '</form>',
-          });
+          type: 'container',
+          html: '<form id="' + self.formId + '" class="flexmls-shortcode-form">' + form + '</form>',
+        });
         resolve({
           title: self.modalTitle,
           body: [ self.container ],
           onsubmit: self.onsubmit.bind(self),
-          onPostRender: self.onPostRender.bind(self)
+          onPostRender: self.onPostRender.bind(self),
         });
       });
 
@@ -91,7 +101,7 @@ class ShortcodeGenerator{
 
 
   setUpLocationsField() {
-    flexmls.locationSelector('.flexmls-locations-selector');
+    locationSelector('.flexmls-locations-selector');
     
     var locationsValue = this.getInitialValues().locations_field;
 
@@ -118,18 +128,20 @@ class ShortcodeGenerator{
       var currentHeight = $('.locationsFieldRow').height();
       
       if (this.locationsRowHeight !== currentHeight){
-
         let difference = currentHeight - this.locationsRowHeight;
-
-        $('.flexmls-locations-selector').parents('.mce-container-body').each(function() {
-          var newHeight = $(this).height() + difference + 'px';
-          $(this).css({ height: newHeight });
-        });
-
+        self.resizeModalHeight(difference);
         self.locationsRowHeight = currentHeight;
       }
     });
   }
+
+  resizeModalHeight(amount){
+    this.modal().find('.mce-container-body').each(function() {
+      var newHeight = $(this).height() + amount + 'px';
+      $(this).css({ height: newHeight });
+    });
+  }
+
 
   // to be removed
   editorOptions(){
@@ -218,7 +230,7 @@ class ShortcodeGenerator{
       value: value,
       classes: 'flexmls-locations-selector',
       onPostRender: () => {
-        flexmls.locationSelector('.mce-flexmls-locations-selector');
+        locationSelector('.mce-flexmls-locations-selector');
 
         // add pre-existing values to the dropdown
         if(value !== undefined) {
@@ -228,9 +240,8 @@ class ShortcodeGenerator{
           var newOption = new Option(text, value, true, true);
           $('.mce-flexmls-locations-selector').append(newOption);
         }
-
       }
-    })
+    });
   }
 
 }
