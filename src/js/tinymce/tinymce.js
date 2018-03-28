@@ -1,6 +1,7 @@
 import { LocationSearch } from './location_search';
 import { GeneralSearch } from './general_search';
 import { MarketStats } from './market_stats';
+import { Slideshow } from './slideshow';
 
 (function($){
 
@@ -334,7 +335,14 @@ import { MarketStats } from './market_stats';
             editor.windowManager.open( flexmls_idxlinks( editor ) );
           } },
           {text: 'IDX Slideshow', onclick: function(){
-            editor.windowManager.open( flexmls_slideshow( editor ) );
+            var slideshow = new Slideshow(editor);
+
+            editor.setProgressState(1);
+            slideshow.editorOptions().then((options) => {
+              editor.setProgressState(0);
+              editor.windowManager.open( options );
+            });
+
           } },
           {text: 'Lead Generation', onclick: function(){
             editor.windowManager.open( flexmls_leadgen( editor ) );

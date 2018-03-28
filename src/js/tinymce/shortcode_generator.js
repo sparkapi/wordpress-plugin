@@ -23,10 +23,10 @@ class ShortcodeGenerator{
     var values = {};
     var selection = tinyMCE.activeEditor.selection.getContent({format : 'text'});
     
-    if( true === !!selection ){
+    if( selection ){
       var shortcode = wp.shortcode.next( this.shortCodeId, selection, 0 );
 
-      if( true === !!shortcode ){
+      if( shortcode ){
         try {
           values = shortcode.shortcode.attrs.named;
         } catch( e ){
