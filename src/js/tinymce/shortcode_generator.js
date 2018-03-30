@@ -118,21 +118,14 @@ class ShortcodeGenerator{
     }
   }
 
-  handleLocationFieldHeightChanges() {
-    var self = this;
-    
-    this.locationsRowHeight = $('.locationsFieldRow').height();
-    
-    $('.flexmls-locations-selector').on('change.select2', (e) => {
+  ensureModalIsVisible() {
+    var modalHeight = this.modal().height();
 
-      var currentHeight = $('.locationsFieldRow').height();
-      
-      if (this.locationsRowHeight !== currentHeight){
-        let difference = currentHeight - this.locationsRowHeight;
-        self.resizeModalHeight(difference);
-        self.locationsRowHeight = currentHeight;
-      }
-    });
+    this.modalBody().css({'overflow-y': 'auto'});
+    
+    if(modalHeight > window.innerHeight){
+      this.resizeModalHeight(window.innerHeight - modalHeight);
+    }
   }
 
   resizeModalHeight(amount){
@@ -174,15 +167,6 @@ class ShortcodeGenerator{
 
   getInitialValues() {
     return $.extend( {}, this.defaultValues, this.userValues() );
-  }
-
-  onsubmit( e ) {
-    var shortcode = wp.shortcode.string({
-      tag: this.shortCodeId,
-      attrs: e.data,
-      type: 'single'
-    });
-    this.editor.insertContent( shortcode );
   }
 
   buildPropertyTypeInput() {

@@ -114,10 +114,10 @@
   </div>
 </div>
 
-<div class="flexmls-field">
+<div class="flexmls-field flexmls-search-widget-theme-select">
   <label for="<?php echo esc_attr( $this->get_field_id( 'theme_style' ) ); ?>">Search Box Theme</label>
   <div class="flexmls-field-inputs">
-    <select class="widefat flexmls-search-widget-theme-select" 
+    <select class="widefat" 
       id="<?php echo $this->get_field_id( 'theme_style' ); ?>" 
       name="<?php echo $this->get_field_name( 'theme_style' ); ?>">
       <option value="" <?php selected( $theme_style, '' ); ?>>None - Controlled By Theme</option>
@@ -127,7 +127,7 @@
   </div>
 </div>
 
-<div class="flexmls-search-widget-theme-options">
+<div class="flexmls-search-widget-theme-options" <?= ($theme_style == '') ? 'style="display: none;"' : '' ?>>
 
   <div class="flexmls-field">
     <label for="<?php echo esc_attr( $this->get_field_id( 'corner_style' ) ); ?>">Box Corners</label>

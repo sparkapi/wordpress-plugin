@@ -23,17 +23,9 @@ class GeneralSearch extends ShortcodeGenerator {
     setTimeout(function() {
       this.ensureModalIsVisible();
     }.bind(this), 1);
+
     doColorPicker();
     doThemeOptions();
-  }
-
-  ensureModalIsVisible() {
-    var modalHeight = this.modal().height();
-    
-    if(modalHeight > window.innerHeight){
-      this.resizeModalHeight(window.innerHeight - modalHeight);
-      this.modalBody().css({'overflow-y': 'auto'});
-    }
   }
 
 }

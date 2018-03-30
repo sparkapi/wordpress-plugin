@@ -94,26 +94,15 @@ export function doColorPicker(){
 }
 
 
-export function doThemeOptions(){
-  if( $( '.flexmls-search-widget-theme-select' ).length ){
-    var select = $( '.flexmls-search-widget-theme-select' );
-    $( select ).each(function(){
-      var widget = $( this ).closest( '.widget' );
-      var optionsSection = $( widget ).find( '.flexmls-search-widget-theme-options' );
-      if ( $( this ).val().length > 0) {
-        $( optionsSection ).fadeIn();
-      } else {
-        $( optionsSection ).fadeOut();
-      }
-
-      $( this ).on( 'change', function( ev ){
-        console.log(this.value);
-        if (this.value.length > 0) {
-          $( optionsSection ).fadeIn();
-        } else {
-          $( optionsSection ).fadeOut();
-        }
-      });
+export function doThemeOptions(scope){
+  var $scope = (scope === undefined) ? $('body') : $(scope);
+  
+  $scope.find('.flexmls-search-widget-theme-select').each(function(){
+    var $optionsSection = $(this).siblings( '.flexmls-search-widget-theme-options' );
+    
+    $(this).find('select').change(function() {
+      $(this).val() ? $($optionsSection).fadeIn() : $($optionsSection).fadeOut();
     });
-  }
+  });
 }
+

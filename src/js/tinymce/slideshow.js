@@ -1,4 +1,6 @@
 import { ShortcodeGenerator } from './shortcode_generator';
+import { dependentSelect } from '../admin/feature_forms.js';
+
 
 var $ = window.jQuery;
 
@@ -16,9 +18,13 @@ class Slideshow extends ShortcodeGenerator {
     };
   }
 
-  onPostRender() {
+  onPostRender() { 
+    setTimeout(function() {
+      this.ensureModalIsVisible();
+    }.bind(this), 1);
+
     this.setUpLocationsField();
-    this.handleLocationFieldHeightChanges();
+    dependentSelect();
   }
 
 }

@@ -7,7 +7,7 @@ import * as featureForms from './feature_forms';
     featureForms.locationSelector('#widgets-right .flexmls-locations-selector');
 
     featureForms.doColorPicker();
-    featureForms.doThemeOptions();
+    featureForms.doThemeOptions('#widgets-right');
     featureForms.dependentSelect();
     featureForms.populateMarketStatOptions();
 
@@ -18,7 +18,7 @@ import * as featureForms from './feature_forms';
     featureForms.locationSelector(id + ' .flexmls-locations-selector');
 
     featureForms.doColorPicker();
-    featureForms.doThemeOptions();
+    featureForms.doThemeOptions(id);
     featureForms.dependentSelect();
     featureForms.populateMarketStatOptions();
   });
