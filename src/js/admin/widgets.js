@@ -1,44 +1,26 @@
+import * as featureForms from './feature_forms';
+
 (function($){
 
-	var dependentSelect = function(){
-		$( 'select.widget-toggle-dependent' ).on( 'change', function(){
-			var v = $( this ).val();
-			var target = $( this ).data( 'child' );
-			var triggeron = $( this ).data( 'triggeron' );
-			if( -1 === $.inArray( v, triggeron ) ){
-				$( target ).hide();
-			} else {
-				$( target ).show();
-			}
-		} );
-	};
+  $(document).ready(function(){
+    // set up the location box only for the widgets that are already in a widget area
+    featureForms.locationSelector('#widgets-right .flexmls-locations-selector');
 
-	var populateMarketStatOptions = function(){
-		$( 'body' ).on( 'change', 'select.flexmls-widget-market-stat-selector', function( ev ){
-			var availableOptions = $( this ).data( 'options' );
-			var selected = $( this ).val();
-			var select = $( this ).closest( '.widget-content' ).find( '.flexmls-widget-market-stat-options' );
-			var options = '';
-			if( availableOptions.hasOwnProperty( selected ) ){
-				$.each( availableOptions[selected], function( key, val ){
-					options += '<option value="' + key + '">' + val + '</option>';
-				} );
-			}
-			$( select ).html( options );
-		} );
-	};
+    featureForms.doColorPicker();
+    featureForms.doThemeOptions('#widgets-right');
+    featureForms.dependentSelect();
+    featureForms.populateMarketStatOptions();
 
-	$(document).ready(function(){
-		dependentSelect();
-		populateMarketStatOptions();
-	});
-  $(document).on('widget-added', function(event, widget){
-    dependentSelect();
-    populateMarketStatOptions();
   });
-  $(document).on('widget-updated', function(event, widget){
-    dependentSelect();
-    populateMarketStatOptions();
+
+  $(document).on('widget-added widget-updated', function(event, widget){
+    var id = '#' + widget.context.id;
+    featureForms.locationSelector(id + ' .flexmls-locations-selector');
+
+    featureForms.doColorPicker();
+    featureForms.doThemeOptions(id);
+    featureForms.dependentSelect();
+    featureForms.populateMarketStatOptions();
   });
 
 })(jQuery);

@@ -38,7 +38,10 @@ class Enqueue {
 
 		$version = in_flexmls_debug_mode() ? time() : FLEXMLS_PLUGIN_VERSION;
 
-		wp_register_script( 'flexmls-admin', FLEXMLS_PLUGIN_DIR_URL . '/dist/js/scripts-admin.min.js', array( 'jquery' ), $version );
+		wp_register_script( 'flexmls-select2', FLEXMLS_PLUGIN_DIR_URL . '/dist/js/select2.min.js', array( 'jquery' ), $version );
+		wp_enqueue_script( 'flexmls-select2' );
+
+		wp_register_script( 'flexmls-admin', FLEXMLS_PLUGIN_DIR_URL . '/dist/js/scripts-admin.js', array( 'jquery' ), $version );
 		wp_enqueue_script( 'flexmls-admin' );
 
 		wp_localize_script( 'flexmls-admin', 'flexmls', array(

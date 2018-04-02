@@ -128,26 +128,41 @@ gulp.task( 'scripts', [ 'lint' ], function(){
 		.pipe( livereload() );
 } );
 
-gulp.task( 'scripts-admin', [ 'lint' ], function(){
+gulp.task( 'select2', function(){
 	return gulp.src( [
 			'src/bower_components/select2/dist/js/select2.full.js',
-			'src/js/optimized-events.js',
-			'src/js/admin/*.js'
 		] )
-		.pipe( concat( 'dist/js/scripts-admin.js' ).on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
-		.pipe( gulp.dest( '' ) )
+		.pipe( concat( 'dist/js/select2.min.js' ).on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
 		.pipe( uglify().on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
-		.pipe( concat( 'dist/js/scripts-admin.min.js' ).on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) )
 		.pipe( gulp.dest( '' ) )
 		.pipe( livereload() );
+} );
+
+gulp.task( 'scripts-admin', [ 'lint' ], function(){
+	return browserify({
+			entries: [
+				'src/js/optimized-events.js',
+				'src/js/admin/settings.js',
+				'src/js/admin/widgets.js',
+			],
+			debug: true
+		})
+		.transform(babelify)
+		.on('error',gutil.log)
+		.bundle()
+		.on('error',gutil.log)
+		.pipe(source('scripts-admin.js'))
+		.pipe(buffer())
+		.pipe( environment == 'production' ? uglify().on( 'error', notify.onError( 'Error: <%= error.message %>' ) ) : gutil.noop() )
+		.pipe(gulp.dest('./dist/js/'));
+
 } );
 
 gulp.task( 'scripts-tinymce', [ 'lint' ], function(){
 		return browserify({
 			entries: [
-			'src/js/admin/locations-selector.js',
-			'src/js/tinymce/tinymce.js'
-		],
+				'src/js/tinymce/tinymce.js'
+			],
 			debug: true
 		})
 		.transform(babelify)
@@ -169,7 +184,7 @@ gulp.task( 'watch', function(){
 } );
 
 gulp.task( 'default', [
-	'assets', 'chartjs', 'font-awesome', 'sass', 'sass-admin', 'lint', 'scripts', 'scripts-admin', 'scripts-tinymce', 'watch'
+	'assets', 'chartjs', 'font-awesome', 'sass', 'sass-admin', 'lint', 'scripts', 'select2', 'scripts-admin', 'scripts-tinymce', 'watch'
 ] );
 
 gulp.task( 'build', [ 'build-plugin-zip' ] );

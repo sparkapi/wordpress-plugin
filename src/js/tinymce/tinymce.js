@@ -1,28 +1,9 @@
-import { MarketStats } from './market_stats';
 import { LocationSearch } from './location_search';
+import { GeneralSearch } from './general_search';
+import { MarketStats } from './market_stats';
+import { Slideshow } from './slideshow';
 
 (function($){
-
-  var flexmls_general_search = function( editor ){
-    return {
-      title: 'General Search',
-      body: [{
-          type: 'listbox',
-          name: 'style',
-          label: 'Style',
-          'values': [
-              {text: 'Clear', value: 'clear'},
-              {text: 'White', value: 'white'},
-              {text: 'Colour 1', value: 'colour1'},
-              {text: 'Colour 2', value: 'colour2'},
-              {text: 'Colour 3', value: 'colour3'},
-          ]
-      }],
-      onsubmit: function( e ) {
-        editor.insertContent( '[container style="' + e.data.style + '"]<br /><br />[/container]');
-      }
-    };
-  };
 
   var flexmls_idxlinks = function( editor ){
     // Widget Defaults
@@ -70,10 +51,10 @@ import { LocationSearch } from './location_search';
                 inputInstance = this;
             $.post( ajaxurl, {action: 'tinymce_get_idx_links'}, function( response ){
               if (response.length) {
-                for (var i = 0; i < inputInstance.items().length; i++) {
+                for (let i = 0; i < inputInstance.items().length; i++) {
                   inputInstance.items()[i].hide();
                 }
-                for (var i = 0; i < response.length; i++) {
+                for (let i = 0; i < response.length; i++) {
                   var lb = {
                     checked: -1 !== idx_link.indexOf(response[i].value),
                     type: 'checkbox',
@@ -341,14 +322,15 @@ import { LocationSearch } from './location_search';
             editor.windowManager.open( locationSearch.editorOptions() );
           } },
           {text: 'General Search', onclick: function(){
-            editor.windowManager.open( flexmls_general_search( editor ) );
+            var generalSearch = new GeneralSearch(editor);
+            generalSearch.open();
           } },
-          // {text: 'IDX Links', onclick: flexmls_idxlinks },
           {text: 'IDX Links', onclick: function(){
             editor.windowManager.open( flexmls_idxlinks( editor ) );
           } },
           {text: 'IDX Slideshow', onclick: function(){
-            editor.windowManager.open( flexmls_slideshow( editor ) );
+            var slideshow = new Slideshow(editor);
+            slideshow.open();
           } },
           {text: 'Lead Generation', onclick: function(){
             editor.windowManager.open( flexmls_leadgen( editor ) );

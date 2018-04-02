@@ -101,42 +101,4 @@ class TinyMCE {
 		exit( json_encode( $json ) );
 	}
 
-	public static function tinymce_popup(){
-
-		?>
-			<h1>Flexmls&reg; Shortcode Selector</h1>
-			<p>Select a shortcode below to enter a Flexmls&reg; widget shortcode on this page.</p>
-			<div class="widget-builder">
-				<ul class="widget-list">
-					<?php
-					foreach( \FBS\Admin\TinyMCE::$registered_widgets as $key => $registered_widget ){
-						printf(
-							'<li><a href="#" class="flexmls-shortcode-selector" data-shortcode="' . $key . '" data-class="' . $registered_widget[ 2 ] . '"><h2>%s</h2><p>%s</p></a></li>',
-							$registered_widget[ 0 ],
-							$registered_widget[ 1 ]
-						);
-					}
-					?>
-				</ul>
-			</div>
-		<?php
-		exit();
-	}
-
-	public static function tinymce_popup_shortcode(){
-		$shortcode = sanitize_text_field( $_POST[ 'shortcode' ] );
-		if( !array_key_exists( $shortcode, \FBS\Admin\TinyMCE::$registered_widgets ) ){
-			exit( '<h1>Flexmls&reg; Shortcode Selector</h1><p>Now you&#8217;re just playing around...</p>' );
-		}
-		$shortcode_selected = \FBS\Admin\TinyMCE::$registered_widgets[ $shortcode ];
-		$class = sanitize_text_field( $_POST[ 'class' ] );
-		echo '<p><a href="#" class="flexmls-shortcode-back">&larr; Back to all shortcodes</a></p>';
-		echo '<h1>' . $shortcode_selected[ 0 ] . '</h1>';
-		echo '<p>You can use <code>{Location}</code> on neighborhood templates to automatically fill in location details.</p>';
-		$c = '\FBS\Widgets\\' . $class;
-		$widget = new $c;
-		echo $widget->form( array() );
-		echo '<p><button type="button" class="button-primary flexmls-insert-shortcode">Insert Shortcode</button></p>';
-		exit();
-	}
 }

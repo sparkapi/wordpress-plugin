@@ -3,7 +3,7 @@ namespace FBS\Widgets;
 
 defined( 'ABSPATH' ) or die( 'This plugin requires WordPress' );
 
-class Search extends \WP_Widget {
+class Search extends BaseWidget {
 
 	public function __construct(){
 		parent::__construct( 'flexmls_general_search', 'Flexmls&reg;: General Search', array(
@@ -32,129 +32,38 @@ class Search extends \WP_Widget {
 	}
 
 	public function form( $instance ){
-		$flexmls_settings = get_option( 'flexmls_settings' );
+		$defaults = array(
+			'title' 									 	=> 'Search Properties',
+			'property_types_to_search' 	=> array(),
+			'user_property_types' 		 	=> 'yes',
+			'idx_link_for_search'		  	=> array(),
+			'attributes_to_search' 			=> array(),
+			'allow_sold_searches' 			=> 0,
+			'submit_button_text' 				=> 'Search For Homes',
+			'more_search_options_link'  => '',
+			'more_search_options_text'  => '',
+			'theme_style' 							=> '',
+			'corner_style' 							=> 'square',
+			'button_background' 				=> '',
+			'button_foreground' 				=> '',
+		);
+
+		$data = array_merge($defaults, $instance);
+
+		$data['flexmls_settings'] = get_option( 'flexmls_settings' );
+
 		$IDXLinks = new \SparkAPI\IDXLinks();
-		$all_idx_links = $IDXLinks->get_all_idx_links( true );
-
-		$title = !isset( $instance[ 'title' ] ) ? 'Search Properties' : $instance[ 'title' ];
-		$property_types_to_search = !isset( $instance[ 'property_types_to_search' ] ) ? array() : $instance[ 'property_types_to_search' ];
-		$user_property_types = !isset( $instance[ 'user_property_types' ] ) ? 'yes' : $instance[ 'user_property_types' ];
-		$idx_link_for_search = !isset( $instance[ 'idx_link_for_search' ] ) ? array() : $instance[ 'idx_link_for_search' ];
-		$attributes_to_search = !isset( $instance[ 'attributes_to_search' ] ) ? array() : $instance[ 'attributes_to_search' ];
-		$allow_sold_searches = !isset( $instance[ 'allow_sold_searches' ] ) ? 0 : $instance[ 'allow_sold_searches' ];
-		$submit_button_text = !isset( $instance[ 'submit_button_text' ] ) ? 'Search For Homes' : $instance[ 'submit_button_text' ];
-		$more_search_options_link = !isset( $instance[ 'more_search_options_link' ] ) ? '' : $instance[ 'more_search_options_link' ];
-		$more_search_options_text = !isset( $instance[ 'more_search_options_text' ] ) ? '' : $instance[ 'more_search_options_text' ];
-
-		$theme_style = !isset( $instance[ 'theme_style' ] ) ? '' : $instance[ 'theme_style' ];
-		$corner_style = !isset( $instance[ 'corner_style' ] ) ? 'square' : $instance[ 'corner_style' ];
-		$button_background = !isset( $instance[ 'button_background' ] ) ? '' : $instance[ 'button_background' ];
-		$button_foreground = !isset( $instance[ 'button_foreground' ] ) ? '' : $instance[ 'button_foreground' ];
+		$data['all_idx_links'] = $IDXLinks->get_all_idx_links( true );
 
 		$system = new \SparkAPI\System();
-		$api_system_info = $system->get_system_info();
+		$data['api_system_info'] = $system->get_system_info();
 
-		$does_allow_sold_search = array(
+		$data['does_allow_sold_search'] = array(
 			'OCA', 'NEF', 'LBR', 'TBR', 'TAR', 'RIC', 'NCR', 'SVV', 'FLK', 'SEM', 'MM', 'KEY', 'SPC', 'CCI', 'YAK', 'NCW', 'RMLS', 'SCC', 'PBB', 'ALX', 'KNX', 'PAZ', 'GVS', 'BC', 'AK', 'LINCOLN', 'LOU', 'ARMLS', 'NEW', 'COA', 'AGS', 'GCO', 'ECN', 'CRMLS', 'EUP', 'BRK', 'SBR', 'PF', 'VC', 'CHS', 'NSBC', 'GANT'
 		);
 
-		?>
-		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>">Title</label>
-			<input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>">
-		</p>
-		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'property_types_to_search' ) ); ?>">Property Type(s) To Search</label>
-			<?php
-				$property_types_letters = array();
-				$SparkPropertyTypes = new \SparkAPI\PropertyTypes();
-				$property_types = $SparkPropertyTypes->get_property_types();
-				if( $property_types ){
-					foreach( $property_types as $label => $name ){
-						$value_to_show = $name;
-						if( isset( $flexmls_settings[ 'general' ][ 'property_types' ][ $label ] ) ){
-							$value_to_show = $flexmls_settings[ 'general' ][ 'property_types' ][ $label ][ 'value' ];
-						}
-						echo '<br /><label><input type="checkbox" name="' . esc_attr( $this->get_field_name( 'property_types_to_search' ) ) . '[]" value="' . esc_attr( $label ) . '" ' . checked( in_array( $label, $property_types_to_search ), true, false ) . '> ' . $name . '</label>';
-					}
-				}
-			?>
-		</p>
-		<p>
-			<label for="<?php echo $this->get_field_id( 'user_property_types' ); ?>">Property Type(s) In Search</label>
-			<br /><small>Should users be able to select from the available property types?</small>
-			<select class="widefat" id="<?php echo $this->get_field_id( 'user_property_types' ); ?>" name="<?php echo $this->get_field_name( 'user_property_types' ); ?>">
-				<option value="yes" <?php selected( $user_property_types, 'yes' ); ?>>Yes, allow visitors to select property types</option>
-				<option value="no" <?php selected( $user_property_types, 'no' ); ?>>No, do not allow visitors to select property types</option>
-			</select>
-		</p>
-		<p>
-			<label for="<?php echo $this->get_field_id( 'idx_link_for_search' ); ?>">Limit Results to Saved Search</label>
-			<select class="widefat" id="<?php echo $this->get_field_id( 'idx_link_for_search' ); ?>" name="<?php echo $this->get_field_name( 'idx_link_for_search' ); ?>">
-				<option value="" <?php selected( $idx_link_for_search, '' ); ?>>Do Not Limit Results</option>
-				<?php foreach( $all_idx_links as $all_idx_link ): ?>
-					<option value="<?php echo $all_idx_link[ 'Id' ]; ?>" <?php selected( $all_idx_link[ 'Id' ], $idx_link_for_search ); ?>><?php echo $all_idx_link[ 'Name' ]; ?></option>
-				<?php endforeach; ?>
-			</select>
-			<small>You can edit these in your FlexMLS dashboard</small>
-		</p>
-		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'attributes_to_search' ) ); ?>">Property Attributes</label>
-			<br /><small>Which attributes do you want to allow users to search by?</small>
-			<?php
-				foreach( $this->attributes as $label => $name ){
-					echo '<br /><label><input type="checkbox" name="' . esc_attr( $this->get_field_name( 'attributes_to_search' ) ) . '[]" value="' . esc_attr( $label ) . '" ' . checked( in_array( $label, $attributes_to_search ), true, false ) . '> ' . $name . '</label>';
-				}
-			?>
-		</p>
-		<?php if( in_array( $api_system_info[ 'Mls' ], $does_allow_sold_search ) ) : ?>
-			<p>
-				<label for="<?php echo esc_attr( $this->get_field_id( 'allow_sold_searches' ) ); ?>">Allow Sold Searches?</label><br />
-				<label><input type="checkbox" id="<?php echo esc_attr( $this->get_field_id( 'allow_sold_searches' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'allow_sold_searches' ) ); ?>" value="1" <?php checked( $allow_sold_searches, 1 ); ?>> Yes, allow searches of sold listings</label>
-			</p>
-		<?php endif; ?>
-		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'submit_button_text' ) ); ?>">Submit Button Text</label>
-			<input placeholder="eg, Search for Homes" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'submit_button_text' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'submit_button_text' ) ); ?>" type="text" value="<?php echo esc_attr( $submit_button_text ); ?>">
-		</p>
-		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'more_search_options_link' ) ); ?>">More Search Options URL (optional)</label>
-			<input placeholder="eg, <?php echo home_url( 'search' ); ?>" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'more_search_options_link' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'more_search_options_link' ) ); ?>" type="text" value="<?php echo esc_attr( $more_search_options_link ); ?>">
-			<br /><small>Adds a link to the bottom of the search widget</small>
-		</p>
-		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'more_search_options_text' ) ); ?>">More Search Options Text (optional)</label>
-			<input placeholder="eg, More Search Options" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'more_search_options_text' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'more_search_options_text' ) ); ?>" type="text" value="<?php echo esc_attr( $more_search_options_text ); ?>">
-			<br /><small>Custom text for the above link on the bottom of the search widget</small>
-		</p>
-		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'theme_style' ) ); ?>">Search Box Theme</label>
-			<select class="widefat flexmls-search-widget-theme-select" id="<?php echo $this->get_field_id( 'theme_style' ); ?>" name="<?php echo $this->get_field_name( 'theme_style' ); ?>">
-				<option value="" <?php selected( $theme_style, '' ); ?>>None - Controlled By Theme</option>
-				<option value="light" <?php selected( $theme_style, 'light' ); ?>>Light</option>
-				<option value="dark" <?php selected( $theme_style, 'dark' ); ?>>Dark</option>
-			</select>
-		</p>
-		<div class="flexmls-search-widget-theme-options">
-			<p>
-				<label for="<?php echo esc_attr( $this->get_field_id( 'corner_style' ) ); ?>">Box Corners</label>
-				<select class="widefat" id="<?php echo $this->get_field_id( 'corner_style' ); ?>" name="<?php echo $this->get_field_name( 'corner_style' ); ?>">
-					<option value="square" <?php selected( $corner_style, 'square' ); ?>>Square (Default)</option>
-					<option value="rounded" <?php selected( $corner_style, 'rounded' ); ?>>Rounded</option>
-				</select>
-			</p>
-			<p>
-				<label for="<?php echo esc_attr( $this->get_field_id( 'button_background' ) ); ?>">Button Background Color</label><br />
-				<small>Leave blank to use the default blue</small>
-				<input placeholder="eg, #4b6ed0" class="widefat iris-color-picker" id="<?php echo esc_attr( $this->get_field_id( 'button_background' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'button_background' ) ); ?>" type="text" value="<?php echo esc_attr( $button_background ); ?>">
-			</p>
-			<p>
-				<label for="<?php echo esc_attr( $this->get_field_id( 'button_foreground' ) ); ?>">Button Text Color</label><br />
-				<small>Leave blank to use the default white</small>
-				<input placeholder="eg, #ffffff" class="widefat iris-color-picker" id="<?php echo esc_attr( $this->get_field_id( 'button_foreground' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'button_foreground' ) ); ?>" type="text" value="<?php echo esc_attr( $button_foreground ); ?>">
-			</p>
-		</div>
-		<?php
+		echo $this->render('search/form.php', $data);
+
 	}
 
 	public function update( $new_instance, $old_instance ){
