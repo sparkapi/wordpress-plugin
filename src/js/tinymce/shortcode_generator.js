@@ -52,6 +52,13 @@ class ShortcodeGenerator{
     return p;
   }
 
+  onPostRender() {
+    // TODO: figure out how to skip this setTimeout hack
+    setTimeout(function() {
+      this.ensureModalIsVisible();
+    }.bind(this), 1);
+  }
+
   gatherData() {
     var self = this;
     var p = new Promise(function(resolve, reject) {  
@@ -76,6 +83,20 @@ class ShortcodeGenerator{
   onsubmit( e ) {
     var self = this;
     var data = $('#' + this.formId).serializeArray();
+    var attrs = this.cleanData(data);
+    console.log( data );
+    console.log( attrs );
+
+    var shortcode = wp.shortcode.string({
+      tag: this.shortCodeId,
+      attrs: attrs,
+      type: 'single'
+    });
+    this.editor.insertContent( shortcode );
+  }
+
+  cleanData(data) {
+    var self = this;
     var attrs = {};
 
     data.forEach((field) => {
@@ -90,12 +111,7 @@ class ShortcodeGenerator{
       }
     });
 
-    var shortcode = wp.shortcode.string({
-      tag: this.shortCodeId,
-      attrs: attrs,
-      type: 'single'
-    });
-    this.editor.insertContent( shortcode );
+    return attrs;
   }
 
 

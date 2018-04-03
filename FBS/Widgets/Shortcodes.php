@@ -68,14 +68,11 @@ class Shortcodes {
       'title' => null,
       'idx_link' => null,
       'property_type' => null,
-      'locations_field' => null,
+      'locations_field' => array(),
       'widget_id' => 'flexmls_location_search',
 		);
 		
-		// The shortcode generator location selector only supports a single location
-		// right now because the modal isn't resizable. The data needs to be copied
-		// into locations_field because the widget support multiple locations.
-		$atts['locations_field'] = [$atts['location_field']];
+		$atts['locations_field'] = explode(',', $atts['locations_field']);
 
 		$atts = shortcode_atts( $defaults, $atts, 'flexmls_location_search' );
 

@@ -178,6 +178,7 @@ class Flexmls {
 		add_action( 'wp_ajax_nopriv_toggle_cart_status', array( SparkAPI\Oauth::class, 'toggle_cart_status' ) );
 		
 
+		add_action( 'wp_ajax_location_search_form', array( FBS\Widgets\LocationSearch::class, 'ajax_form' ) );
 		add_action( 'wp_ajax_slideshow_form', array( FBS\Widgets\Slideshow::class, 'ajax_form' ) );
 		add_action( 'wp_ajax_general_search_form', array( FBS\Widgets\Search::class, 'ajax_form' ) );
 
