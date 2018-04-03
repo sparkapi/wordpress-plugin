@@ -49,6 +49,10 @@
     font-size: smaller
     margin: 4px 0
 
+  input[type="text"]
+    width: 100%
+    box-sizing: border-box
+    
   input[type="text"],
   input[type="number"]
     height: 26px
@@ -60,9 +64,14 @@
   input[type="checkbox"]
     vertical-align: baseline
 
+  .select2-selection
+    position: relative // to keep the dropdown arrow from getting away
+
   .select2-selection--multiple
     padding-bottom: 5px
 
   .flexmls-search-widget-theme-options
     margin-top: 20px
 
+  .flexmls-market-stats-fields
+    margin: 20px 0

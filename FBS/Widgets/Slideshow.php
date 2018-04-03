@@ -13,6 +13,10 @@ class Slideshow extends BaseWidget {
 	}
 
 	public function form( $instance ){
+		if($instance == NULL) {
+			$instance = array();
+		}
+		
 		$flexmls_settings = get_option( 'flexmls_settings' );
 		
 		$search_results_default = !empty( $flexmls_settings[ 'general' ][ 'search_results_default' ] ) ? $flexmls_settings[ 'general' ][ 'search_results_default' ] : '';

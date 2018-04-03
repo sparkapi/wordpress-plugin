@@ -319,7 +319,7 @@ import { Slideshow } from './slideshow';
         menu: [
           {text: '1-Click Location Search', onclick: function(){
             var locationSearch = new LocationSearch(editor);
-            editor.windowManager.open( locationSearch.editorOptions() );
+            locationSearch.open();
           } },
           {text: 'General Search', onclick: function(){
             var generalSearch = new GeneralSearch(editor);
@@ -337,7 +337,7 @@ import { Slideshow } from './slideshow';
           } },
           {text: 'Market Statistics', onclick: function(){
             var marketStats = new MarketStats(editor);
-            editor.windowManager.open( marketStats.editorOptions() );
+            marketStats.open();
           } },
           {text: 'Portal Widget', onclick: function(){
             editor.windowManager.open( flexmls_portal( editor ) );

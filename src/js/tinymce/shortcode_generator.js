@@ -1,4 +1,4 @@
-import { locationSelector } from '../admin/feature_forms.js';
+import { locationSelector, populateMarketStatOptions } from '../admin/feature_forms.js';
 
 var $ = window.jQuery;
 
@@ -6,9 +6,6 @@ class ShortcodeGenerator{
 
   constructor(editor) {
     this.editor = editor;
-
-    // override the default values in the children
-    this.defaultValues = {};
   }
 
   open() {
@@ -52,6 +49,16 @@ class ShortcodeGenerator{
     return p;
   }
 
+  onPostRender() {
+    // TODO: figure out how to skip this setTimeout hack
+    setTimeout(function() {
+      this.ensureModalIsVisible();
+    }.bind(this), 1);
+
+    this.setUpLocationsField();
+    populateMarketStatOptions();
+  }
+
   gatherData() {
     var self = this;
     var p = new Promise(function(resolve, reject) {  
@@ -62,7 +69,7 @@ class ShortcodeGenerator{
         dataType: 'html',
         data: {
           action: self.ajaxAction,
-          instance: self.getInitialValues()
+          instance: self.userValues()
         },
         success: function(data) {
           resolve(data);
@@ -76,6 +83,18 @@ class ShortcodeGenerator{
   onsubmit( e ) {
     var self = this;
     var data = $('#' + this.formId).serializeArray();
+    var attrs = this.cleanData(data);
+
+    var shortcode = wp.shortcode.string({
+      tag: this.shortCodeId,
+      attrs: attrs,
+      type: 'single'
+    });
+    this.editor.insertContent( shortcode );
+  }
+
+  cleanData(data) {
+    var self = this;
     var attrs = {};
 
     data.forEach((field) => {
@@ -90,12 +109,7 @@ class ShortcodeGenerator{
       }
     });
 
-    var shortcode = wp.shortcode.string({
-      tag: this.shortCodeId,
-      attrs: attrs,
-      type: 'single'
-    });
-    this.editor.insertContent( shortcode );
+    return attrs;
   }
 
 
@@ -103,7 +117,7 @@ class ShortcodeGenerator{
   setUpLocationsField() {
     locationSelector('.flexmls-locations-selector');
     
-    var locationsValue = this.getInitialValues().locations_field;
+    var locationsValue = this.userValues().locations_field;
 
     // add pre-existing values to the dropdown
     if(locationsValue !== undefined) {
@@ -165,10 +179,6 @@ class ShortcodeGenerator{
     return values;
   }
 
-  getInitialValues() {
-    return $.extend( {}, this.defaultValues, this.userValues() );
-  }
-
   buildPropertyTypeInput() {
     return tinymce.ui.Factory.create({
       type: 'container',
@@ -194,7 +204,7 @@ class ShortcodeGenerator{
           name: 'property_type',
           type: 'listbox',
           values: response,
-          value: self.getInitialValues().property_type,
+          value: self.userValues().property_type,
         };
 
         self.propertyTypeInput.append(newListBox);

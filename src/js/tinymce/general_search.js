@@ -13,16 +13,10 @@ class GeneralSearch extends ShortcodeGenerator {
     this.formId      =  this.shortCodeId + '_form';
     this.modalTitle  = 'General Search';
     this.ajaxAction  = 'general_search_form';
-
-    this.defaultValues = {
-    };
   }
 
   onPostRender() {
-    // TODO: figure out how to skip this setTimeout hack
-    setTimeout(function() {
-      this.ensureModalIsVisible();
-    }.bind(this), 1);
+    super.onPostRender();
 
     doColorPicker();
     doThemeOptions();
