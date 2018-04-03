@@ -13,17 +13,11 @@ class Slideshow extends ShortcodeGenerator {
     this.formId      =  this.shortCodeId + '_form';
     this.modalTitle  = 'Slideshow';
     this.ajaxAction  = 'slideshow_form';
-
-    this.defaultValues = {
-    };
   }
 
   onPostRender() { 
-    setTimeout(function() {
-      this.ensureModalIsVisible();
-    }.bind(this), 1);
+    super.onPostRender();
 
-    this.setUpLocationsField();
     dependentSelect();
   }
 

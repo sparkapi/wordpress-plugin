@@ -13,9 +13,6 @@ class GeneralSearch extends ShortcodeGenerator {
     this.formId      =  this.shortCodeId + '_form';
     this.modalTitle  = 'General Search';
     this.ajaxAction  = 'general_search_form';
-
-    this.defaultValues = {
-    };
   }
 
   onPostRender() {

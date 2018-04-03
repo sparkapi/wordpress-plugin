@@ -3,7 +3,7 @@ namespace FBS\Widgets;
 
 defined( 'ABSPATH' ) or die( 'This plugin requires WordPress' );
 
-class MarketStats extends \WP_Widget {
+class MarketStats extends BaseWidget {
 
 	public static $chart_colors = array(
 		array(78,183,78),
@@ -69,80 +69,38 @@ class MarketStats extends \WP_Widget {
 	}
 
 	public function form( $instance ){
-		add_thickbox();
-		$title = !isset( $instance[ 'title' ] ) ? 'Market Statistics' : $instance[ 'title' ];
-		$stat_type = !isset( $instance[ 'stat_type' ] ) ? 'absorption' : $instance[ 'stat_type' ];
-		$chart_data = !isset( $instance[ 'chart_data' ] ) ? array( 'AbsorptionRate' ) : $instance[ 'chart_data' ];
-		$chart_type = !isset( $instance[ 'chart_type' ] ) ? 'line' : $instance[ 'chart_type' ];
-		$property_type = !isset( $instance[ 'property_type' ] ) ? 'A' : $instance[ 'property_type' ];
-		$time_period = !isset( $instance[ 'time_period' ] ) ? 12 : $instance[ 'time_period' ];
-		$location_field_name_to_display = !isset( $instance[ 'location_field_name_to_display' ] ) ? '' : $instance[ 'location_field_name_to_display' ];
-		$location_field_name_to_search = !isset( $instance[ 'location_field_name_to_search' ] ) ? '' : $instance[ 'location_field_name_to_search' ];
-		$location_field_value_to_search = !isset( $instance[ 'location_field_value_to_search' ] ) ? '' : $instance[ 'location_field_value_to_search' ];
-		$location_field = !isset( $instance[ 'location_field' ] ) ? '' : $instance[ 'location_field' ];
+
+		if($instance == NULL) {
+			$instance = array();
+		}
+
+		$defaults = array(
+			'title' => 'Market Statistics',
+			'stat_type' => 'absorption',
+			'chart_data' => array( 'AbsorptionRate' ),
+			'chart_type' => 'line',
+			'property_type' => 'A',
+			'time_period' => 12,
+			'location_field_name_to_display' => '',
+			'location_field_name_to_search' => '',
+			'location_field_value_to_search' => '',
+			'location_field' => '',
+		);
+
+		$data = array_merge($defaults, $instance);
+
+		// The shortcode generator stores chart_data as a string, but we need an array
+		if ( ! is_array($data['chart_data'])) {
+			$data['chart_data'] = explode(',', $data['chart_data']);
+		}
+
+		$data['stat_options'] = self::$stat_options;
+
 		$flexmls_settings = get_option( 'flexmls_settings' );
-		?>
-		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>">Title</label>
-			<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" value="<?php echo $title; ?>">
-		</p>
-		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'stat_type' ) ); ?>">Type of Statistics</label>
-			<select class="widefat flexmls-widget-market-stat-selector" id="<?php echo esc_attr( $this->get_field_id( 'stat_type' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'stat_type' ) ); ?>" data-options='<?php echo json_encode( self::$stat_options ); ?>'>
-				<option value="absorption" <?php selected( $stat_type, 'absorption' ); ?>>Absorption Rate</option>
-				<option value="inventory" <?php selected( $stat_type, 'inventory' ); ?>>Inventory</option>
-				<option value="price" <?php selected( $stat_type, 'price' ); ?>>Price</option>
-				<option value="ratio" <?php selected( $stat_type, 'ratio' ); ?>>Sale to List Price Ratios</option>
-				<option value="dom" <?php selected( $stat_type, 'dom' ); ?>>Days On Market</option>
-				<option value="volume" <?php selected( $stat_type, 'volume' ); ?>>Volume</option>
-			</select>
-		</p>
-		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'chart_data' ) ); ?>">What data would you like to display?</label>
-			<select multiple class="widefat flexmls-widget-market-stat-options" id="<?php echo esc_attr( $this->get_field_id( 'chart_data' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'chart_data' ) ); ?>[]" size="5">
-				<?php
-					$selectOptions = self::$stat_options[ $stat_type ];
-					foreach( $selectOptions as $k => $v ){
-						echo '<option value="' . $k . '" ' . selected( in_array( $k, $chart_data ), true, false ) . '>' . $v . '</option>';
-					}
-				?>
-			</select>
-		</p>
-		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'chart_type' ) ); ?>">Chart Type</label>
-			<select class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'chart_type' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'chart_type' ) ); ?>">
-				<option value="line" <?php selected( $chart_type, 'line' ); ?>>Line Chart</option>
-				<option value="bar" <?php selected( $chart_type, 'bar' ); ?>>Bar Chart</option>
-			</select>
-		</p>
-		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'property_type' ) ); ?>">Property Type</label>
-			<select class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'property_type' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'property_type' ) ); ?>">
-				<?php foreach( $flexmls_settings[ 'general' ][ 'property_types' ] as $ptype_key => $ptype_values ): ?>
-					<option value="<?php echo $ptype_key; ?>" <?php selected( $property_type, $ptype_key ); ?>><?php echo $ptype_values[ 'value' ]; ?></option>
-				<?php endforeach; ?>
-			</select>
-		</p>
-		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'time_period' ) ); ?>">Time Period</label>
-			<select class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'time_period' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'time_period' ) ); ?>">
-				<?php for( $i = 1; $i < 13; $i++ ): ?>
-					<option value="<?php echo $i; ?>" <?php selected( $time_period, $i ); ?>><?php printf( _n( '%d Month', '%d Months', $i ), $i ); ?></option>
-				<?php endfor; ?>
-			</select>
-		</p>
-		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'location_field' ) ); ?>">Select Location</label>
-			<select name="<?php echo esc_attr( $this->get_field_name( 'location_field' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'location_field' ) ); ?>" class="flexmls-locations-selector" style="display: block; width: 100%;">
-				<?php
-					if( !empty( $location_field ) ){
-						$location_field_pieces = explode( '***', $location_field );
-						echo '<option selected="selected" value="' . $location_field . '">' . $location_field_pieces[ 0 ] . ' (' . $location_field_pieces[ 1 ] . ')</option>';
-					}
-				?>
-			</select>
-		</p>
-		<?php
+		$data['property_types'] = $flexmls_settings[ 'general' ][ 'property_types' ];
+
+		echo $this->render('market_stats/form.php', $data);
+
 	}
 
 	public function update( $new_instance, $old_instance ){
@@ -177,9 +135,6 @@ class MarketStats extends \WP_Widget {
 		$instance[ 'chart_type' ] = 'bar' == $new_instance[ 'chart_type' ] ? 'bar' : 'line';
 		$instance[ 'property_type' ] = sanitize_text_field( $new_instance[ 'property_type' ] );
 		$instance[ 'time_period' ] = min( 12, max( 1, absint( $new_instance[ 'time_period' ] ) ) );
-		//$instance[ 'location_field_name_to_display' ] = !isset( $new_instance[ 'location_field_name_to_display' ] ) ? '' : sanitize_text_field( $new_instance[ 'location_field_name_to_display' ] );
-		//$instance[ 'location_field_name_to_search' ] = !isset( $new_instance[ 'location_field_name_to_search' ] ) ? '' : sanitize_text_field( $new_instance[ 'location_field_name_to_search' ] );
-		//$instance[ 'location_field_value_to_search' ] = !isset( $new_instance[ 'location_field_value_to_search' ] ) ? '' : sanitize_text_field( $new_instance[ 'location_field_value_to_search' ] );
 		$instance[ 'location_field' ] = !isset( $new_instance[ 'location_field' ] ) ? '' : sanitize_text_field( $new_instance[ 'location_field' ] );
 
 		return $instance;

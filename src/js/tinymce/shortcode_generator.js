@@ -1,4 +1,4 @@
-import { locationSelector } from '../admin/feature_forms.js';
+import { locationSelector, populateMarketStatOptions } from '../admin/feature_forms.js';
 
 var $ = window.jQuery;
 
@@ -6,9 +6,6 @@ class ShortcodeGenerator{
 
   constructor(editor) {
     this.editor = editor;
-
-    // override the default values in the children
-    this.defaultValues = {};
   }
 
   open() {
@@ -57,6 +54,9 @@ class ShortcodeGenerator{
     setTimeout(function() {
       this.ensureModalIsVisible();
     }.bind(this), 1);
+
+    this.setUpLocationsField();
+    populateMarketStatOptions();
   }
 
   gatherData() {
@@ -69,7 +69,7 @@ class ShortcodeGenerator{
         dataType: 'html',
         data: {
           action: self.ajaxAction,
-          instance: self.getInitialValues()
+          instance: self.userValues()
         },
         success: function(data) {
           resolve(data);
@@ -84,8 +84,6 @@ class ShortcodeGenerator{
     var self = this;
     var data = $('#' + this.formId).serializeArray();
     var attrs = this.cleanData(data);
-    console.log( data );
-    console.log( attrs );
 
     var shortcode = wp.shortcode.string({
       tag: this.shortCodeId,
@@ -119,7 +117,7 @@ class ShortcodeGenerator{
   setUpLocationsField() {
     locationSelector('.flexmls-locations-selector');
     
-    var locationsValue = this.getInitialValues().locations_field;
+    var locationsValue = this.userValues().locations_field;
 
     // add pre-existing values to the dropdown
     if(locationsValue !== undefined) {
@@ -181,10 +179,6 @@ class ShortcodeGenerator{
     return values;
   }
 
-  getInitialValues() {
-    return $.extend( {}, this.defaultValues, this.userValues() );
-  }
-
   buildPropertyTypeInput() {
     return tinymce.ui.Factory.create({
       type: 'container',
@@ -210,7 +204,7 @@ class ShortcodeGenerator{
           name: 'property_type',
           type: 'listbox',
           values: response,
-          value: self.getInitialValues().property_type,
+          value: self.userValues().property_type,
         };
 
         self.propertyTypeInput.append(newListBox);

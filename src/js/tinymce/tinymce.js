@@ -337,7 +337,7 @@ import { Slideshow } from './slideshow';
           } },
           {text: 'Market Statistics', onclick: function(){
             var marketStats = new MarketStats(editor);
-            editor.windowManager.open( marketStats.editorOptions() );
+            marketStats.open();
           } },
           {text: 'Portal Widget', onclick: function(){
             editor.windowManager.open( flexmls_portal( editor ) );

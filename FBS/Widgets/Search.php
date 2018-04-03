@@ -32,6 +32,10 @@ class Search extends BaseWidget {
 	}
 
 	public function form( $instance ){
+		if($instance == NULL) {
+			$instance = array();
+		}
+		
 		$defaults = array(
 			'title' 									 	=> 'Search Properties',
 			'property_types_to_search' 	=> array(),
