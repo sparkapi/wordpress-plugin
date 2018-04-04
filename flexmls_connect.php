@@ -180,6 +180,7 @@ class Flexmls {
 		add_action( 'wp_ajax_idx_links_form', array( FBS\Widgets\IDXLinks::class, 'ajax_form' ) );
 		add_action( 'wp_ajax_lead_generation_form', array( FBS\Widgets\LeadGeneration::class, 'ajax_form' ) );
 		add_action( 'wp_ajax_market_stats_form', array( FBS\Widgets\MarketStats::class, 'ajax_form' ) );
+		add_action( 'wp_ajax_portal_form', array( FBS\Widgets\Portal::class, 'ajax_form' ) );
 
 
 

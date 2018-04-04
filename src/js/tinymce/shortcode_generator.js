@@ -81,16 +81,19 @@ class ShortcodeGenerator{
 
 
   onsubmit( e ) {
-    var self = this;
-    var data = $('#' + this.formId).serializeArray();
-    var attrs = this.cleanData(data);
+
 
     var shortcode = wp.shortcode.string({
       tag: this.shortCodeId,
-      attrs: attrs,
+      attrs: this.getFormData(),
       type: 'single'
     });
     this.editor.insertContent( shortcode );
+  }
+
+  getFormData() {
+    var data = $('#' + this.formId).serializeArray();
+    return this.cleanData(data);
   }
 
   cleanData(data) {

@@ -3,7 +3,7 @@ namespace FBS\Widgets;
 
 defined( 'ABSPATH' ) or die( 'This plugin requires WordPress' );
 
-class Portal extends \WP_Widget {
+class Portal extends BaseWidget {
 
 	public function __construct(){
 		parent::__construct( 'flexmls_portal', 'Flexmls&reg;: Portal Widget', array(
@@ -13,41 +13,45 @@ class Portal extends \WP_Widget {
 	}
 
 	public function form( $instance ){
-		$saved_searches = !isset( $instance[ 'saved_searches' ] ) ? 1 : $instance[ 'saved_searches' ];
-		$listing_carts = !isset( $instance[ 'listing_carts' ] ) ? 1 : $instance[ 'listing_carts' ];
-		?>
-		<p>
-			Do you want to display your visitor&#8217;s <em>Saved Searches</em> on this widget?<br />
-			<label for="<?php echo esc_attr( $this->get_field_id( 'saved_searches' ) ); ?>"><input type="checkbox" id="<?php echo esc_attr( $this->get_field_id( 'saved_searches' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'saved_searches' ) ); ?>" <?php checked( $saved_searches, 1 ); ?>> Yes, include Saved Searches</label>
-		</p>
-		<p>
-			Do you want to display your visitor&#8217;s <em>Listing Carts</em> on this widget?<br />
-			<label for="<?php echo esc_attr( $this->get_field_id( 'listing_carts' ) ); ?>"><input type="checkbox" id="<?php echo esc_attr( $this->get_field_id( 'listing_carts' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'listing_carts' ) ); ?>" <?php checked( $listing_carts, 1 ); ?>> Yes, include Listing Carts</label>
-		</p>
-		<?php
+
+		if( ! $this->oauth_credentials_present() ) {
+			echo $this->unavailable_message();
+			return;
+		}
+
+		if($instance == NULL) {
+			$instance = array();
+		}
+
+		$defaults = array(
+			'saved_searches' => 'on',
+			'listing_carts' => 'on',
+		);
+
+		$data = array_merge($defaults, $instance);
+
+		echo $this->render('portal/form.php', $data);
 	}
 
 	public function update( $new_instance, $old_instance ){
 		$instance = array();
-		$instance[ 'saved_searches' ] = isset( $new_instance[ 'saved_searches' ] ) ? 1 : 0;
-		$instance[ 'listing_carts' ] = isset( $new_instance[ 'listing_carts' ] ) ? 1 : 0;
+		$instance[ 'saved_searches' ] = isset( $new_instance[ 'saved_searches' ] ) ? 'on' : 'off';
+		$instance[ 'listing_carts' ] = isset( $new_instance[ 'listing_carts' ] ) ? 'on' : 'off';
 		return $instance;
 	}
 
 	public function widget( $args, $instance ){
-		if( 0 == $instance[ 'saved_searches' ] && 0 == $instance[ 'listing_carts' ] ){
+		if( (0 == $instance[ 'saved_searches' ] || $instance[ 'saved_searches'] == 'off' ) && 
+				(0 == $instance[ 'listing_carts' ]  || $instance[ 'listing_carts' ] == 'off') ){
 			// Don't show anything if no boxes are checked in the widget
 			return;
 		}
 		$flexmls_settings = get_option( 'flexmls_settings' );
 
-		if ( ! fmc_array_get( $flexmls_settings, 'credentials.oauth_key' ) or ! fmc_array_get( $flexmls_settings,
-				'credentials.oauth_secret' ) ) {
-			// this widget isn't any good if there aren't OAuth credentials on the account
+		if ( ! $this->oauth_credentials_present() ) {
 			if ( is_user_logged_in() ) {
-				echo "<span style='color: red;'>Admin: Portal widget is unavailable until OAuth credentials are provided within the Flexmls IDX plugin settings screen.</span>";
+				echo $this->unavailable_message();
 			}
-
 			return;
 		}
 
@@ -76,7 +80,7 @@ class Portal extends \WP_Widget {
 			?>
 			<div class="flexmls-portal-container">
 				<div class="flexmls-portal-body">
-					<?php if( 1 == $instance[ 'listing_carts' ] ): ?>
+					<?php if( 1 == $instance[ 'listing_carts' ] || $instance[ 'listing_carts' ] == 'on' ): ?>
 						<p><strong>My Listing Carts</strong></p>
 						<ul>
 							<li><?php
@@ -91,7 +95,7 @@ class Portal extends \WP_Widget {
 							?></li>
 						</ul>
 					<?php endif; ?>
-					<?php if( 1 == $instance[ 'saved_searches' ] ): ?>
+					<?php if( 1 == $instance[ 'saved_searches' ] || $instance[ 'saved_searches' ] == 'on' ): ?>
 						<?php
 							$saved_searches = $Oauth->get_portal_saved_searches( $get_me[ 'Id' ] );
 							if( $saved_searches ):
@@ -110,5 +114,16 @@ class Portal extends \WP_Widget {
 		}
 
 		echo $args[ 'after_widget' ];
+	}
+
+	private function unavailable_message() {
+		return "<p>The Portal widget is unavailable because the OAuth credentials are missing from the Flexmls plugin settings page.</p>";
+	}
+
+	private function oauth_credentials_present() {
+		$flexmls_settings = get_option( 'flexmls_settings' );
+
+		return ( fmc_array_get( $flexmls_settings, 'credentials.oauth_key' 		) && 
+						 fmc_array_get( $flexmls_settings, 'credentials.oauth_secret' ) );
 	}
 }
