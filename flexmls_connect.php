@@ -170,10 +170,6 @@ class Flexmls {
 		add_action( 'wp_ajax_nopriv_get_listing_media', array( FBS\Pages\Page::class, 'listing_media' ) );
 		add_action( 'wp_ajax_flexmls_listing_schedule_showing', array( FBS\Pages\Page::class, 'schedule_showing' ) );
 		add_action( 'wp_ajax_nopriv_flexmls_listing_schedule_showing', array( FBS\Pages\Page::class, 'schedule_showing' ) );
-		add_action( 'wp_ajax_tinymce_get_idx_links', array( FBS\Admin\TinyMCE::class, 'tinymce_get_idx_links' ) );
-		add_action( 'wp_ajax_tinymce_get_idx_links_list', array( FBS\Admin\TinyMCE::class, 'tinymce_get_idx_links_list' ) );
-		add_action( 'wp_ajax_tinymce_get_property_types', array( FBS\Admin\TinyMCE::class, 'tinymce_get_property_types' ) );
-		add_action( 'wp_ajax_tinymce_get_stat_options', array( FBS\Widgets\MarketStats::class, 'tinymce_get_stat_options' ) );
 		add_action( 'wp_ajax_toggle_cart_status', array( SparkAPI\Oauth::class, 'toggle_cart_status' ) );
 		add_action( 'wp_ajax_nopriv_toggle_cart_status', array( SparkAPI\Oauth::class, 'toggle_cart_status' ) );
 		
@@ -181,6 +177,7 @@ class Flexmls {
 		add_action( 'wp_ajax_location_search_form', array( FBS\Widgets\LocationSearch::class, 'ajax_form' ) );
 		add_action( 'wp_ajax_slideshow_form', array( FBS\Widgets\Slideshow::class, 'ajax_form' ) );
 		add_action( 'wp_ajax_general_search_form', array( FBS\Widgets\Search::class, 'ajax_form' ) );
+		add_action( 'wp_ajax_idx_links_form', array( FBS\Widgets\IDXLinks::class, 'ajax_form' ) );
 		add_action( 'wp_ajax_market_stats_form', array( FBS\Widgets\MarketStats::class, 'ajax_form' ) );
 
 

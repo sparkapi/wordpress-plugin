@@ -1,137 +1,10 @@
 import { LocationSearch } from './location_search';
-import { GeneralSearch } from './general_search';
-import { MarketStats } from './market_stats';
-import { Slideshow } from './slideshow';
+import { GeneralSearch }  from './general_search';
+import { IdxLinks }       from './idx_links';
+import { MarketStats }    from './market_stats';
+import { Slideshow }      from './slideshow';
 
 (function($){
-
-  var flexmls_idxlinks = function( editor ){
-    // Widget Defaults
-    var title = 'Saved Searches';
-    var idx_link = [];
-
-    // If existing shortcode is selected and matches this type
-    var selection = tinyMCE.activeEditor.selection.getContent({format : 'text'});
-    if( true === !!selection ){
-      var shortcode = wp.shortcode.next( 'flexmls_idxlinks', selection, 0 );
-      if( true === !!shortcode ){
-        try {
-          var atts = shortcode.shortcode.attrs.named;
-          if( atts.hasOwnProperty( 'title' ) ){
-            title = atts.title;
-          }
-          if( atts.hasOwnProperty( 'idx_link' ) ){
-            idx_link = atts.idx_link.split(',');
-          }
-        } catch( e ){
-          console.log( 'Error' );
-          console.log( e );
-        }
-      }
-    }
-
-    return {
-      title: 'IDX Links',
-      body: [
-        {
-          type: 'textbox',
-          name: 'title',
-          label: 'Title',
-          size: 42,
-          value: title
-        },
-        {
-          type: 'container',
-          name: 'idx_link',
-          label: 'IDX Link(s)',
-          onPostRender: function(){
-            var element = this.getEl(),
-                input = element.firstChild,
-                $input = $( input ),
-                inputInstance = this;
-            $.post( ajaxurl, {action: 'tinymce_get_idx_links'}, function( response ){
-              if (response.length) {
-                for (let i = 0; i < inputInstance.items().length; i++) {
-                  inputInstance.items()[i].hide();
-                }
-                for (let i = 0; i < response.length; i++) {
-                  var lb = {
-                    checked: -1 !== idx_link.indexOf(response[i].value),
-                    type: 'checkbox',
-                    text: response[i].text,
-                    name: response[i].value
-                  };
-                  inputInstance.append(lb);
-                }
-                element.style.overflowY='scroll';
-                inputInstance.reflow();
-              }
-            }, 'json' );
-          },
-          items: [
-            {
-              disabled: true,
-              type: 'checkbox',
-              text: 'Loading',
-              value: 0
-            },
-            {
-              disabled: true,
-              type: 'checkbox',
-              text: 'Loading',
-              value: 0
-            },
-            {
-              disabled: true,
-              type: 'checkbox',
-              text: 'Loading',
-              value: 0
-            },
-            {
-              disabled: true,
-              type: 'checkbox',
-              text: 'Loading',
-              value: 0
-            },
-            {
-              disabled: true,
-              type: 'checkbox',
-              text: 'Loading',
-              value: 0
-            },
-            {
-              disabled: true,
-              type: 'checkbox',
-              text: 'Loading',
-              value: 0
-            },
-          ]
-        }
-      ],
-      onsubmit: function( e ) {
-        var attrs = {};
-        var links = [];
-        for (key in e.data) {
-          switch (true) {
-            case 'title' === key:
-              attrs.title = e.data[key];
-              break;
-            default:
-              if (true === e.data[key]) {
-                links.push(key);
-              }
-          }
-        }
-        attrs.idx_link = links.join(',');
-        var shortcode = wp.shortcode.string({
-          tag: 'flexmls_idxlinks',
-          attrs: attrs,
-          type: 'single'
-        });
-        editor.insertContent( shortcode );
-      }
-    };
-  };
 
   var flexmls_leadgen = function( editor ){
     // Widget Defaults
@@ -326,7 +199,8 @@ import { Slideshow } from './slideshow';
             generalSearch.open();
           } },
           {text: 'IDX Links', onclick: function(){
-            editor.windowManager.open( flexmls_idxlinks( editor ) );
+            var idxLinks = new IdxLinks(editor);
+            idxLinks.open();
           } },
           {text: 'IDX Slideshow', onclick: function(){
             var slideshow = new Slideshow(editor);

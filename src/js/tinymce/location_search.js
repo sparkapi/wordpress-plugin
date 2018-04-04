@@ -1,7 +1,5 @@
 import { ShortcodeGenerator } from './shortcode_generator';
 
-var $ = window.jQuery;
-
 class LocationSearch extends ShortcodeGenerator {
 
   constructor(editor){

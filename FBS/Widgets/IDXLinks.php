@@ -3,7 +3,7 @@ namespace FBS\Widgets;
 
 defined( 'ABSPATH' ) or die( 'This plugin requires WordPress' );
 
-class IDXLinks extends \WP_Widget {
+class IDXLinks extends BaseWidget {
 
 	public function __construct(){
 		parent::__construct( 'flexmls_idxlinks', 'Flexmls&reg;: IDX Links', array(
@@ -41,29 +41,26 @@ class IDXLinks extends \WP_Widget {
 	}
 
 	public function form( $instance ){
-		$title = !isset( $instance[ 'title' ] ) ? 'Saved Searches' : $instance[ 'title' ];
-		$idx_link = !isset( $instance[ 'idx_link' ] ) ? array() : $instance[ 'idx_link' ];
+		if($instance == NULL) {
+			$instance = array();
+		}
+
+		$defaults = array(
+			'title' 	 => 'Saved Searches',
+			'idx_link' => array(),
+		);
+
+		$data = array_merge($defaults, $instance);
+
 		$IDXLinks = new \SparkAPI\IDXLinks();
-		$all_idx_links = $IDXLinks->get_all_idx_links( true );
-		?>
-		<?php if( !$all_idx_links ): ?>
-			<p>You do not have any saved searches in Flexmls&reg;. Create saved searches in your Flexmls&reg; account, and then come back here to select which ones you want to show on your site.</p>
-		<?php else: ?>
-			<p>
-				<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_attr_e( 'Title:', 'text_domain' ); ?></label>
-				<input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>">
-			</p>
-			<ul>
-			<?php foreach( $all_idx_links as $all_idx_link ): ?>
-				<li>
-					<label for="<?php echo esc_attr( $this->get_field_id( 'idx_link_' . $all_idx_link[ 'LinkId' ] ) ); ?>">
-						<input id="<?php echo esc_attr( $this->get_field_id( 'idx_link_' . $all_idx_link[ 'LinkId' ] ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'idx_link' ) ); ?>[]" type="checkbox" value="<?php echo $all_idx_link[ 'Id' ]; ?>" <?php checked( in_array( $all_idx_link[ 'Id' ], $idx_link ) ); ?>> <?php echo $all_idx_link[ 'Name' ]; ?>
-					</label>
-				</li>
-			<?php endforeach; ?>
-			</ul>
-		<?php
-			endif;
+  	$data['all_idx_links'] = $IDXLinks->get_all_idx_links( true );
+
+
+		if( ! $data['all_idx_links'] ) {
+			echo '<p>You do not have any saved searches in Flexmls&reg;. Create saved searches in your Flexmls&reg; account, and then come back here to select which ones you want to show on your site.</p>';
+		} else {
+			echo $this->render('idx_links/form.php', $data);
+		}
 	}
 
 	public function update( $new_instance, $old_instance ){
