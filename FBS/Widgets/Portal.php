@@ -41,8 +41,8 @@ class Portal extends BaseWidget {
 	}
 
 	public function widget( $args, $instance ){
-		if( (0 == $instance[ 'saved_searches' ] || $instance[ 'saved_searches'] == 'off' ) && 
-				(0 == $instance[ 'listing_carts' ]  || $instance[ 'listing_carts' ] == 'off') ){
+		if( (0 === $instance[ 'saved_searches' ] || $instance[ 'saved_searches'] === 'off' ) && 
+				(0 === $instance[ 'listing_carts' ]  || $instance[ 'listing_carts' ] === 'off') ){
 			// Don't show anything if no boxes are checked in the widget
 			return;
 		}
