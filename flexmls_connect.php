@@ -130,9 +130,9 @@ class Flexmls {
 			),
 			'popup_summaries' => 0,
 			'popup_details' => 0,
-			'portal_title' => 'Create a Real Estate Portal',
+			'portal_title' => 'Sign Up',
 			'require_login' => 0,
-			'registration_text' => 'With a portal you are able to:' . PHP_EOL . '<ol><li>Save your searches</li><li>Get updates on listings</li><li>Track listings</li><li>Add notes and messages</li><li>Personalize your dashboard</li></ol>',
+			'registration_text' => 'Create an account to save and hide listings.',
 			'allow_carts' => 1
 		),
 		'seo' => array(
@@ -178,7 +178,9 @@ class Flexmls {
 		add_action( 'wp_ajax_slideshow_form', array( FBS\Widgets\Slideshow::class, 'ajax_form' ) );
 		add_action( 'wp_ajax_general_search_form', array( FBS\Widgets\Search::class, 'ajax_form' ) );
 		add_action( 'wp_ajax_idx_links_form', array( FBS\Widgets\IDXLinks::class, 'ajax_form' ) );
+		add_action( 'wp_ajax_lead_generation_form', array( FBS\Widgets\LeadGeneration::class, 'ajax_form' ) );
 		add_action( 'wp_ajax_market_stats_form', array( FBS\Widgets\MarketStats::class, 'ajax_form' ) );
+		add_action( 'wp_ajax_portal_form', array( FBS\Widgets\Portal::class, 'ajax_form' ) );
 
 
 
@@ -192,6 +194,7 @@ class Flexmls {
 		//add_filter( 'nav_menu_meta_box_object', array( 'FBS\Admin\NavMenus', 'nav_menu_meta_box_object' ) );
 		add_filter( 'script_loader_tag', array( FBS\Admin\Enqueue::class, 'script_loader_tag' ), 10, 2 );
 
+		add_shortcode( 'flexmls_general_search', array( FBS\Widgets\Shortcodes::class, 'flexmls_general_search' ) );
 		add_shortcode( 'flexmls_idxlinks', array( FBS\Widgets\Shortcodes::class, 'flexmls_idxlinks' ) );
 		add_shortcode( 'flexmls_leadgen', array( FBS\Widgets\Shortcodes::class, 'flexmls_leadgen' ) );
 		add_shortcode( 'flexmls_portal', array( FBS\Widgets\Shortcodes::class, 'flexmls_portal' ) );
