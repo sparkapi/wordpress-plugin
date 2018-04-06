@@ -27,11 +27,18 @@ class Shortcodes {
 		return self::render('MarketStats', $atts);
 	}
 
-	public static function flexmls_location_search( $atts ){
+  public static function flexmls_location_search( $atts ){
 
     $atts['locations_field'] = self::ensure_array($atts['locations_field']);
 
-		return self::render('LocationSearch', $atts);
+    return self::render('LocationSearch', $atts);
+  }
+
+	public static function flexmls_general_search( $atts ){
+    $atts['attributes_to_search'] = self::ensure_array($atts['attributes_to_search']);
+    $atts['property_types_to_search'] = self::ensure_array($atts['property_types_to_search']);
+
+		return self::render('Search', $atts);
 	}
 
 	private static function render($widget_name, $atts) {

@@ -15,7 +15,9 @@ class IdxLinks extends ShortcodeGenerator {
     var superValues = super.userValues();
     var newValues = Object.assign({}, superValues);
 
-    newValues.idx_link = newValues.idx_link.split(',');
+    if(newValues.idx_link !== undefined){
+      newValues.idx_link = newValues.idx_link.split(',');
+    }
     return newValues;
   }
 
