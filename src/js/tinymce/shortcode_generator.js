@@ -81,16 +81,19 @@ class ShortcodeGenerator{
 
 
   onsubmit( e ) {
-    var self = this;
-    var data = $('#' + this.formId).serializeArray();
-    var attrs = this.cleanData(data);
+
 
     var shortcode = wp.shortcode.string({
       tag: this.shortCodeId,
-      attrs: attrs,
+      attrs: this.getFormData(),
       type: 'single'
     });
     this.editor.insertContent( shortcode );
+  }
+
+  getFormData() {
+    var data = $('#' + this.formId).serializeArray();
+    return this.cleanData(data);
   }
 
   cleanData(data) {
@@ -150,15 +153,6 @@ class ShortcodeGenerator{
   }
 
 
-  // to be removed
-  editorOptions(){
-    return {
-      title: this.modalTitle,
-      body: this.body(),
-      onsubmit: this.onsubmit.bind(this),
-    };
-  }
-
   // Gets the values from a previously created shortcode of the current type.
   // Returns and object.
   userValues() {
@@ -177,65 +171,6 @@ class ShortcodeGenerator{
       }
     }
     return values;
-  }
-
-  buildPropertyTypeInput() {
-    return tinymce.ui.Factory.create({
-      type: 'container',
-      label: 'Property Type',
-      minWidth: 42,
-      name: 'property_type',
-      onPostRender: this.addPropertyTypeValues.bind(this),
-      items: [{
-        type: 'listbox',
-        values: [{text: 'Loading Property Types'}],
-        disabled: true,
-      }]
-    });
-  }
-
-  addPropertyTypeValues(){
-    var self = this;
-    
-    this.getPropertytypes(function( response ){
-      if (response.length) {
-
-        var newListBox = {
-          name: 'property_type',
-          type: 'listbox',
-          values: response,
-          value: self.userValues().property_type,
-        };
-
-        self.propertyTypeInput.append(newListBox);
-        self.propertyTypeInput.items()[0].remove();
-      }
-    });
-  }
-
-  getPropertytypes(callback) {
-    $.post( ajaxurl, {action: 'tinymce_get_property_types'}, callback, 'json');
-  }
-
-  buildLocationInput(value){
-    return tinymce.ui.Factory.create({
-      type: 'selectbox',
-      name: 'location_field',
-      value: value,
-      classes: 'flexmls-locations-selector',
-      onPostRender: () => {
-        locationSelector('.mce-flexmls-locations-selector');
-
-        // add pre-existing values to the dropdown
-        if(value !== undefined) {
-          const [id, field_name, display_name] = value.split('***');
-          var text = `${display_name} (${field_name})`;
-
-          var newOption = new Option(text, value, true, true);
-          $('.mce-flexmls-locations-selector').append(newOption);
-        }
-      }
-    });
   }
 
 }

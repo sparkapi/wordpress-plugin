@@ -57,10 +57,6 @@ class MarketStats extends BaseWidget {
 		)
 	);
 
-	public static function tinymce_get_stat_options() {
-		exit( json_encode( self::$stat_options ) );
-	}
-
 	public function __construct(){
 		parent::__construct( 'flexmls_market_stats', 'Flexmls&reg;: Market Statistics', array(
 			'classname' => 'flexmls_market_stats',

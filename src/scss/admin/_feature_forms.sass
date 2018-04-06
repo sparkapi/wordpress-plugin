@@ -12,6 +12,8 @@
   .flexmls-field
     margin: 1em 0
 
+  .idx-links-shortcode-label
+    display: none
 
 
 // Shortcode Generator form, tinymce plugin on page/post editor
@@ -39,6 +41,10 @@
     line-height: 1.8em
     *
       white-space: normal
+    ul
+      margin-left: 0
+    li+li
+      margin-top: 0.5em
 
   select
     width: 100%
@@ -49,7 +55,8 @@
     font-size: smaller
     margin: 4px 0
 
-  input[type="text"]
+  input[type="text"],
+  textarea
     width: 100%
     box-sizing: border-box
     
@@ -61,8 +68,12 @@
     border-radius: 4px
     padding: 1px 6px
 
-  input[type="checkbox"]
+  textarea
+    height: 4em
     vertical-align: baseline
+    border: 1px solid #BBB
+    border-radius: 4px
+    padding: 1px 6px
 
   .select2-selection
     position: relative // to keep the dropdown arrow from getting away
@@ -75,3 +86,8 @@
 
   .flexmls-market-stats-fields
     margin: 20px 0
+
+  
+  ul.flexmls-portal-options-list
+    margin-top: 0.5em 
+    margin-left: 1em
